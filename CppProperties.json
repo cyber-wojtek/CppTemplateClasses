@@ -1,0 +1,39 @@
+{
+  "configurations": [
+    {
+      "inheritEnvironments": [
+        "msvc_x64"
+      ],
+      "name": "MSVC-x64-Release",
+      "includePath": [
+        "${env.INCLUDE}",
+        "${workspaceRoot}\\**"
+      ],
+      "defines": [
+        "WIN32",
+        "NDEBUG",
+        "UNICODE",
+        "_UNICODE"
+      ],
+      "cppStandard": "c++20",
+      "intelliSenseMode": "windows-msvc-x64"
+    }, {
+      "inheritEnvironments": [
+          "msvc_x64"
+        ],
+        "name": "MSVC-x64-Debug",
+        "includePath": [
+          "${env.INCLUDE}",
+          "${workspaceRoot}\\**"
+        ],
+        "defines": [
+          "WIN32",
+          "DEBUG",
+          "UNICODE",
+          "_UNICODE"
+        ],
+        "cppStandard": "c++20",
+        "intelliSenseMode": "windows-msvc-x64"
+     }
+  ]
+}

@@ -605,11 +605,11 @@ namespace woj
 int main()
 {
 
-	CONSTEXPR20 woj::stack::string<char, 100> str1{ "Hello, World!" };
+	constexpr woj::stack::string<char, 100> str1{ "Hello, World!" };
 
-	CONSTEXPR20 woj::stack::string<char, 100> str2{ "Hello, World!", 5 };
+	constexpr  woj::stack::string<char, 100> str2{ "Hello, World!", 5 };
 
-	CONSTEXPR20 woj::stack::string<char, 100> str3{ str2.data() };
+	constexpr  woj::stack::string<char, 100> str3{ str2.data() };
 
 	woj::stack::string str{ "34" };
 
