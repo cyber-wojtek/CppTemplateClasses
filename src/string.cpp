@@ -16,7 +16,7 @@ namespace woj
 {
 	namespace stack
 	{
-		template <char_t TElem, size_t Size> 
+		template <typename TElem, size_t Size> requires is_char<TElem>
 		class string
 		{
 		public:
@@ -286,13 +286,13 @@ namespace woj
 				}
 				else
 				{
-					CONSTEXPR20 size_type byte_size = Size * sizeof(TElem);
+					constexpr size_type byte_size = Size * sizeof(TElem);
 					std::memcpy(buffer, other, byte_size);
-					}
+				}
 
-					buffer[Size - 1] = '\0';
+				buffer[Size - 1] = '\0';
 
-					return *this;
+				return *this;
 			}
 
 			/**
@@ -339,7 +339,7 @@ namespace woj
 				ASSERT_ASSUME(other != nullptr);
 				//[[assume(other != nullptr)]]
 
-				CONSTEXPR20 size_type min_count = (std::min)(OtherSize, Size - 1);
+				constexpr size_type min_count = (std::min)(OtherSize, Size - 1);
 
 				IF_CONSTEVAL
 				{
@@ -350,7 +350,7 @@ namespace woj
 				}
 				else
 				{
-					CONSTEXPR20 size_type byte_size = min_count * sizeof(TElem);
+					constexpr size_type byte_size = min_count * sizeof(TElem);
 					std::memcpy(buffer, other, byte_size);
 				}
 
@@ -419,11 +419,11 @@ namespace woj
 						buffer[Size - 1] = TElem{ 0 };
 					}
 				}
-				else if CONSTEXPR17 (std::is_same_v<TElem, char>)
+				else IF_CONSTEXPR17 (std::is_same_v<TElem, char>)
 				{
 					strcpy_s(buffer, other);
 				}
-				else if CONSTEXPR17 (std::is_same_v<TElem, wchar_t>)
+				else IF_CONSTEXPR17 (std::is_same_v<TElem, wchar_t>)
 				{
 					wcscpy_s(buffer, other);
 				}
@@ -468,11 +468,11 @@ namespace woj
 
 					buffer[min_count] = '\0';
 				}
-				else if CONSTEXPR17(std::is_same_v<TElem, char>)
+				else IF_CONSTEXPR17(std::is_same_v<TElem, char>)
 				{
 					strcpy_s(buffer, other);
 					}
-				else if CONSTEXPR17(std::is_same_v<TElem, wchar_t>)
+				else IF_CONSTEXPR17(std::is_same_v<TElem, wchar_t>)
 				{
 					wcscpy_s(buffer, other);
 					}
@@ -533,11 +533,11 @@ namespace woj
 					}
 					return *this;
 				}
-				if CONSTEXPR17 (std::is_same_v<TElem, char>)
+				IF_CONSTEXPR17 (std::is_same_v<TElem, char>)
 				{
 					std::memset(buffer, val, Size);
 				}
-				else if CONSTEXPR17 (std::is_same_v<TElem, wchar_t>)
+				else IF_CONSTEXPR17 (std::is_same_v<TElem, wchar_t>)
 				{
 					std::wmemset(buffer, val, Size);
 				}

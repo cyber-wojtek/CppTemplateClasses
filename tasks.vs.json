@@ -3,12 +3,22 @@
   "tasks": [
     {
       "appliesTo": "src",
-      "command": "build_all.bat",
-      "contextType": "build",
+      "command": "msvc_build_all_release.bat",
+      "contextType": "custom",
       "group": "build",
       "problemMatcher": [ "$msCompile" ],
-      "taskLabel": "msvc-build-all",
-      "taskName": "msvc-build-all",
+      "taskLabel": "msvc-build-all-release",
+      "taskName": "msvc-build-all-relase",
+      "type": "launch"
+    },
+    {
+      "appliesTo": "src",
+      "command": "msvc_build_all_debug.bat",
+      "contextType": "custom",
+      "group": "build",
+      "problemMatcher": [ "$msCompile" ],
+      "taskLabel": "msvc-build-all-debug",
+      "taskName": "msvc-build-all-debug",
       "type": "launch"
     }
   ]

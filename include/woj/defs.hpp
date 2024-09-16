@@ -54,9 +54,11 @@
 #endif
 
 #if defined(HAS_CXX17)
-#define CONSTEXPR17 constexpr
+#define CONSTEXPR17    constexpr
+#define IF_CONSTEXPR17 if constexpr
 #else
 #define CONSTEXPR17 inline
+#define IF_CONSTEXPR17 if
 #endif
 
 #if defined(HAS_CXX23)
