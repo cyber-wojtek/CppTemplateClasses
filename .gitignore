@@ -400,3 +400,4 @@ FodyWeavers.xsd
 *.sln.iml
 /CppProperties.json
 /tasks.vs.json
+/main.cpp
