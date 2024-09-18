@@ -49,16 +49,22 @@
 
 #if defined(HAS_CXX20)
 #define CONSTEXPR20 constexpr
+#define LIKELY [[likely]]
+#define UNLIKELY [[unlikely]]
 #else
 #define CONSTEXPR20 inline
+#define LIKELY
+#define UNLIKELY
 #endif
 
 #if defined(HAS_CXX17)
 #define CONSTEXPR17    constexpr
 #define IF_CONSTEXPR17 if constexpr
+#define NODISCARD [[nodiscard]]
 #else
 #define CONSTEXPR17 inline
-#define IF_CONSTEXPR17 if
+#define IF_CONSTEXPR17 if (false)
+#define NODISCARD
 #endif
 
 #if defined(HAS_CXX23)
@@ -76,7 +82,7 @@
 #elif defined(__clang__) || defined(__GNUC__) // Clang or GCC
 #define ASSUME(expr) __builtin_assume(expr)
 #else
-#define ASSUME(expr) do { if (!(expr)) __builtin_unreachable(); } while (0)
+#define ASSUME(expr)
 #endif
 
 #define ASSERT_ASSUME(expr) assert(expr); ASSUME(expr);
