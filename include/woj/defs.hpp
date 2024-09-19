@@ -76,13 +76,16 @@
 #endif
 
 #if defined(HAS_CXX23)
-#define ASSUME(x) [[assume(x > 0)]]
+#define ASSUME(...) [[assume(__VA_ARGS__)]]
 #elif defined(_MSC_VER) // Microsoft Visual C++
 #define ASSUME(expr) __assume(expr)
-#elif defined(__clang__) || defined(__GNUC__) // Clang or GCC
-#define ASSUME(expr) __builtin_assume(expr)
-#else
-#define ASSUME(expr)
+#elif defined(__clang__) // Clang
+#define ASSUME(...) __builtin_assume(__VA_ARGS__)
+#elif defined(__GNUC__)
+#if __GNUC__ >= 13
+#define ASSUME(...)
+__attribute__((__assume__(__VA_ARGS__)))
+#else   
+#define ASSUME(...) do { if (!(__VA_ARGS__)) __builtin_unreachable(); } while (0);
 #endif
-
 #define ASSERT_ASSUME(expr) assert(expr); ASSUME(expr);
