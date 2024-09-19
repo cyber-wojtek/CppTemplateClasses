@@ -86,6 +86,6 @@
 #define ASSUME(...)
 __attribute__((__assume__(__VA_ARGS__)))
 #else   
-#define ASSUME(...) do { if (!(__VA_ARGS__)) __builtin_unreachable(); } while (0);
+#define ASSUME(...) do { if (!(__VA_ARGS__)) __builtin_unreachable(); } while (false);
 #endif
 #define ASSERT_ASSUME(...) assert(__VA_ARGS__); ASSUME(__VA_ARGS__);
