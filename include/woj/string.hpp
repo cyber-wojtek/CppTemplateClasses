@@ -28,7 +28,16 @@ namespace woj
 	concept char_type = std::is_same_v<T, char> || std::is_same_v<T, char8_t> || std::is_same_v<T, wchar_t> || std::is_same_v<T, char16_t> || std::is_same_v<T, char32_t>;
 	#else
 	template <typename T>
-	constexpr bool is_char = std::is_same_v<T, char> || std::is_same_v<T, wchar_t> || std::is_same_v<T, char16_t> || std::is_same_v<T, char32_t>;
+	constexpr bool is_char_v = std::is_same_v<T, char> || std::is_same_v<T, wchar_t> || std::is_same_v<T, char16_t> || std::is_same_v<T, char32_t>;
+
+	template <typename T>
+	struct is_char
+	{
+		static constexpr bool value = std::is_same_v<T, char> || std::is_same_v<T, wchar_t> || std::is_same_v<T, char16_t> || std::is_same_v<T, char32_t>;
+	};
+
+	template <typename T>
+	using is_char_v = is_char<T>::value;
 	#endif
 
 	template <typename T>
@@ -106,7 +115,7 @@ namespace woj
 #if defined(HAS_CXX20)
 		template <char_type Elem, size_t Size>
 #else
-		template <typename Elem, size_t Size> requires is_char<Elem>
+		template <typename Elem, size_t Size> requires is_char_v<Elem>
 #endif
 		class string
 		{
@@ -121,7 +130,7 @@ namespace woj
 
 			using iterator = pointer;
 			using const_iterator = const_pointer;
-			using reverse_iterator = =pointer;
+			using reverse_iterator = pointer;
 			using const_reverse_iterator = const_pointer;
 
 			alignas(Elem) Elem buffer[Size]{};
@@ -148,7 +157,7 @@ namespace woj
 					typename Traits::int_type chr = istr.rdbuf()->sgetc();
 					bool changed{ false };
 
-					for (size_type i = (std::min)(str.size(), istr.width()); i > 0; --i, chr = istr.rdbuf()->snextc()) LIKELY
+					for (size_type i = 0; i < (std::min)(str.size(), istr.width()); ++i, chr = istr.rdbuf()->snextc()) LIKELY
 					{
 						if (Traits::eq_int_type(chr, Traits::eof)) UNLIKELY
 						{
