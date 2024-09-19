@@ -78,7 +78,7 @@
 #if defined(HAS_CXX23)
 #define ASSUME(...) [[assume(__VA_ARGS__)]]
 #elif defined(_MSC_VER) // Microsoft Visual C++
-#define ASSUME(expr) __assume(expr)
+#define ASSUME(...) __assume(__VA_ARGS__)
 #elif defined(__clang__) // Clang
 #define ASSUME(...) __builtin_assume(__VA_ARGS__)
 #elif defined(__GNUC__)
@@ -88,4 +88,4 @@ __attribute__((__assume__(__VA_ARGS__)))
 #else   
 #define ASSUME(...) do { if (!(__VA_ARGS__)) __builtin_unreachable(); } while (0);
 #endif
-#define ASSERT_ASSUME(expr) assert(expr); ASSUME(expr);
+#define ASSERT_ASSUME(...) assert(__VA_ARGS__); ASSUME(__VA_ARGS__);
