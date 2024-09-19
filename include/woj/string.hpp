@@ -1,4 +1,4 @@
-ragma once
+#pragma once
 
 #ifndef WOJ_STRING_HPP
 #define WOJ_STRING_HPP
