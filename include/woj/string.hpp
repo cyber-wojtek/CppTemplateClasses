@@ -1,4 +1,4 @@
-#pragma once
+ragma once
 
 #ifndef WOJ_STRING_HPP
 #define WOJ_STRING_HPP
@@ -28,16 +28,13 @@ namespace woj
 	concept char_type = std::is_same_v<T, char> || std::is_same_v<T, char8_t> || std::is_same_v<T, wchar_t> || std::is_same_v<T, char16_t> || std::is_same_v<T, char32_t>;
 	#else
 	template <typename T>
-	constexpr bool is_char_v = std::is_same_v<T, char> || std::is_same_v<T, wchar_t> || std::is_same_v<T, char16_t> || std::is_same_v<T, char32_t>;
-
-	template <typename T>
 	struct is_char
 	{
 		static constexpr bool value = std::is_same_v<T, char> || std::is_same_v<T, wchar_t> || std::is_same_v<T, char16_t> || std::is_same_v<T, char32_t>;
 	};
 
 	template <typename T>
-	using is_char_v = is_char<T>::value;
+	using is_char_v = typename is_char<T>::value;
 	#endif
 
 	template <typename T>
