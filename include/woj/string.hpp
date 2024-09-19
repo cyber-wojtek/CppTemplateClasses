@@ -132,18 +132,18 @@ namespace woj
 
 			alignas(Elem) Elem buffer[Size]{};
 
-			template <typename Elem, typename Traits = std::char_traits<Elem>>
-			CONSTEXPR20 friend std::ostream& operator<<(std::basic_ostream<Elem, Traits>& ostr, const string& str)
+			template <typename IStrElem, typename IStrTraits = std::char_traits<IStrElem>>
+			CONSTEXPR20 friend std::ostream& operator<<(std::basic_ostream<IStrElem, IStrTraits>& ostr, const string& str)
 			{
 				ostr.write(str.data(), str.size());
 				return ostr;
 			}
 
-			template <typename Elem, typename Traits = std::char_traits<Elem>>
-			CONSTEXPR20 friend std::istream& operator>>(std::basic_istream<Elem, Traits>& istr, string& str)
+			template <typename IStrElem, typename IStrTraits = std::char_traits<IStrElem>>
+			CONSTEXPR20 friend std::istream& operator>>(std::basic_istream<IStrElem, IStrTraits>& istr, string& str)
 			{
-				using istr_type = std::basic_istream<Elem, Traits>;
-				using ctype = std::ctype<Elem>;
+				using istr_type = std::basic_istream<IStrElem, IStrTraits>;
+				using ctype = std::ctype<IStrElem>;
 
 				typename istr_type::iostate state{ istr_type::goodbit };
 
@@ -151,21 +151,21 @@ namespace woj
 				{
 					const ctype& ctype_facet = std::use_facet<ctype>(istr.getloc());
 
-					typename Traits::int_type chr = istr.rdbuf()->sgetc();
+					typename IStrTraits::int_type chr = istr.rdbuf()->sgetc();
 					bool changed{ false };
 
 					for (size_type i = 0; i < (std::min)(str.size(), istr.width()); ++i, chr = istr.rdbuf()->snextc()) LIKELY
 					{
-						if (Traits::eq_int_type(chr, Traits::eof)) UNLIKELY
+						if (IStrTraits::eq_int_type(chr, IStrTraits::eof)) UNLIKELY
 						{
 							state |= istr_type::eofbit;
 							break;
 						}
-						if (ctype_facet.is(ctype::space, Traits::to_char_type(chr))) UNLIKELY
+						if (ctype_facet.is(ctype::space, IStrTraits::to_char_type(chr))) UNLIKELY
 						{
 							break;
 						}
-						str[i] = Traits::to_char_type(chr);
+						str[i] = IStrTraits::to_char_type(chr);
 
 						if (!changed) UNLIKELY
 						{

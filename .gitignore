@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /src/string.cpp
 /CMakeLists.txt
+/main.cpp
