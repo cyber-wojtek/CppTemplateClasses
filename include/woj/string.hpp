@@ -37,7 +37,6 @@ namespace woj
 			using base_type::swap;
 
 			// Public
-			using base_type::~basic_streambuf;
 			using base_type::pubseekoff;
 			using base_type::pubseekpos;
 			using base_type::pubsetbuf;
@@ -90,21 +89,29 @@ namespace woj
 	template <typename T>
 	struct is_char
 	{
-		static constexpr bool value = std::is_same_v<T, char> || std::is_same_v<T, wchar_t> || std::is_same_v<T, char16_t> || std::is_same_v<T, char32_t>;
+		static constexpr bool value = std::is_same_v<T, char>     ||
+									  std::is_same_v<T, wchar_t>  ||
+									  std::is_same_v<T, char16_t> ||
+									  std::is_same_v<T, char32_t>;
 	};
 
 	template <typename T>
-	using is_char_v = typename is_char<T>::value;
+	constexpr bool is_char_v = is_char<T>::value;
 	#endif
 
 	namespace stack
 	{
 #if defined(HAS_CXX20)
-		template <char_type Elem, size_t Size, bool EnableIndexWrapAround = false>
+		/**
+		 * Class representing a stack-allocated string
+		 * @tparam Elem Type of the string's elements
+		 * @tparam MemSize Size of the string's memory buffer
+		 */
+		template <char_type Elem, size_t MemSize>
 #else
-		template <typename Elem, size_t Size, bool EnableIndexWrapAround = false> requires is_char_v<Elem>
+		template <typename Elem, size_t MemSize, typename = std::enable_if_t<is_char_v<Elem>>>
 #endif
-		class string
+		class string 
 		{
 		public:
 			using value_type = Elem;
@@ -120,10 +127,18 @@ namespace woj
 			using reverse_iterator = pointer;
 			using const_reverse_iterator = const_pointer;
 
-			alignas(Elem) Elem buffer[Size]{};
+			alignas(Elem) Elem buffer[MemSize]{};
 
+			/**
+			 * Output stream operator (outputs str_size() characters)
+			 * @tparam IStrElem Type of the output stream's elements
+			 * @tparam IStrTraits Type of the output stream's traits
+			 * @param ostr Output stream to output to
+			 * @param str String to output from
+			 * @return Output stream reference
+			 */
 			template <typename IStrElem, typename IStrTraits = std::char_traits<IStrElem>>
-			CONSTEXPR20 friend std::ostream& operator<<(std::basic_ostream<IStrElem, IStrTraits>& ostr, const string& str)
+			constexpr friend std::ostream& operator<<(std::basic_ostream<IStrElem, IStrTraits>& ostr, const string& str)
 			{
 				using ostr_type = std::basic_ostream<IStrElem, IStrTraits>;
 				typename ostr_type::iostate state{ ostr_type::goodbit };
@@ -134,24 +149,24 @@ namespace woj
 				if (typename ostr_type::sentry{ ostr }) LIKELY
 				{
 					size_type pad = (ostr.width() <= 0) ? 0 : static_cast<size_type>(ostr.width());
-
-					if ((ostr.flags() & ostr_type::adjustfield) != ostr_type::left)
-					{
-						for ()
-					}
+					ostr.rdbuf()->sputn(str.c_str(), str.str_size());
 				}
 				else
 					state |= ostr_type::badbit;
 
-				auto obj = static_cast<std::basic_streambuf<char>*>(nullptr);
-				obj->xsputn
-
-				ostr.rdbuf()->in_avail();
 				return ostr;
 			}
 
+			/**
+			 * Input stream operator (inputs MemSize/width characters)
+			 * @tparam IStrElem Type of the input stream's elements
+			 * @tparam IStrTraits Type of the input stream's traits
+			 * @param istr Input stream to input from
+			 * @param str String to input to
+			 * @return Input stream reference
+			 */
 			template <typename IStrElem, typename IStrTraits = std::char_traits<IStrElem>>
-			CONSTEXPR20 friend std::istream& operator>>(std::basic_istream<IStrElem, IStrTraits>& istr, string& str)
+			constexpr friend std::istream& operator>>(std::basic_istream<IStrElem, IStrTraits>& istr, string& str)
 			{
 				using istr_type = std::basic_istream<IStrElem, IStrTraits>;
 				using ctype = std::ctype<IStrElem>;
@@ -203,7 +218,7 @@ namespace woj
 			/**
 			 * Default constructor (empty string)
 			 */
-			CONSTEXPR20 string() = default;
+			constexpr string() = default;
 
 			// ----- Copy constructors from buffers -----
 
@@ -211,7 +226,7 @@ namespace woj
 			 * Copy constructor from array buffer
 			 * @param other Buffer to copy from
 			 */
-			CONSTEXPR20 string(const Elem(&other)[Size]) noexcept
+			explicit constexpr string(const Elem(&other)[MemSize]) noexcept
 			{
 				copy(other);
 			}
@@ -219,62 +234,105 @@ namespace woj
 			/**
 			 * Copy constructor from array buffer count of characters
 			 * @param other Buffer to copy from
-			 * @param count Size of the buffer to copy from
+			 * @param count Count of characters to copy
 			 */
-			CONSTEXPR20 string(const Elem(&other)[Size], const size_type count) noexcept
+			constexpr string(const Elem(&other)[MemSize], const size_type count) noexcept
 			{
 				copy(other, count);
 			}
 
+#if defined(HAS_CXX20)
 			/**
 			 * Copy constructor from array buffer whose size is different from the string size
-			 * @tparam OtherSize Size of the buffer to copy from
+			 * @tparam OtherMemSize MemSize of the buffer to copy from
 			 * @param other Buffer to copy from
 			 */
-			template <size_type OtherSize> requires (OtherSize != Size)
-				CONSTEXPR20 string(const Elem(&other)[OtherSize]) noexcept
+			template <size_type OtherMemSize> requires (OtherMemSize != MemSize)
+#else
+			/**
+			 * Copy constructor from array buffer whose size is different from the string size
+			 * @tparam OtherMemSize MemSize of the buffer to copy from
+			 * @param other Buffer to copy from
+			 */
+			template <size_type OtherMemSize, typename = std::enable_if_t<OtherMemSize != MemSize>>
+#endif
+				explicit CONSTEXPR17 string(const Elem(&other)[OtherMemSize]) noexcept
 			{
 				copy(other);
 			}
 
+#if defined(HAS_CXX20)
 			/**
 			 * Copy constructor from array buffer whose size is different from the string size
-			 * @tparam OtherSize Size of the buffer to copy from
+			 * @tparam OtherMemSize MemSize of the buffer to copy from
 			 * @param other Buffer to copy from
-			 * @param count Size of the buffer to copy from
+			 * @param count Count of characters to copy
 			 */
-			template <size_type OtherSize> requires (OtherSize != Size)
-				CONSTEXPR20 string(const Elem(&other)[OtherSize], const size_type count) noexcept
+			template <size_type OtherMemSize> requires (OtherMemSize != MemSize)
+#else
+			/**
+			 * Copy constructor from array buffer whose size is different from the string size
+			 * @tparam OtherMemSize MemSize of the buffer to copy from
+			 * @param other Buffer to copy from
+			 * @param count Count of characters to copy
+			 */
+			template <size_type OtherMemSize, typename = std::enable_if_t<OtherMemSize != MemSize>>
+#endif
+				constexpr string(const Elem(&other)[OtherMemSize], const size_type count) noexcept
 			{
 				copy(other, count);
 			}
 
-
+#if defined(HAS_CXX20)
 			/**
-			 * Copy constructor from pointer buffer until null terminator is found or maximum size is reached (Size)
+			 * Copy constructor from pointer buffer until null terminator is found or maximum size is reached (MemSize)
 			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
 			 * @param other Buffer to copy from
 			 */
 			template <typename ElemPtr = const Elem* const>
-				requires std::is_pointer_v<ElemPtr>&&
+				requires std::is_pointer_v<ElemPtr> &&
+						 std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
+						 (!std::is_array_v<ElemPtr>)
+#else
+			/**
+			 * Copy constructor from pointer buffer until null terminator is found or maximum size is reached (MemSize)
+			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
+			 * @param other Buffer to copy from
+			 */
+			template <typename ElemPtr = const Elem* const, typename = std::enable_if_t<
+				std::is_pointer_v<ElemPtr> &&
 				std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-				(!std::is_array_v<ElemPtr>)
-				CONSTEXPR20 string(ElemPtr other) noexcept
+				!std::is_array_v<ElemPtr>>>
+#endif
+					explicit constexpr string(ElemPtr other) noexcept
 			{
 				copy(other);
 			}
 
+#if defined(HAS_CXX20)
 			/**
 			 * Copy constructor from pointer buffer count of characters
 			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
 			 * @param other Buffer to copy from
-			 * @param count Size of the buffer to copy from
+			 * @param count Count of characters to copy
 			 */
 			template <typename ElemPtr = const Elem* const>
-				requires std::is_pointer_v<ElemPtr>&&
+				requires std::is_pointer_v<ElemPtr> &&
+						 std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
+						 (!std::is_array_v<ElemPtr>)
+#else
+			/**
+			 * Copy constructor from pointer buffer count of characters
+			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
+			 * @param other Buffer to copy from
+			 * @param count Count of characters to copy
+			 */
+			template <typename ElemPtr = const Elem* const, typename = std::enable_if_t<
+				std::is_pointer_v<ElemPtr> &&
 				std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-				(!std::is_array_v<ElemPtr>)
-				CONSTEXPR20 string(ElemPtr other, const size_type count) noexcept
+				!std::is_array_v<ElemPtr>>>
+#endif
+				constexpr string(ElemPtr other, const size_type count) noexcept
 			{
 				copy(other, count);
 			}
@@ -284,7 +342,7 @@ namespace woj
 			 * Copy constructor from another string
 			 * @param other String to copy from
 			 */
-			CONSTEXPR20 string(const string& other) noexcept
+			explicit constexpr string(const string& other) noexcept
 			{
 				copy(other);
 			}
@@ -292,9 +350,47 @@ namespace woj
 			/**
 			 * Copy constructor from another string count of characters
 			 * @param other String to copy from
-			 * @param count Size of the buffer to copy from
+			 * @param count Count of characters to copy
 			 */
-			CONSTEXPR20 string(const string& other, const size_type count) noexcept
+			explicit constexpr string(const string& other, const size_type count) noexcept
+			{
+				copy(other, count);
+			}
+
+			/**
+			 * Copy constructor from another string of different params 
+			 * @param other String to copy from
+			 */
+#if defined(HAS_CXX20)
+			template <char_type OtherElem, size_type OtherMemSize> requires (OtherMemSize != MemSize)
+#else
+			template <typename OtherElem, size_type OtherMemSize, typename = std::enable_if_t<OtherMemSize != MemSize>>
+#endif
+				explicit constexpr string(const string<OtherElem, OtherMemSize>& other) noexcept
+			{
+				copy(other);
+			}
+
+#if defined(HAS_CXX20)
+			/**
+			 * Copy constructor from another string of different params count of characters
+			 * @tparam OtherElem Type of the other string's elements
+			 * @tparam OtherMemSize MemSize of the other string
+			 * @param other String to copy from
+			 * @param count Count of characters to copy
+			 */
+			template <char_type OtherElem, size_type OtherMemSize> requires (OtherMemSize != MemSize)
+#else
+			/**
+			 * Copy constructor from another string of different params count of characters
+			 * @tparam OtherElem Type of the other string's elements
+			 * @tparam OtherMemSize MemSize of the other string
+			 * @param other String to copy from
+			 * @param count Count of characters to copy
+			 */
+			template <typename OtherElem, size_type OtherMemSize, typename = std::enable_if_t<OtherMemSize != MemSize>>
+#endif
+				constexpr string(const string<OtherElem, OtherMemSize>& other, const size_type count) noexcept
 			{
 				copy(other, count);
 			}
@@ -302,7 +398,7 @@ namespace woj
 			/**
 			 * Move constructor is deleted
 			 */
-			CONSTEXPR20 string(string&&) = delete;
+			constexpr string(string&&) = delete;
 
 			/**
 			 * Destructs the string
@@ -312,124 +408,199 @@ namespace woj
 			// ----- Assignment operators -----
 
 			/**
-			 * Copy from array buffer
+			 * Assign from array buffer operator
 			 * @param other Buffer to copy from
-			 * @return Self reference
+			 * @return Reference to self
 			 */
-			CONSTEXPR20 string& operator=(const Elem other[Size]) noexcept
+			constexpr string& operator=(const Elem (&other)[MemSize]) noexcept
 			{
 				return copy(other);
 			}
 
+#if defined(HAS_CXX20)
 			/**
-			 * Copy from array buffer
-			 * @tparam OtherSize Size of the buffer to copy from
+			 * Assign from array buffer with different size operator
+			 * @tparam OtherMemSize Size of the buffer to copy from
 			 * @param other Buffer to copy from
-			 * @return Self reference
+			 * @return Reference to self
 			 */
-			template <size_type OtherSize> requires (OtherSize != Size)
-				CONSTEXPR20 string& operator=(const Elem other[OtherSize]) noexcept
+			template <size_type OtherMemSize> requires (OtherMemSize != MemSize)
+#else
+			/**
+			 * Assign from array buffer with different size operator
+			 * @tparam OtherMemSize Size of the buffer to copy from
+			 * @param other Buffer to copy from
+			 * @return Reference to self
+			 */
+			template <size_type OtherMemSize, typename = std::enable_if_t<OtherMemSize != MemSize>>
+#endif
+				constexpr string& operator=(const Elem (&other)[OtherMemSize]) noexcept
 			{
 				return copy(other);
 			}
 
-			/**
-			 * Copy from pointer buffer
-			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
-			 * @param other Buffer to copy from
-			 * @return Self reference
-			 */
+#if defined(HAS_CXX20)
+				/**
+				 * Assign from pointer buffer operator
+				 * @tparam ElemPtr Type of the pointer buffer to copy from (Default: const Elem* const)
+				 * @param other Buffer to copy from
+				 * @return Reference to self
+				 */
 			template <typename ElemPtr = const Elem* const>
-				requires std::is_pointer_v<ElemPtr>&&
-			std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-				(!std::is_array_v<ElemPtr>)
-				CONSTEXPR20 string& operator=(ElemPtr other) noexcept
+				requires std::is_pointer_v<ElemPtr> &&
+						 std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
+						 (!std::is_array_v<ElemPtr>)
+#else
+				/**
+				 * Assign from pointer buffer operator
+				 * @tparam ElemPtr Type of the pointer buffer to copy from (Default: const Elem* const)
+				 * @param other Buffer to copy from
+				 * @return Reference to self
+				 */
+				template <typename ElemPtr = const Elem* const, typename = std::enable_if_t<
+					std::is_pointer_v<ElemPtr> &&
+					std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
+					!std::is_array_v<ElemPtr>>>
+#endif
+				constexpr string& operator=(ElemPtr other) noexcept
 			{
 				return copy(other);
 			}
 
 			/**
-			 * Copy from another string
+			 * Assign from another string operator
 			 * @param other String to copy from
-			 * @return Self reference
+			 * @return Reference to self
 			 */
-			CONSTEXPR20 string& operator=(const string& other) noexcept
+			constexpr string& operator=(const string& other) noexcept
+			{
+				return copy(other);
+			}
+
+
+#if defined(HAS_CXX20)
+			/**
+			 * Assign from another string of different params operator
+			 * @tparam OtherElem Type of the other string's elements
+			 * @tparam OtherMemSize MemSize of the other string
+			 * @param other String to copy from
+			 * @return Reference to self
+			 */
+			template <char_type OtherElem, size_type OtherMemSize> requires (OtherMemSize != MemSize)
+#else
+			/**
+			 * Assign from another string of different params operator
+			 * @tparam OtherElem Type of the other string's elements
+			 * @tparam OtherMemSize MemSize of the other string
+			 * @param other String to copy from
+			 * @return Reference to self
+			 */
+			template <typename OtherElem, size_type OtherMemSize, typename = std::enable_if_t<OtherMemSize != MemSize>>
+#endif
+			constexpr string& operator=(const string<OtherElem, OtherMemSize>& other) noexcept
 			{
 				return copy(other);
 			}
 
 			/**
-			 * Move from another string is deleted
+			 * Assign from move operator is deleted, use copy constructor instead
 			 */
-			CONSTEXPR20 string& operator=(string&&) = delete;
+			constexpr string& operator=(string&&) = delete;
 
-			NODISCARD17 CONSTEXPR20 Elem& operator[](const size_type index) noexcept
+			/**
+			 * Index operator
+			 * @param index Index of the element to access
+			 * @return Reference to the element at the index
+			 */
+			NODISCARD17 constexpr Elem& operator[](const size_type index) noexcept
 			{
 				return at(index);
 			}
 
-			NODISCARD17 CONSTEXPR20 const Elem& operator[](const size_type index) const noexcept
+			/**
+			 * Const index operator
+			 * @param index Index of the element to access
+			 * @return Const reference to the element at the index
+			 */
+			NODISCARD17 constexpr const Elem& operator[](const size_type index) const noexcept
 			{
 				return at(index);
 			}
 
 			// ----- Iteration functions -----
-			NODISCARD17 CONSTEXPR20 iterator begin() noexcept
+
+			/**
+			 * Begin iterator
+			 * @return Iterator to the beginning of the string
+			 */
+			NODISCARD17 constexpr iterator begin() noexcept
 			{
 				return buffer;
 			}
 
-			NODISCARD17 CONSTEXPR20 const_iterator begin() const noexcept
+			/**
+			 * Const begin iterator
+			 * @return Const iterator to the beginning of the string
+			 */
+			NODISCARD17 constexpr const_iterator begin() const noexcept
 			{
 				return buffer;
 			}
 
-			NODISCARD17 CONSTEXPR20 const_iterator cbegin() const noexcept
+			/**
+			 * Const begin iterator
+			 * @return Const iterator to the beginning of the string
+			 */
+			NODISCARD17 constexpr const_iterator cbegin() const noexcept
 			{
 				return begin();
 			}
 
-			NODISCARD17 CONSTEXPR20 iterator end() noexcept
+			/**
+			 * End iterator
+			 * @return Iterator to the end of the string (after the null terminator)
+			 */
+			NODISCARD17 constexpr iterator end() noexcept
 			{
-				return buffer + Size;
+				return buffer + MemSize;
 			}
 
-			NODISCARD17 CONSTEXPR20 const_iterator end() const noexcept
+			NODISCARD17 constexpr const_iterator end() const noexcept
 			{
-				return buffer + Size;
+				return buffer + MemSize;
 			}
 
-			NODISCARD17 CONSTEXPR20 const_iterator cend() const noexcept
+			NODISCARD17 constexpr const_iterator cend() const noexcept
 			{
 				return end();
 			}
 
-			NODISCARD17 CONSTEXPR20 reverse_iterator rbegin() noexcept
+			NODISCARD17 constexpr reverse_iterator rbegin() noexcept
 			{
-				return buffer + Size - 1;
+				return buffer + MemSize - 1;
 			}
 
-			NODISCARD17 CONSTEXPR20 const_reverse_iterator rbegin() const noexcept
+			NODISCARD17 constexpr const_reverse_iterator rbegin() const noexcept
 			{
-				return buffer + Size - 1;
+				return buffer + MemSize - 1;
 			}
 
-			NODISCARD17 CONSTEXPR20 const_reverse_iterator crbegin() const noexcept
+			NODISCARD17 constexpr const_reverse_iterator crbegin() const noexcept
 			{
 				return rbegin();
 			}
 
-			NODISCARD17 CONSTEXPR20 pointer rend() noexcept
+			NODISCARD17 constexpr pointer rend() noexcept
 			{
 				return buffer - 1;
 			}
 
-			NODISCARD17 CONSTEXPR20 const_reverse_iterator rend() const noexcept
+			NODISCARD17 constexpr const_reverse_iterator rend() const noexcept
 			{
 				return buffer - 1;
 			}
 
-			NODISCARD17 CONSTEXPR20 const_reverse_iterator crend() const noexcept
+			NODISCARD17 constexpr const_reverse_iterator crend() const noexcept
 			{
 				return rend();
 			}
@@ -438,153 +609,191 @@ namespace woj
 
 			/**
 			 * Copy from array buffer
+			 * @tparam OtherMemSize Size of the buffer to copy from
 			 * @param other Buffer to copy from
 			 * @return Self reference
 			 */
-			CONSTEXPR20 string& copy(const Elem(&other)[Size]) noexcept
+			template <size_type OtherMemSize>
+			CONSTEXPR17 string& copy(const Elem(&other)[OtherMemSize]) noexcept
 			{
 				ASSERT_ASSUME(other != nullptr);
+				//[[assume(other != nullptr)]]
 
-				IF_CONSTEVAL
+				IF_CONSTEVAL20
 				{
-					for (size_type i = 0; i < Size - 1; ++i) [[likely]]
+					IF_CONSTEXPR17 (OtherMemSize < MemSize)
 					{
-						buffer[i] = other[i];
+						for (size_type i = 0; i < OtherMemSize; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
+
+						buffer[OtherMemSize] = 0;
 					}
+					else
+					{
+						for (size_type i = 0; i < MemSize; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
+					}
+
 				}
 				else
 				{
-					constexpr size_type byte_size = Size * sizeof(Elem);
-					std::memcpy(buffer, other, byte_size);
+					IF_CONSTEXPR17 (OtherMemSize < MemSize)
+					{
+						constexpr size_type byte_size = OtherMemSize * sizeof(Elem);
+						std::memcpy(buffer, other, byte_size);
+
+						buffer[OtherMemSize] = 0;
+					}
+					else
+					{
+						constexpr size_type byte_size = MemSize * sizeof(Elem);
+						std::memcpy(buffer, other, byte_size);
+					}
 				}
 
-				buffer[Size - 1] = '\0';
+				return *this;
+			}
+
+
+			/**
+			 * Copy from array buffer with count of characters
+			 * @tparam Count Count of characters to copy
+			 * @tparam OtherMemSize Size of the buffer to copy from
+			 * @param other Buffer to copy from
+			 * @return Self reference
+			 */
+			template <size_type Count, size_type OtherMemSize>
+			CONSTEXPR17 string& copy(const Elem(&other)[OtherMemSize]) noexcept
+			{
+				ASSERT_ASSUME(other != nullptr);
+				//[[assume(other != nullptr)]]
+
+				IF_CONSTEVAL20
+				{
+					IF_CONSTEXPR17 (Count < MemSize)
+					{
+						for (size_type i = 0; i < Count; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
+
+						buffer[Count] = 0;
+					}
+					else
+					{
+						for (size_type i = 0; i < MemSize; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
+					}
+
+				}
+				else
+				{
+					IF_CONSTEXPR17 (Count < MemSize)
+					{
+						const size_type byte_size = Count * sizeof(Elem);
+						std::memcpy(buffer, other, byte_size);
+
+						buffer[Count] = 0;
+					}
+					else
+					{
+						constexpr size_type byte_size = MemSize * sizeof(Elem);
+						std::memcpy(buffer, other, byte_size);
+					}
+				}
 
 				return *this;
 			}
 
 			/**
 			 * Copy from array buffer with count of characters
+			 * @tparam OtherMemSize Size of the buffer to copy from
 			 * @param other Buffer to copy from
 			 * @param count Count of characters to copy
 			 * @return Self reference
 			 */
-			CONSTEXPR20 string& copy(const Elem(&other)[Size], const size_type count) noexcept
+			template <size_type OtherMemSize>
+			CONSTEXPR20 string& copy(const Elem(&other)[OtherMemSize], const size_type count) noexcept
 			{
-				//std::unreachable();
 				ASSERT_ASSUME(other != nullptr);
+				//[[assume(other != nullptr)]]
 
-				const size_type min_count = (std::min)(count, Size - 1);
-
-				IF_CONSTEVAL
+				IF_CONSTEVAL20
 				{
-					for (size_type i = 0; i < min_count; ++i) [[likely]]
+					if (count < MemSize) LIKELY
 					{
-						buffer[i] = other[i];
+						for (size_type i = 0; i < count; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
+
+						buffer[count  - 1] = 0;
+					}
+					else UNLIKELY
+					{
+						for (size_type i = 0; i < MemSize; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
 					}
 				}
 				else
 				{
-					const size_type byte_size = min_count * sizeof(Elem);
-					std::memcpy(buffer, other, byte_size);
+					if (count < MemSize) LIKELY
+					{
+						const size_type byte_size = count * sizeof(Elem);
+						std::memcpy(buffer, other, byte_size);
+
+						buffer[count - 1] = 0;
+					}
+					else UNLIKELY
+					{
+						constexpr size_type byte_size = MemSize * sizeof(Elem);
+						std::memcpy(buffer, other, byte_size);
+					}
 				}
-
-
-				buffer[min_count] = '\0';
 
 				return *this;
 			}
 
 			/**
-			 * Copy from array buffer whose size is different from the string size
-			 * @tparam OtherSize Size of the buffer to copy from
-			 * @param other Buffer to copy from
-			 * @return Self reference
-			 */
-			template <size_type OtherSize>
-			CONSTEXPR20 string& copy(const Elem(&other)[OtherSize]) noexcept
-			{
-				ASSERT_ASSUME(other != nullptr);
-				//[[assume(other != nullptr)]]
-
-				constexpr size_type min_count = (std::min)(OtherSize, Size - 1);
-
-				IF_CONSTEVAL
-				{
-					for (size_type i = 0; i < min_count; ++i) [[likely]]
-					{
-						buffer[i] = other[i];
-					}
-				}
-				else
-				{
-					constexpr size_type byte_size = min_count * sizeof(Elem);
-					std::memcpy(buffer, other, byte_size);
-				}
-
-				buffer[min_count] = '\0';
-
-				return *this;
-			}
-
-			/**
-			 * Copy from array buffer whose size is different from the string size
-			 * @tparam OtherSize Size of the buffer to copy from
-			 * @param other Buffer to copy from
-			 * @param count Count of characters to copy
-			 * @return Self reference
-			 */
-			template <size_type OtherSize>
-			CONSTEXPR20 string& copy(const Elem(&other)[OtherSize], const size_type count) noexcept
-			{
-				ASSERT_ASSUME(other != nullptr);
-				//[[assume(other != nullptr)]]
-
-				const size_type min_count = (std::min)(count, Size - 1);
-
-				IF_CONSTEVAL
-				{
-					for (size_type i = 0; i < min_count; ++i) [[likely]]
-					{
-						buffer[i] = other[i];
-					}
-				}
-				else
-				{
-					const size_type byte_size = min_count * sizeof(Elem);
-					std::memcpy(buffer, other, byte_size);
-				}
-
-					buffer[min_count] = '\0';
-
-					return *this;
-			}
-
-			/**
-			 * Copy from pointer buffer until null terminator is found or maximum size is reached (Size)
+			 * Copy from pointer buffer until null terminator is found or maximum size is reached (MemSize)
 			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
 			 * @param other Buffer to copy from
 			 * @return Self reference
 			 */
+#if defined(HAS_CXX20)
 			template <typename ElemPtr = const Elem* const>
-				requires std::is_pointer_v<ElemPtr>&&
+				requires std::is_pointer_v<ElemPtr> &&
+						 std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
+						 (!std::is_array_v<ElemPtr>)
+#else
+			template <typename ElemPtr = const Elem* const, typename = std::enable_if_t<
+				std::is_pointer_v<ElemPtr> &&
 				std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-				(!std::is_array_v<ElemPtr>)
-				CONSTEXPR20 string& copy(ElemPtr other) noexcept
+				(!std::is_array_v<ElemPtr>)>>
+#endif
+				constexpr string& copy(ElemPtr other) noexcept
 			{
 				ASSERT_ASSUME(other != nullptr);
 
 				//[[assume(other != nullptr)]]
 
-				IF_CONSTEVAL
+				IF_CONSTEVAL20
 				{
 					size_type i = 0;
 
-					while (i < Size - 1 && !(buffer[i] = other[i++])) [[likely]] {}
+					while (i < MemSize - 1 && !(buffer[i] = other[i++])) LIKELY {}
 
-					if (i >= Size - 1)
+					if (i < MemSize - 1) LIKELY
 					{
-						buffer[Size - 1] = Elem{ 0 };
+						buffer[i] = 0;
 					}
 				}
 				else IF_CONSTEXPR17(std::is_same_v<Elem, char>)
@@ -599,11 +808,11 @@ namespace woj
 				{
 					size_type i = 0;
 
-					while (i < Size - 1 && !(buffer[i] = other[i++])) [[likely]] {}
+					while (i < MemSize - 1 && !(buffer[i] = other[i++])) LIKELY {}
 
-					if (i >= Size - 1)
+					if (i < MemSize - 1) LIKELY
 					{
-						buffer[Size - 1] = Elem{ 0 };
+						buffer[i] = 0;
 					}
 				}
 				return *this;
@@ -613,28 +822,43 @@ namespace woj
 			 * Copy from pointer buffer count of characters
 			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
 			 * @param other Buffer to copy from
-			 * @param count Size of the buffer to copy from
+			 * @param count MemSize of the buffer to copy from
 			 * @return Self reference
 			 */
+#if defined(HAS_CXX20)
 			template <typename ElemPtr = const Elem* const>
-				requires std::is_pointer_v<ElemPtr>&&
+				requires std::is_pointer_v<ElemPtr> &&
+						 std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
+						 (!std::is_array_v<ElemPtr>)
+#else
+			template <typename ElemPtr = const Elem* const, typename = std::enable_if_t<
+				std::is_pointer_v<ElemPtr>&&
 				std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-				(!std::is_array_v<ElemPtr>)
-				CONSTEXPR20 string& copy(ElemPtr other, const size_type count) noexcept
+				(!std::is_array_v<ElemPtr>)>>
+#endif
+				constexpr string& copy(ElemPtr other, const size_type count) noexcept
 			{
 				ASSERT_ASSUME(other != nullptr);
 				//[[assume(other != nullptr)]]
 
-				IF_CONSTEVAL
+				IF_CONSTEVAL20
 				{
-					const size_type min_count = (std::min)(count, Size - 1);
-
-					for (size_type i = 0; i < min_count; ++i) [[likely]]
+					if (count < MemSize) LIKELY
 					{
-						buffer[i] = other[i];
-					}
+						for (size_type i = 0; i < count; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
 
-					buffer[min_count] = '\0';
+						buffer[count - 1] = 0;
+					}
+					else UNLIKELY
+					{
+						for (size_type i = 0; i < MemSize; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
+					}
 				}
 				else IF_CONSTEXPR17(std::is_same_v<Elem, char>)
 				{
@@ -646,81 +870,193 @@ namespace woj
 				}
 				else
 				{
-					const size_type min_count = (std::min)(count, Size - 1);
-
-					for (size_type i = 0; i < min_count; ++i) [[likely]]
+					if (count < MemSize) LIKELY
 					{
-						buffer[i] = other[i];
-					}
+						for (size_type i = 0; i < count; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
 
-					buffer[min_count] = '\0';
+						buffer[count - 1] = 0;
+					}
+					else UNLIKELY
+					{
+						for (size_type i = 0; i < MemSize; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
+					}
 				}
 
 				return *this;
 			}
 
-			CONSTEXPR20 string& copy(const string& other)
+			/**
+			 * Copy from pointer buffer count of characters
+			 * @tparam Count Count of characters to copy
+			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
+			 * @param other Buffer to copy from
+			 * @return Self reference
+			 */
+#if defined(HAS_CXX20)
+			template <size_type Count, typename ElemPtr = const Elem* const>
+				requires std::is_pointer_v<ElemPtr> &&
+						 std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
+						 (!std::is_array_v<ElemPtr>)
+#else
+			template <size_type Count, typename ElemPtr, typename = std::enable_if_t<
+				std::is_pointer_v<ElemPtr> &&
+				std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
+				(!std::is_array_v<ElemPtr>)>>
+#endif
+				constexpr string& copy(ElemPtr other) noexcept
 			{
-				ASSERT_ASSUME(this != &other);
+				ASSERT_ASSUME(other != nullptr);
+				//[[assume(other != nullptr)]]
 
-				copy(other.buffer);
-
-				return *this;
-			}
-
-			CONSTEXPR20 string& copy(const string& other, const size_type count)
-			{
-				ASSERT_ASSUME(this != &other);
-
-				copy(other.buffer, count);
-
-				return *this;
-			}
-
-			CONSTEXPR20 Elem& at(const size_type index) noexcept
-			{
-				ASSERT_ASSUME(index >= 0 && index < Size);
-
-				return buffer[index];
-			}
-
-			CONSTEXPR20 const Elem& at(const size_type index) const noexcept
-			{
-				ASSERT_ASSUME(index >= 0 && index < Size);
-
-				return buffer[index];
-			}
-
-			CONSTEXPR20 string& fill(const Elem val) noexcept
-			{
-				IF_CONSTEVAL
+				IF_CONSTEVAL20
 				{
-					for (size_type i = 0; i < Size; ++i)
+					IF_CONSTEXPR17 (Count < MemSize)
+					{
+						for (size_type i = 0; i < Count; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
+
+						buffer[Count - 1] = 0;
+					}
+					else UNLIKELY
+					{
+						for (size_type i = 0; i < MemSize; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
+					}
+				}
+				else IF_CONSTEXPR17(std::is_same_v<Elem, char>)
+				{
+					strcpy_s(buffer, other);
+				}
+				else IF_CONSTEXPR17(std::is_same_v<Elem, wchar_t>)
+				{
+					wcscpy_s(buffer, other);
+				}
+				else
+				{
+					IF_CONSTEXPR17 (Count < MemSize) LIKELY
+					{
+						for (size_type i = 0; i < Count; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
+
+						buffer[Count - 1] = 0;
+					}
+					else UNLIKELY
+					{
+						for (size_type i = 0; i < MemSize; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
+					}
+				}
+				return *this;
+			}
+
+
+#if defined(HAS_CXX20)
+			template <char_type OtherElem, size_type OtherMemSize>
+#else
+			template <typename OtherElem, size_type OtherMemSize>
+#endif
+			constexpr string& copy(const string<OtherElem, OtherMemSize>& other)
+			{
+				ASSERT_ASSUME(this != &other);
+
+				copy(other.data());
+
+				return *this;
+			}
+
+#if defined(HAS_CXX20)
+			template <char_type OtherElem, size_type OtherMemSize>
+#else
+			template <typename OtherElem, size_type OtherMemSize>
+#endif
+			constexpr string& copy(const string<OtherElem, OtherMemSize>& other, const size_type count)
+			{
+				ASSERT_ASSUME(this != &other);
+
+				copy(other.data(), count);
+
+				return *this;
+			}
+
+			/**
+			 * Access the element at the index (unchecked)
+			 * @param index Index of the element to access
+			 * @return Reference to the element at the index
+			 */
+			NODISCARD17 constexpr Elem& at(const size_type index) noexcept
+			{
+				ASSERT_ASSUME(index < MemSize);
+
+				return buffer[index];
+			}
+
+			/**
+			 * Returns a const reference to the element at the index (unchecked)
+			 * @param index Index of the element to access
+			 * @return Const reference to the element at the index
+			 */
+			NODISCARD17 constexpr const Elem& at(const size_type index) const noexcept
+			{
+				ASSERT_ASSUME(index < MemSize);
+
+				return buffer[index];
+			}
+
+			/**
+			 * Fill the string with a value
+			 * @param val Value to fill the string with
+			 * @return Reference to self
+			 */
+			constexpr string& fill(const Elem val) noexcept
+			{
+				IF_CONSTEVAL20
+				{
+					for (size_type i = 0; i < MemSize; ++i)
 					{
 						buffer[i] = val;
 					}
 					return *this;
 				}
-				IF_CONSTEXPR17(std::is_same_v<Elem, char>)
+				IF_CONSTEXPR17 (std::is_same_v<Elem, char>)
 				{
-					std::memset(buffer, val, Size);
+					std::memset(buffer, val, MemSize);
 				}
-				else IF_CONSTEXPR17(std::is_same_v<Elem, wchar_t>)
+				else IF_CONSTEXPR17 (std::is_same_v<Elem, wchar_t>)
 				{
-					std::wmemset(buffer, val, Size);
-					}
+					std::wmemset(buffer, val, MemSize);
+				}
 				else
 				{
-					std::fill(buffer, buffer + Size, val);
+					std::fill(buffer, buffer + MemSize, val);
 				}
 
 				return *this;
 			}
 
-			CONSTEXPR20 string& swap(const size_type index1, const size_type index2) noexcept
+			/**
+			 * Swaps two elements in the string
+			 * @param index1 Index of the first element to swap
+			 * @param index2 Index of the second element to swap
+			 * @return Reference to self
+			 */
+			constexpr string& swap(const size_type index1, const size_type index2) noexcept
 			{
-				ASSERT_ASSUME(index1 >= 0 && index1 < Size);
-				ASSERT_ASSUME(index2 >= 0 && index2 < Size);
+				ASSERT_ASSUME(index1 >= 0 && index1 < MemSize);
+				ASSERT_ASSUME(index2 >= 0 && index2 < MemSize);
 
 				buffer[index1] ^= buffer[index2];
 				buffer[index2] ^= buffer[index1];
@@ -728,11 +1064,16 @@ namespace woj
 				return *this;
 			}
 
-			CONSTEXPR20 string& swap(string& other) noexcept
+			/**
+			 * Swaps the contents of two strings
+			 * @param other Other string to swap with
+			 * @return Reference to self
+			 */
+			constexpr string& swap(string& other) noexcept
 			{
 				ASSERT_ASSUME(this != &other);
 
-				for (size_type i = 0; i < Size; ++i)
+				for (size_type i = 0; i < MemSize; ++i)
 				{
 					buffer[i] ^= other.buffer[i];
 					other.buffer[i] ^= buffer[i];
@@ -742,47 +1083,117 @@ namespace woj
 				return *this;
 			}
 
-			NODISCARD17 CONSTEXPR20 const string& as_const() const noexcept
+			/**
+			 * Returns a reference to self as const, useful for const-correctness e.g. when iterating
+			 * @return Reference to self as const
+			 */
+			NODISCARD17 constexpr const string& as_const() const noexcept
 			{
 				return *this;
 			}
 
-			NODISCARD17 CONSTEXPR20 const decltype(buffer)& data() const noexcept
+			/**
+			 * @return Array representing string data
+			 */
+			NODISCARD17 constexpr Elem(&data() noexcept)[MemSize]
 			{
 				return buffer;
 			}
 
-			NODISCARD17 CONSTEXPR20 decltype(buffer)& data() noexcept
+			/**
+			 * @return Const array representing string data
+			 */
+			NODISCARD17 constexpr const Elem(&data() const noexcept)[MemSize]
 			{
 				return buffer;
 			}
 
-			NODISCARD17 CONSTEXPR20 const decltype(buffer)& c_str() const noexcept
+			/**
+			 * @return C-String representation of the string (not necessarily null-terminated)
+			 */
+			NODISCARD17 constexpr const Elem(&c_str() const noexcept)[MemSize]
 			{
 				return buffer;
 			}
 
-			NODISCARD17 CONSTEXPR20 size_type str_size() const noexcept
-			{
-				size_type len{ mem_size() };
 
-				for (; len > 0 && buffer[len]; --len) [[likely]] {}
+			/**
+			 * @return Size of the string (until null terminator)
+			 */
+			NODISCARD17 constexpr size_type str_size() const noexcept
+			{
+				IF_CONSTEXPR17 (!MemSize)
+					return 0;
+
+				IF_CONSTEXPR17 (MemSize == 1)
+					return static_cast<bool>(buffer[0]);
+
+				IF_CONSTEVAL20
+				{
+					size_type len{ 0 };
+
+					for (; len < mem_size() && buffer[len]; ++len);
+
+					return len;
+				}
+
+				IF_CONSTEXPR17 (std::is_same<Elem, char>::value)
+				{
+#if !defined(HAS_CXX17) // C++14 fails to recognize type restriction
+					return strnlen(reinterpret_cast<const char*>(buffer), MemSize);
+#else
+					return strnlen(buffer, MemSize);
+#endif
+				}
+
+				IF_CONSTEXPR17 (std::is_same<Elem, wchar_t>::value && false)
+				{
+#if !defined(HAS_CXX17) // C++14 fails to recognize type restriction
+					return wcsnlen(reinterpret_cast<const wchar_t*>(buffer), MemSize);
+#else
+					return wcsnlen(buffer, MemSize);
+#endif
+				}
+
+				size_type len{ 0 };
+
+				for (; len < mem_size() && buffer[len]; ++len);
 
 				return len;
-
 			}
 
-			NODISCARD17 CONSTEXPR20 size_type size() const noexcept
+			/**
+			 * @return Size of the string (until null terminator)
+			 */
+			NODISCARD17 constexpr size_type size() const noexcept
 			{
 				return str_size();
 			}
 
-			NODISCARD17 static CONSTEVAL20 size_type mem_size() noexcept
+			/**
+			 * @return Size of the string memory buffer
+			 */
+			NODISCARD17 static
+#if defined(HAS_CXX20)
+			CONSTEVAL20
+#else
+			constexpr
+#endif
+			size_type mem_size() noexcept
 			{
-				return Size;
+				return MemSize;
 			}
 
-			NODISCARD17 static CONSTEVAL20 size_type max_size() noexcept
+			/**
+			 * @return Size of the string memory buffer
+			 */
+			NODISCARD17 static
+#if defined(HAS_CXX20)
+				CONSTEVAL20
+#else
+				constexpr
+#endif
+			size_type max_size() noexcept
 			{
 				return mem_size();
 			}

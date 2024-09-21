@@ -37,12 +37,16 @@
 // Define CONSTEXPR macros based on detected C++ version
 #if defined(HAS_CXX26)
 	#define CONSTEXPR26 constexpr
+	#define IF_HAS_CXX26_(...) if constexpr (true && __VA_ARGS__)
+	#define IF_HAS_CXX26 if constexpr (true)
 #else
 	#define CONSTEXPR26 inline
 #endif
 
 #if defined(HAS_CXX23)
 	#define CONSTEXPR23 constexpr
+	#define IF_HAS_CXX23_(...) if constexpr (true && __VA_ARGS__)
+	#define IF_HAS_CXX23 if constexpr (true)
 #else
 	#define CONSTEXPR23 inline
 #endif
@@ -52,6 +56,8 @@
 	#define CONSTEVAL20 consteval
 	#define LIKELY [[likely]]
 	#define UNLIKELY [[unlikely]]
+	#define IF_HAS_CXX20_(...) if constexpr (true __VA_ARGS__)
+	#define IF_HAS_CXX20 if constexpr (true)
 #else
 	#define CONSTEXPR20 inline
 	#define CONSTEVAL20 inline
@@ -63,18 +69,40 @@
 	#define CONSTEXPR17    constexpr
 	#define IF_CONSTEXPR17 if constexpr
 	#define NODISCARD17 [[nodiscard]]
+	#define IF_HAS_CXX17_(...) if constexpr (true __VA_ARGS__)
+	#define IF_HAS_CXX17 if constexpr (true)
 #else
 	#define CONSTEXPR17 inline
-	#define IF_CONSTEXPR17 if (false)
+	#define IF_CONSTEXPR17 if
 	#define NODISCARD17
+	#define IF_HAS_CXX17_(...) if (false __VA_ARGS__)
+	#define IF_HAS_CXX17 if (false)
+#endif
+
+#if !defined(HAS_CXX26)
+#define IF_HAS_CXX26_(...) IF_CONSTEXPR17 (false __VA_ARGS__)
+#define IF_HAS_CXX26 IF_CONSTEXPR17 (false)
+#endif
+
+#if !defined(HAS_CXX23)
+#define IF_HAS_CXX23_(...) IF_CONSTEXPR17 (false __VA_ARGS__)
+#define IF_HAS_CXX23 IF_CONSTEXPR17 (false)
+#endif
+
+#if !defined(HAS_CXX20)
+#define IF_HAS_CXX20_(...) IF_CONSTEXPR17 (false __VA_ARGS__)
+#define IF_HAS_CXX20 IF_CONSTEXPR17 (false)
 #endif
 
 #if defined(HAS_CXX23)
-	#define IF_CONSTEVAL if consteval
+	#define IF_CONSTEVAL23 if consteval
+	#define IF_CONSTEVAL20 if consteval
 #elif defined(HAS_CXX20)
-	#define IF_CONSTEVAL if (std::is_constant_evaluated())
+	#define IF_CONSTEVAL23 IF_CONSTEXPR17 (false)
+	#define IF_CONSTEVAL20 if (std::is_constant_evaluated())
 #else
-	#define IF_CONSTEVAL if (false)
+	#define IF_CONSTEVAL23 IF_CONSTEXPR17 (false)
+	#define IF_CONSTEVAL20 IF_CONSTEXPR17 (false)
 #endif
 
 #if defined(HAS_CXX23)
