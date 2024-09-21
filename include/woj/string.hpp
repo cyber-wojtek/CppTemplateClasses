@@ -220,37 +220,37 @@ namespace woj
 			 */
 			constexpr string() = default;
 
-			// ----- Copy constructors from buffers -----
-
 			/**
-			 * Copy constructor from array buffer
+			 * Constructor from array buffer
 			 * @param other Buffer to copy from
 			 */
-			explicit constexpr string(const Elem(&other)[MemSize]) noexcept
+			explicit constexpr string(const Elem(&other)[MemSize + 1]) noexcept
 			{
 				copy(other);
 			}
 
 			/**
-			 * Copy constructor from array buffer count of characters
+			 * Constructor from array buffer with count of characters
 			 * @param other Buffer to copy from
 			 * @param count Count of characters to copy
 			 */
-			constexpr string(const Elem(&other)[MemSize], const size_type count) noexcept
+			constexpr string(const Elem(&other)[MemSize + 1], const size_type count) noexcept
 			{
 				copy(other, count);
 			}
 
+			// ----- Copy constructors from buffers -----
+
 #if defined(HAS_CXX20)
 			/**
-			 * Copy constructor from array buffer whose size is different from the string size
+			 * Copy constructor from array buffer
 			 * @tparam OtherMemSize MemSize of the buffer to copy from
 			 * @param other Buffer to copy from
 			 */
 			template <size_type OtherMemSize> requires (OtherMemSize != MemSize)
 #else
 			/**
-			 * Copy constructor from array buffer whose size is different from the string size
+			 * Copy constructor from array buffer
 			 * @tparam OtherMemSize MemSize of the buffer to copy from
 			 * @param other Buffer to copy from
 			 */
@@ -263,7 +263,7 @@ namespace woj
 
 #if defined(HAS_CXX20)
 			/**
-			 * Copy constructor from array buffer whose size is different from the string size
+			 * Copy constructor from array buffer with count of characters
 			 * @tparam OtherMemSize MemSize of the buffer to copy from
 			 * @param other Buffer to copy from
 			 * @param count Count of characters to copy
@@ -271,7 +271,7 @@ namespace woj
 			template <size_type OtherMemSize> requires (OtherMemSize != MemSize)
 #else
 			/**
-			 * Copy constructor from array buffer whose size is different from the string size
+			 * Copy constructor from array buffer with count of characters
 			 * @tparam OtherMemSize MemSize of the buffer to copy from
 			 * @param other Buffer to copy from
 			 * @param count Count of characters to copy
@@ -295,7 +295,7 @@ namespace woj
 						 (!std::is_array_v<ElemPtr>)
 #else
 			/**
-			 * Copy constructor from pointer buffer until null terminator is found or maximum size is reached (MemSize)
+			 * Copy constructor from pointer buffer
 			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
 			 * @param other Buffer to copy from
 			 */
@@ -311,7 +311,7 @@ namespace woj
 
 #if defined(HAS_CXX20)
 			/**
-			 * Copy constructor from pointer buffer count of characters
+			 * Copy constructor from pointer buffer with count of characters
 			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
 			 * @param other Buffer to copy from
 			 * @param count Count of characters to copy
@@ -322,7 +322,7 @@ namespace woj
 						 (!std::is_array_v<ElemPtr>)
 #else
 			/**
-			 * Copy constructor from pointer buffer count of characters
+			 * Copy constructor from pointer buffer with count of characters
 			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
 			 * @param other Buffer to copy from
 			 * @param count Count of characters to copy
@@ -409,32 +409,12 @@ namespace woj
 
 			/**
 			 * Assign from array buffer operator
-			 * @param other Buffer to copy from
-			 * @return Reference to self
-			 */
-			constexpr string& operator=(const Elem (&other)[MemSize]) noexcept
-			{
-				return copy(other);
-			}
-
-#if defined(HAS_CXX20)
-			/**
-			 * Assign from array buffer with different size operator
 			 * @tparam OtherMemSize Size of the buffer to copy from
 			 * @param other Buffer to copy from
 			 * @return Reference to self
 			 */
-			template <size_type OtherMemSize> requires (OtherMemSize != MemSize)
-#else
-			/**
-			 * Assign from array buffer with different size operator
-			 * @tparam OtherMemSize Size of the buffer to copy from
-			 * @param other Buffer to copy from
-			 * @return Reference to self
-			 */
-			template <size_type OtherMemSize, typename = std::enable_if_t<OtherMemSize != MemSize>>
-#endif
-				constexpr string& operator=(const Elem (&other)[OtherMemSize]) noexcept
+			template <size_type OtherMemSize>
+			constexpr string& operator=(const Elem (&other)[OtherMemSize]) noexcept
 			{
 				return copy(other);
 			}
@@ -466,6 +446,14 @@ namespace woj
 			{
 				return copy(other);
 			}
+
+				/**
+				 * Assign from pointer buffer with count of characters operator
+				 * @tparam ElemPtr Type of the pointer buffer to copy from (Default: const Elem* const)
+				 * @param other Buffer to copy from
+				 * @param count Count of characters to copy
+				 * @return Reference to self
+				 */
 
 			/**
 			 * Assign from another string operator
@@ -508,7 +496,7 @@ namespace woj
 			constexpr string& operator=(string&&) = delete;
 
 			/**
-			 * Index operator
+			 * Index operator (unchecked & UB if index >= MemSize)
 			 * @param index Index of the element to access
 			 * @return Reference to the element at the index
 			 */
@@ -518,7 +506,7 @@ namespace woj
 			}
 
 			/**
-			 * Const index operator
+			 * Const index operator (unchecked & UB if index >= MemSize)
 			 * @param index Index of the element to access
 			 * @return Const reference to the element at the index
 			 */
@@ -658,6 +646,56 @@ namespace woj
 				return *this;
 			}
 
+			/**
+			 * Copy from array buffer
+			 * @tparam OtherMemSize Size of the buffer to copy from
+			 * @param other Buffer to copy from
+			 * @return Self reference
+			 */
+			template <typename OtherElem, size_type OtherMemSize>
+			CONSTEXPR17 string& copy(const OtherElem(&other)[OtherMemSize]) noexcept
+			{
+				ASSERT_ASSUME(other != nullptr);
+				//[[assume(other != nullptr)]]
+
+				IF_CONSTEVAL20
+				{
+					IF_CONSTEXPR17(OtherMemSize < MemSize)
+					{
+						for (size_type i = 0; i < OtherMemSize; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
+
+						buffer[OtherMemSize] = 0;
+					}
+					else
+					{
+						for (size_type i = 0; i < MemSize; ++i) LIKELY
+						{
+							buffer[i] = other[i];
+						}
+					}
+
+				}
+				else
+				{
+					IF_CONSTEXPR17(OtherMemSize < MemSize)
+					{
+						constexpr size_type byte_size = OtherMemSize * sizeof(Elem);
+						std::memcpy(buffer, other, byte_size);
+
+						buffer[OtherMemSize] = 0;
+					}
+					else
+					{
+						constexpr size_type byte_size = MemSize * sizeof(Elem);
+						std::memcpy(buffer, other, byte_size);
+						}
+						}
+
+						return *this;
+			}
 
 			/**
 			 * Copy from array buffer with count of characters
@@ -1197,6 +1235,55 @@ namespace woj
 			{
 				return mem_size();
 			}
+
+			template <typename From, typename To> // character types
+			size_type str_conversion_minimal_size()
+			{
+				IF_CONSTEXPR17 (std::is_same_v<From, To>)
+				{
+					return mem_size();
+				}
+				size_type total_size{ 0ull };
+
+				for (size_type i = 0; i < mem_size(); ++i)
+				{
+					// ASCII character
+					if (buffer[i] < 0x80)
+					{
+						total_size += 1;
+					}
+					// 2-byte character
+					else if (buffer[i] < 0x800)
+					{
+						total_size += 2;
+					}
+					else if (buffer[i] < 0x10000)
+					{
+						total_size += 3;
+					}
+					else if (buffer[i] < 0x200000)
+					{
+						total_size += 4;
+					}
+					else if (buffer[i] < 0x4000000)
+					{
+						total_size += 5;
+					}
+					else
+					{
+						total_size += 6;
+					}
+				}
+			}
 		};
+
+		// ----- Deduction guides for string -----
+#if defined(HAS_CXX17)
+		template <typename Elem, size_t Size>
+		explicit string(const Elem(&)[Size]) -> string<Elem, Size - 1>;
+
+		template <typename Elem, size_t Size>
+		explicit string(const Elem(&)[Size], size_t) -> string<Elem, Size - 1>;
+#endif
 	}
 }
