@@ -598,15 +598,15 @@ namespace woj
 			/**
 			 * Copy from array buffer
 			 * @tparam OtherMemSize Size of the buffer to copy from
+			 * @tparam BuffersOverlap Whether the buffers overlap (F
 			 * @param other Buffer to copy from
 			 * @return Self reference
 			 */
-			template <size_type OtherMemSize>
+			template <size_type OtherMemSize, bool BuffersOverlap = false>
 			CONSTEXPR17 string& copy(const Elem(&other)[OtherMemSize]) noexcept
 			{
 				ASSERT_ASSUME(other != nullptr);
 				//[[assume(other != nullptr)]]
-
 				IF_CONSTEVAL20
 				{
 					IF_CONSTEXPR17 (OtherMemSize < MemSize)
@@ -628,17 +628,24 @@ namespace woj
 				}
 				else
 				{
-					IF_CONSTEXPR17(OtherMemSize < MemSize)
-					{
-						constexpr size_type byte_size = OtherMemSize * sizeof(Elem);
-						std::memcpy(buffer, other, byte_size);
+					constexpr bool buffer_smaller = OtherMemSize < MemSize;
 
-						buffer[OtherMemSize] = 0;
+					constexpr size_type byte_size = (buffer_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
+
+
+					IF_CONSTEXPR17 (BuffersOverlap)
+					{
+						std::memmove(buffer, other, byte_size);
 					}
 					else
 					{
-						constexpr size_type byte_size = MemSize * sizeof(Elem);
 						std::memcpy(buffer, other, byte_size);
+					}
+
+
+					IF_CONSTEXPR17 (buffer_smaller)
+					{
+						buffer[OtherMemSize] = 0;
 					}
 				}
 
@@ -690,10 +697,10 @@ namespace woj
 					{
 						constexpr size_type byte_size = MemSize * sizeof(Elem);
 						std::memcpy(buffer, other, byte_size);
-						}
-						}
+					}
+				}
 
-						return *this;
+				return *this;
 			}
 
 			/**
