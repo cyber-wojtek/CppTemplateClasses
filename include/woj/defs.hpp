@@ -94,14 +94,25 @@
 #define IF_HAS_CXX20 IF_CONSTEXPR17 (false)
 #endif
 
+namespace woj
+{
+	namespace utils
+	{
+#if defined(HAS_CXX23)		
+	}
+}
+
 #if defined(HAS_CXX23)
 	#define IF_CONSTEVAL23 if consteval
 	#define IF_CONSTEVAL20 if consteval
+	#define IF_CONSTEVAL11 if consteval
 #elif defined(HAS_CXX20)
 	#define IF_CONSTEVAL23 IF_CONSTEXPR17 (false)
 	#define IF_CONSTEVAL20 if (std::is_constant_evaluated())
+	#define IF_CONSTEVAL11 if (std::is_constant_evaluated())
 #else
 	#define IF_CONSTEVAL23 IF_CONSTEXPR17 (false)
+	#define IF_CONSTEVAL20 IF_CONSTEXPR17 (false)
 	#define IF_CONSTEVAL20 IF_CONSTEXPR17 (false)
 #endif
 

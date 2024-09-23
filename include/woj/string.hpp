@@ -51,7 +51,7 @@ namespace woj
 			using base_type::sputbackc;
 #if !defined(HAS_CXX17)
 			using base_type::stossc;
-#endif // _HAS_OLD_IOSTREAMS_MEMBERS
+#endif
 			using base_type::sungetc;
 			using base_type::sputc;
 			using base_type::sputn;
@@ -127,7 +127,7 @@ namespace woj
 			using reverse_iterator = pointer;
 			using const_reverse_iterator = const_pointer;
 
-			alignas(Elem) Elem buffer[MemSize]{};
+			alignas(Elem) Elem buffer[MemSize];
 
 			/**
 			 * Output stream operator (outputs str_size() characters)
@@ -224,7 +224,7 @@ namespace woj
 			 * Constructor from array buffer
 			 * @param other Buffer to copy from
 			 */
-			explicit constexpr string(const Elem(&other)[MemSize + 1]) noexcept
+			explicit constexpr string(const Elem(&other)[MemSize + 1]) noexcept : buffer{}
 			{
 				copy(other);
 			}
@@ -625,11 +625,10 @@ namespace woj
 							buffer[i] = other[i];
 						}
 					}
-
 				}
 				else
 				{
-					IF_CONSTEXPR17 (OtherMemSize < MemSize)
+					IF_CONSTEXPR17(OtherMemSize < MemSize)
 					{
 						constexpr size_type byte_size = OtherMemSize * sizeof(Elem);
 						std::memcpy(buffer, other, byte_size);
@@ -1175,7 +1174,7 @@ namespace woj
 					return len;
 				}
 
-				IF_CONSTEXPR17 (std::is_same<Elem, char>::value)
+				IF_CONSTEXPR17 (std::is_same_v<Elem, char>)
 				{
 #if !defined(HAS_CXX17) // C++14 fails to recognize type restriction
 					return strnlen(reinterpret_cast<const char*>(buffer), MemSize);
@@ -1184,7 +1183,7 @@ namespace woj
 #endif
 				}
 
-				IF_CONSTEXPR17 (std::is_same<Elem, wchar_t>::value && false)
+				IF_CONSTEXPR17 (std::is_same_v<Elem, wchar_t> && false)
 				{
 #if !defined(HAS_CXX17) // C++14 fails to recognize type restriction
 					return wcsnlen(reinterpret_cast<const wchar_t*>(buffer), MemSize);
@@ -1235,49 +1234,9 @@ namespace woj
 			{
 				return mem_size();
 			}
-
-			template <typename From, typename To> // character types
-			size_type str_conversion_minimal_size()
-			{
-				IF_CONSTEXPR17 (std::is_same_v<From, To>)
-				{
-					return mem_size();
-				}
-				size_type total_size{ 0ull };
-
-				for (size_type i = 0; i < mem_size(); ++i)
-				{
-					// ASCII character
-					if (buffer[i] < 0x80)
-					{
-						total_size += 1;
-					}
-					// 2-byte character
-					else if (buffer[i] < 0x800)
-					{
-						total_size += 2;
-					}
-					else if (buffer[i] < 0x10000)
-					{
-						total_size += 3;
-					}
-					else if (buffer[i] < 0x200000)
-					{
-						total_size += 4;
-					}
-					else if (buffer[i] < 0x4000000)
-					{
-						total_size += 5;
-					}
-					else
-					{
-						total_size += 6;
-					}
-				}
-			}
 		};
 
-		// ----- Deduction guides for string -----
+		// ----- Deduction guides -----
 #if defined(HAS_CXX17)
 		template <typename Elem, size_t Size>
 		explicit string(const Elem(&)[Size]) -> string<Elem, Size - 1>;
