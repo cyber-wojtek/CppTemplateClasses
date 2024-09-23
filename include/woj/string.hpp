@@ -26,7 +26,7 @@ namespace woj
 	namespace impl
 	{
 		template <typename Elem, typename Traits = std::char_traits<Elem>>
-		class basic_streambuf_publicized : public std::basic_streambuf<Elem, Traits>
+		class basic_streambuf_publicized final : public std::basic_streambuf<Elem, Traits>
 		{
 		public:
 			using base_type = std::basic_streambuf<Elem, Traits>;
@@ -84,15 +84,15 @@ namespace woj
 
 	#if defined(HAS_CXX20)
 	template <typename T>
-	concept char_type = std::is_same_v<T, char> || std::is_same_v<T, char8_t> || std::is_same_v<T, wchar_t> || std::is_same_v<T, char16_t> || std::is_same_v<T, char32_t>;
+	concept char_type = std::is_same<T, char>::value || std::is_same<T, char8_t>::value || std::is_same<T, wchar_t>::value || std::is_same<T, char16_t>::value || std::is_same<T, char32_t>::value;
 	#else
 	template <typename T>
 	struct is_char
 	{
-		static constexpr bool value = std::is_same_v<T, char>     ||
-									  std::is_same_v<T, wchar_t>  ||
-									  std::is_same_v<T, char16_t> ||
-									  std::is_same_v<T, char32_t>;
+		static constexpr bool value = std::is_same<T, char>::value     ||
+									  std::is_same<T, wchar_t>::value  ||
+									  std::is_same<T, char16_t>::value ||
+									  std::is_same<T, char32_t>::value;
 	};
 
 	template <typename T>
@@ -127,7 +127,7 @@ namespace woj
 			using reverse_iterator = pointer;
 			using const_reverse_iterator = const_pointer;
 
-			alignas(Elem) Elem buffer[MemSize];
+			alignas(Elem) Elem buffer[MemSize]{};
 
 			/**
 			 * Output stream operator (outputs str_size() characters)
@@ -290,9 +290,9 @@ namespace woj
 			 * @param other Buffer to copy from
 			 */
 			template <typename ElemPtr = const Elem* const>
-				requires std::is_pointer_v<ElemPtr> &&
-						 std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-						 (!std::is_array_v<ElemPtr>)
+				requires std::is_pointer<ElemPtr>::value &&
+						 std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
+						 (!std::is_array<ElemPtr>::value)
 #else
 			/**
 			 * Copy constructor from pointer buffer
@@ -300,9 +300,9 @@ namespace woj
 			 * @param other Buffer to copy from
 			 */
 			template <typename ElemPtr = const Elem* const, typename = std::enable_if_t<
-				std::is_pointer_v<ElemPtr> &&
-				std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-				!std::is_array_v<ElemPtr>>>
+				std::is_pointer<ElemPtr>::value &&
+				std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
+				!std::is_array<ElemPtr>::value>>
 #endif
 					explicit constexpr string(ElemPtr other) noexcept
 			{
@@ -317,9 +317,9 @@ namespace woj
 			 * @param count Count of characters to copy
 			 */
 			template <typename ElemPtr = const Elem* const>
-				requires std::is_pointer_v<ElemPtr> &&
-						 std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-						 (!std::is_array_v<ElemPtr>)
+				requires std::is_pointer<ElemPtr>::value &&
+						 std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
+						 (!std::is_array<ElemPtr>::value)
 #else
 			/**
 			 * Copy constructor from pointer buffer with count of characters
@@ -328,9 +328,9 @@ namespace woj
 			 * @param count Count of characters to copy
 			 */
 			template <typename ElemPtr = const Elem* const, typename = std::enable_if_t<
-				std::is_pointer_v<ElemPtr> &&
-				std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-				!std::is_array_v<ElemPtr>>>
+				std::is_pointer<ElemPtr>::value &&
+				std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
+				!std::is_array<ElemPtr>::value>>
 #endif
 				constexpr string(ElemPtr other, const size_type count) noexcept
 			{
@@ -427,9 +427,9 @@ namespace woj
 				 * @return Reference to self
 				 */
 			template <typename ElemPtr = const Elem* const>
-				requires std::is_pointer_v<ElemPtr> &&
-						 std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-						 (!std::is_array_v<ElemPtr>)
+				requires std::is_pointer<ElemPtr>::value &&
+						 std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
+						 (!std::is_array<ElemPtr>::value)
 #else
 				/**
 				 * Assign from pointer buffer operator
@@ -438,9 +438,9 @@ namespace woj
 				 * @return Reference to self
 				 */
 				template <typename ElemPtr = const Elem* const, typename = std::enable_if_t<
-					std::is_pointer_v<ElemPtr> &&
-					std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-					!std::is_array_v<ElemPtr>>>
+					std::is_pointer<ElemPtr>::value &&
+					std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
+					!std::is_array<ElemPtr>::value>>
 #endif
 				constexpr string& operator=(ElemPtr other) noexcept
 			{
@@ -500,7 +500,7 @@ namespace woj
 			 * @param index Index of the element to access
 			 * @return Reference to the element at the index
 			 */
-			NODISCARD17 constexpr Elem& operator[](const size_type index) noexcept
+			NODISCARD constexpr Elem& operator[](const size_type index) noexcept
 			{
 				return at(index);
 			}
@@ -510,7 +510,7 @@ namespace woj
 			 * @param index Index of the element to access
 			 * @return Const reference to the element at the index
 			 */
-			NODISCARD17 constexpr const Elem& operator[](const size_type index) const noexcept
+			NODISCARD constexpr const Elem& operator[](const size_type index) const noexcept
 			{
 				return at(index);
 			}
@@ -521,7 +521,7 @@ namespace woj
 			 * Begin iterator
 			 * @return Iterator to the beginning of the string
 			 */
-			NODISCARD17 constexpr iterator begin() noexcept
+			NODISCARD constexpr iterator begin() noexcept
 			{
 				return buffer;
 			}
@@ -530,7 +530,7 @@ namespace woj
 			 * Const begin iterator
 			 * @return Const iterator to the beginning of the string
 			 */
-			NODISCARD17 constexpr const_iterator begin() const noexcept
+			NODISCARD constexpr const_iterator begin() const noexcept
 			{
 				return buffer;
 			}
@@ -539,7 +539,7 @@ namespace woj
 			 * Const begin iterator
 			 * @return Const iterator to the beginning of the string
 			 */
-			NODISCARD17 constexpr const_iterator cbegin() const noexcept
+			NODISCARD constexpr const_iterator cbegin() const noexcept
 			{
 				return begin();
 			}
@@ -548,47 +548,47 @@ namespace woj
 			 * End iterator
 			 * @return Iterator to the end of the string (after the null terminator)
 			 */
-			NODISCARD17 constexpr iterator end() noexcept
+			NODISCARD constexpr iterator end() noexcept
 			{
 				return buffer + MemSize;
 			}
 
-			NODISCARD17 constexpr const_iterator end() const noexcept
+			NODISCARD constexpr const_iterator end() const noexcept
 			{
 				return buffer + MemSize;
 			}
 
-			NODISCARD17 constexpr const_iterator cend() const noexcept
+			NODISCARD constexpr const_iterator cend() const noexcept
 			{
 				return end();
 			}
 
-			NODISCARD17 constexpr reverse_iterator rbegin() noexcept
+			NODISCARD constexpr reverse_iterator rbegin() noexcept
 			{
 				return buffer + MemSize - 1;
 			}
 
-			NODISCARD17 constexpr const_reverse_iterator rbegin() const noexcept
+			NODISCARD constexpr const_reverse_iterator rbegin() const noexcept
 			{
 				return buffer + MemSize - 1;
 			}
 
-			NODISCARD17 constexpr const_reverse_iterator crbegin() const noexcept
+			NODISCARD constexpr const_reverse_iterator crbegin() const noexcept
 			{
 				return rbegin();
 			}
 
-			NODISCARD17 constexpr pointer rend() noexcept
+			NODISCARD constexpr pointer rend() noexcept
 			{
 				return buffer - 1;
 			}
 
-			NODISCARD17 constexpr const_reverse_iterator rend() const noexcept
+			NODISCARD constexpr const_reverse_iterator rend() const noexcept
 			{
 				return buffer - 1;
 			}
 
-			NODISCARD17 constexpr const_reverse_iterator crend() const noexcept
+			NODISCARD constexpr const_reverse_iterator crend() const noexcept
 			{
 				return rend();
 			}
@@ -607,9 +607,14 @@ namespace woj
 			{
 				ASSERT_ASSUME(other != nullptr);
 				//[[assume(other != nullptr)]]
+<<<<<<< HEAD
 				IF_CONSTEVAL20
+=======
+
+				if (woj::utils::is_constant_evaluated())
+>>>>>>> b8b57f4c10ab42532ba102babfd18bb58a5cebe0
 				{
-					IF_CONSTEXPR17 (OtherMemSize < MemSize)
+					IF_CONSTEXPR (OtherMemSize < MemSize)
 					{
 						for (size_type i = 0; i < OtherMemSize; ++i) LIKELY
 						{
@@ -628,7 +633,14 @@ namespace woj
 				}
 				else
 				{
+<<<<<<< HEAD
 					constexpr bool buffer_smaller = OtherMemSize < MemSize;
+=======
+					IF_CONSTEXPR(OtherMemSize < MemSize)
+					{
+						constexpr size_type byte_size = OtherMemSize * sizeof(Elem);
+						std::memcpy(buffer, other, byte_size);
+>>>>>>> b8b57f4c10ab42532ba102babfd18bb58a5cebe0
 
 					constexpr size_type byte_size = (buffer_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
 
@@ -664,9 +676,9 @@ namespace woj
 				ASSERT_ASSUME(other != nullptr);
 				//[[assume(other != nullptr)]]
 
-				IF_CONSTEVAL20
+				if (woj::utils::is_constant_evaluated())
 				{
-					IF_CONSTEXPR17(OtherMemSize < MemSize)
+					IF_CONSTEXPR(OtherMemSize < MemSize)
 					{
 						for (size_type i = 0; i < OtherMemSize; ++i) LIKELY
 						{
@@ -686,7 +698,7 @@ namespace woj
 				}
 				else
 				{
-					IF_CONSTEXPR17(OtherMemSize < MemSize)
+					IF_CONSTEXPR(OtherMemSize < MemSize)
 					{
 						constexpr size_type byte_size = OtherMemSize * sizeof(Elem);
 						std::memcpy(buffer, other, byte_size);
@@ -716,9 +728,9 @@ namespace woj
 				ASSERT_ASSUME(other != nullptr);
 				//[[assume(other != nullptr)]]
 
-				IF_CONSTEVAL20
+				if (woj::utils::is_constant_evaluated())
 				{
-					IF_CONSTEXPR17 (Count < MemSize)
+					IF_CONSTEXPR (Count < MemSize)
 					{
 						for (size_type i = 0; i < Count; ++i) LIKELY
 						{
@@ -738,7 +750,7 @@ namespace woj
 				}
 				else
 				{
-					IF_CONSTEXPR17 (Count < MemSize)
+					IF_CONSTEXPR (Count < MemSize)
 					{
 						const size_type byte_size = Count * sizeof(Elem);
 						std::memcpy(buffer, other, byte_size);
@@ -768,7 +780,7 @@ namespace woj
 				ASSERT_ASSUME(other != nullptr);
 				//[[assume(other != nullptr)]]
 
-				IF_CONSTEVAL20
+				if (woj::utils::is_constant_evaluated())
 				{
 					if (count < MemSize) LIKELY
 					{
@@ -814,14 +826,14 @@ namespace woj
 			 */
 #if defined(HAS_CXX20)
 			template <typename ElemPtr = const Elem* const>
-				requires std::is_pointer_v<ElemPtr> &&
-						 std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-						 (!std::is_array_v<ElemPtr>)
+				requires std::is_pointer<ElemPtr>::value &&
+						 std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
+						 (!std::is_array<ElemPtr>::value)
 #else
 			template <typename ElemPtr = const Elem* const, typename = std::enable_if_t<
-				std::is_pointer_v<ElemPtr> &&
-				std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-				(!std::is_array_v<ElemPtr>)>>
+				std::is_pointer<ElemPtr>::value &&
+				std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
+				(!std::is_array<ElemPtr>::value)>>
 #endif
 				constexpr string& copy(ElemPtr other) noexcept
 			{
@@ -829,7 +841,7 @@ namespace woj
 
 				//[[assume(other != nullptr)]]
 
-				IF_CONSTEVAL20
+				if (woj::utils::is_constant_evaluated())
 				{
 					size_type i = 0;
 
@@ -840,11 +852,11 @@ namespace woj
 						buffer[i] = 0;
 					}
 				}
-				else IF_CONSTEXPR17(std::is_same_v<Elem, char>)
+				else IF_CONSTEXPR(std::is_same<Elem, char>::value)
 				{
 					strcpy_s(buffer, other);
 				}
-				else IF_CONSTEXPR17(std::is_same_v<Elem, wchar_t>)
+				else IF_CONSTEXPR(std::is_same<Elem, wchar_t>::value)
 				{
 					wcscpy_s(buffer, other);
 				}
@@ -871,21 +883,21 @@ namespace woj
 			 */
 #if defined(HAS_CXX20)
 			template <typename ElemPtr = const Elem* const>
-				requires std::is_pointer_v<ElemPtr> &&
-						 std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-						 (!std::is_array_v<ElemPtr>)
+				requires std::is_pointer<ElemPtr>::value &&
+						 std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
+						 (!std::is_array<ElemPtr>::value)
 #else
 			template <typename ElemPtr = const Elem* const, typename = std::enable_if_t<
-				std::is_pointer_v<ElemPtr>&&
-				std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-				(!std::is_array_v<ElemPtr>)>>
+				std::is_pointer<ElemPtr>::value&&
+				std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
+				(!std::is_array<ElemPtr>::value)>>
 #endif
 				constexpr string& copy(ElemPtr other, const size_type count) noexcept
 			{
 				ASSERT_ASSUME(other != nullptr);
 				//[[assume(other != nullptr)]]
 
-				IF_CONSTEVAL20
+				if (woj::utils::is_constant_evaluated())
 				{
 					if (count < MemSize) LIKELY
 					{
@@ -904,11 +916,11 @@ namespace woj
 						}
 					}
 				}
-				else IF_CONSTEXPR17(std::is_same_v<Elem, char>)
+				else IF_CONSTEXPR(std::is_same<Elem, char>::value)
 				{
 					strcpy_s(buffer, other);
 				}
-				else IF_CONSTEXPR17(std::is_same_v<Elem, wchar_t>)
+				else IF_CONSTEXPR(std::is_same<Elem, wchar_t>::value)
 				{
 					wcscpy_s(buffer, other);
 				}
@@ -944,23 +956,23 @@ namespace woj
 			 */
 #if defined(HAS_CXX20)
 			template <size_type Count, typename ElemPtr = const Elem* const>
-				requires std::is_pointer_v<ElemPtr> &&
-						 std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-						 (!std::is_array_v<ElemPtr>)
+				requires std::is_pointer<ElemPtr>::value &&
+						 std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
+						 (!std::is_array<ElemPtr>::value)
 #else
 			template <size_type Count, typename ElemPtr, typename = std::enable_if_t<
-				std::is_pointer_v<ElemPtr> &&
-				std::is_same_v<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem> &&
-				(!std::is_array_v<ElemPtr>)>>
+				std::is_pointer<ElemPtr>::value &&
+				std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
+				(!std::is_array<ElemPtr>::value)>>
 #endif
 				constexpr string& copy(ElemPtr other) noexcept
 			{
 				ASSERT_ASSUME(other != nullptr);
 				//[[assume(other != nullptr)]]
 
-				IF_CONSTEVAL20
+				if (woj::utils::is_constant_evaluated())
 				{
-					IF_CONSTEXPR17 (Count < MemSize)
+					IF_CONSTEXPR (Count < MemSize)
 					{
 						for (size_type i = 0; i < Count; ++i) LIKELY
 						{
@@ -977,17 +989,17 @@ namespace woj
 						}
 					}
 				}
-				else IF_CONSTEXPR17(std::is_same_v<Elem, char>)
+				else IF_CONSTEXPR(std::is_same<Elem, char>::value)
 				{
 					strcpy_s(buffer, other);
 				}
-				else IF_CONSTEXPR17(std::is_same_v<Elem, wchar_t>)
+				else IF_CONSTEXPR(std::is_same<Elem, wchar_t>::value)
 				{
 					wcscpy_s(buffer, other);
 				}
 				else
 				{
-					IF_CONSTEXPR17 (Count < MemSize) LIKELY
+					IF_CONSTEXPR (Count < MemSize) LIKELY
 					{
 						for (size_type i = 0; i < Count; ++i) LIKELY
 						{
@@ -1041,7 +1053,7 @@ namespace woj
 			 * @param index Index of the element to access
 			 * @return Reference to the element at the index
 			 */
-			NODISCARD17 constexpr Elem& at(const size_type index) noexcept
+			NODISCARD constexpr Elem& at(const size_type index) noexcept
 			{
 				ASSERT_ASSUME(index < MemSize);
 
@@ -1053,7 +1065,7 @@ namespace woj
 			 * @param index Index of the element to access
 			 * @return Const reference to the element at the index
 			 */
-			NODISCARD17 constexpr const Elem& at(const size_type index) const noexcept
+			NODISCARD constexpr const Elem& at(const size_type index) const noexcept
 			{
 				ASSERT_ASSUME(index < MemSize);
 
@@ -1067,7 +1079,7 @@ namespace woj
 			 */
 			constexpr string& fill(const Elem val) noexcept
 			{
-				IF_CONSTEVAL20
+				if (woj::utils::is_constant_evaluated())
 				{
 					for (size_type i = 0; i < MemSize; ++i)
 					{
@@ -1075,11 +1087,11 @@ namespace woj
 					}
 					return *this;
 				}
-				IF_CONSTEXPR17 (std::is_same_v<Elem, char>)
+				IF_CONSTEXPR (std::is_same<Elem, char>::value)
 				{
 					std::memset(buffer, val, MemSize);
 				}
-				else IF_CONSTEXPR17 (std::is_same_v<Elem, wchar_t>)
+				else IF_CONSTEXPR (std::is_same<Elem, wchar_t>::value)
 				{
 					std::wmemset(buffer, val, MemSize);
 				}
@@ -1131,7 +1143,7 @@ namespace woj
 			 * Returns a reference to self as const, useful for const-correctness e.g. when iterating
 			 * @return Reference to self as const
 			 */
-			NODISCARD17 constexpr const string& as_const() const noexcept
+			NODISCARD constexpr const string& as_const() const noexcept
 			{
 				return *this;
 			}
@@ -1139,7 +1151,7 @@ namespace woj
 			/**
 			 * @return Array representing string data
 			 */
-			NODISCARD17 constexpr Elem(&data() noexcept)[MemSize]
+			NODISCARD constexpr Elem(&data() noexcept)[MemSize]
 			{
 				return buffer;
 			}
@@ -1147,7 +1159,7 @@ namespace woj
 			/**
 			 * @return Const array representing string data
 			 */
-			NODISCARD17 constexpr const Elem(&data() const noexcept)[MemSize]
+			NODISCARD constexpr const Elem(&data() const noexcept)[MemSize]
 			{
 				return buffer;
 			}
@@ -1155,7 +1167,7 @@ namespace woj
 			/**
 			 * @return C-String representation of the string (not necessarily null-terminated)
 			 */
-			NODISCARD17 constexpr const Elem(&c_str() const noexcept)[MemSize]
+			NODISCARD constexpr const Elem(&c_str() const noexcept)[MemSize]
 			{
 				return buffer;
 			}
@@ -1164,15 +1176,15 @@ namespace woj
 			/**
 			 * @return Size of the string (until null terminator)
 			 */
-			NODISCARD17 constexpr size_type str_size() const noexcept
+			NODISCARD constexpr size_type str_size() const noexcept
 			{
-				IF_CONSTEXPR17 (!MemSize)
+				IF_CONSTEXPR (!MemSize)
 					return 0;
 
-				IF_CONSTEXPR17 (MemSize == 1)
+				IF_CONSTEXPR (MemSize == 1)
 					return static_cast<bool>(buffer[0]);
 
-				IF_CONSTEVAL20
+				if (woj::utils::is_constant_evaluated())
 				{
 					size_type len{ 0 };
 
@@ -1181,7 +1193,7 @@ namespace woj
 					return len;
 				}
 
-				IF_CONSTEXPR17 (std::is_same_v<Elem, char>)
+				IF_CONSTEXPR (std::is_same<Elem, char>::value)
 				{
 #if !defined(HAS_CXX17) // C++14 fails to recognize type restriction
 					return strnlen(reinterpret_cast<const char*>(buffer), MemSize);
@@ -1190,7 +1202,7 @@ namespace woj
 #endif
 				}
 
-				IF_CONSTEXPR17 (std::is_same_v<Elem, wchar_t> && false)
+				IF_CONSTEXPR (std::is_same<Elem, wchar_t>::value)
 				{
 #if !defined(HAS_CXX17) // C++14 fails to recognize type restriction
 					return wcsnlen(reinterpret_cast<const wchar_t*>(buffer), MemSize);
@@ -1209,7 +1221,7 @@ namespace woj
 			/**
 			 * @return Size of the string (until null terminator)
 			 */
-			NODISCARD17 constexpr size_type size() const noexcept
+			NODISCARD constexpr size_type size() const noexcept
 			{
 				return str_size();
 			}
@@ -1217,7 +1229,7 @@ namespace woj
 			/**
 			 * @return Size of the string memory buffer
 			 */
-			NODISCARD17 static
+			NODISCARD static
 #if defined(HAS_CXX20)
 			CONSTEVAL20
 #else
@@ -1231,7 +1243,7 @@ namespace woj
 			/**
 			 * @return Size of the string memory buffer
 			 */
-			NODISCARD17 static
+			NODISCARD static
 #if defined(HAS_CXX20)
 				CONSTEVAL20
 #else

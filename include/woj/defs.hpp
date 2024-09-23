@@ -4,11 +4,6 @@
 #define	WOJ_DEFS_HPP
 #endif
 
-#define _SILENCE_CXX17_IS_LITERAL_TYPE_DEPRECATION_WARNING 1
-#define _SILENCE_CXX17_IS_LITERAL_TYPE_DEPRECATION_WARNING true
-
-#pragma warning(disable: 4996)
-
 // Define version detection for MSVC (_MSVC_LANG) and GCC/Clang (__cplusplus)
 #if defined(_MSC_VER) && defined(_MSVC_LANG)
 	#define CPP_VERSION _MSVC_LANG
@@ -59,54 +54,98 @@
 #if defined(HAS_CXX20)
 	#define CONSTEXPR20 constexpr
 	#define CONSTEVAL20 consteval
-	#define LIKELY [[likely]]
-	#define UNLIKELY [[unlikely]]
 	#define IF_HAS_CXX20_(...) if constexpr (true __VA_ARGS__)
 	#define IF_HAS_CXX20 if constexpr (true)
 #else
 	#define CONSTEXPR20 inline
 	#define CONSTEVAL20 inline
-	#define LIKELY
-	#define UNLIKELY
 #endif
 
 #if defined(HAS_CXX17)
-	#define CONSTEXPR17    constexpr
-	#define IF_CONSTEXPR17 if constexpr
-	#define NODISCARD17 [[nodiscard]]
+	#define CONSTEXPR17  constexpr
 	#define IF_HAS_CXX17_(...) if constexpr (true __VA_ARGS__)
 	#define IF_HAS_CXX17 if constexpr (true)
 #else
 	#define CONSTEXPR17 inline
-	#define IF_CONSTEXPR17 if
-	#define NODISCARD17
 	#define IF_HAS_CXX17_(...) if (false __VA_ARGS__)
 	#define IF_HAS_CXX17 if (false)
 #endif
 
-#if !defined(HAS_CXX26)
-#define IF_HAS_CXX26_(...) IF_CONSTEXPR17 (false __VA_ARGS__)
-#define IF_HAS_CXX26 IF_CONSTEXPR17 (false)
+#if __has_cpp_attribute(likely) >= 201803L
+	#define LIKELY [[likely]]
+#else
+	#define LIKELY
 #endif
 
-#if !defined(HAS_CXX23)
-#define IF_HAS_CXX23_(...) IF_CONSTEXPR17 (false __VA_ARGS__)
-#define IF_HAS_CXX23 IF_CONSTEXPR17 (false)
+#if __has_cpp_attribute(unlikely) >= 201803L
+	#define UNLIKELY [[unlikely]]
+#else
+	#define UNLIKELY
 #endif
 
-#if !defined(HAS_CXX20)
-#define IF_HAS_CXX20_(...) IF_CONSTEXPR17 (false __VA_ARGS__)
-#define IF_HAS_CXX20 IF_CONSTEXPR17 (false)
+#if __has_cpp_attribute(nodiscard) >= 201603L
+	#define NODISCARD [[nodiscard]]
+#else
+	#define NODISCARD
+#endif
+
+#if __has_cpp_attribute(nodiscard) >= 201907L
+	#define NODISCARD_(msg) [[nodiscard(msg)]]
+#else
+	#define NODISCARD_(msg) NODISCARD
+#endif
+
+#if __has_cpp_attribute(maybe_unused) >= 201603L
+	#define MAYBE_UNUSED [[maybe_unused]]
+#else
+	#define MAYBE_UNUSED
+#endif
+
+#if __has_cpp_attribute(deprecated) >= 201309L
+	#define DEPRECATED [[deprecated]]
+	#define DEPRECATED_(msg) [[deprecated(msg)]]
+#else
+	#define DEPRECATED
+	#define DEPRECATED_(msg)
+#endif
+
+#if __has_cpp_attribute(fallthrough) >= 201603L
+	#define FALLTHROUGH [[fallthrough]]
+#else
+	#define FALLTHROUGH
+#endif
+
+#if __has_cpp_attribute(noreturn) >= 200809L
+	#define NORETURN [[noreturn]]
+#else
+	#define NORETURN
+#endif
+
+#if __has_cpp_attribute(carries_dependency) >= 200809L
+	#define CARRIES_DEPENDENCY [[carries_dependency]]
+#else
+	#define CARRIES_DEPENDENCY
+#endif
+
+#if __has_cpp_attribute(indeterminate) >= 202106L
+	#define INDETERMINATE [[indeterminate]]
+#else
+	#define INDETERMINATE
 #endif
 
 namespace woj
-
 {
 	namespace utils
 	{
 		constexpr bool is_constant_evaluated()
 		{
-#if defined(HAS_CXX20)
+#if __cpp_if_consteval >= 202106L
+			if consteval
+			{
+				return true;
+			}
+			return false;
+#elif __cpp_lib_is_constant_evaluated >= 201811L
 			return std::is_constant_evaluated();
 #elif defined(_MSC_VER)
 			return std::_Is_constant_evaluated();
@@ -119,21 +158,7 @@ namespace woj
 	}
 }
 
-#if defined(HAS_CXX23)
-	#define IF_CONSTEVAL23 if consteval
-	#define IF_CONSTEVAL20 if consteval
-	#define IF_CONSTEVALALL if consteval
-#elif defined(HAS_CXX20)
-	#define IF_CONSTEVAL23 IF_CONSTEXPR17 (false)
-	#define IF_CONSTEVAL20 if (std::is_constant_evaluated())
-	#define IF_CONSTEVALALL if (std::is_constant_evaluated())
-#else
-	#define IF_CONSTEVAL23 IF_CONSTEXPR17 (false)
-	#define IF_CONSTEVAL20 IF_CONSTEXPR17 (false)
-	#define IF_CONSTEVAL20 IF_CONSTEXPR17 (false)
-#endif
-
-#if defined(HAS_CXX23)
+#if __has_cpp_attribute(assume) >= 202207L
 	#define ASSUME(...) [[assume(__VA_ARGS__)]]
 #elif defined(_MSC_VER) // Microsoft Visual C++
 	#define ASSUME(...) __assume(__VA_ARGS__)
@@ -146,4 +171,26 @@ namespace woj
 		#define ASSUME(...) do { if (!(__VA_ARGS__)) __builtin_unreachable(); } while (false);
 	#endif
 #endif
+
+#if __cpp_if_constexpr	>= 201606L
+	#define IF_CONSTEXPR(...) if constexpr (__VA_ARGS__)
+#else
+	#define IF_CONSTEXPR(...) if (__VA_ARGS__)
+#endif
+
+#if !defined(HAS_CXX26)
+#define IF_HAS_CXX26_(...) IF_CONSTEXPR (false __VA_ARGS__)
+#define IF_HAS_CXX26 IF_CONSTEXPR (false)
+#endif
+
+#if !defined(HAS_CXX23)
+#define IF_HAS_CXX23_(...) IF_CONSTEXPR (false __VA_ARGS__)
+#define IF_HAS_CXX23 IF_CONSTEXPR (false)
+#endif
+
+#if !defined(HAS_CXX20)
+#define IF_HAS_CXX20_(...) IF_CONSTEXPR (false __VA_ARGS__)
+#define IF_HAS_CXX20 IF_CONSTEXPR (false)
+#endif
+
 #define ASSERT_ASSUME(...) assert(__VA_ARGS__); ASSUME(__VA_ARGS__);
