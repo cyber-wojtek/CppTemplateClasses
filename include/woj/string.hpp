@@ -607,12 +607,8 @@ namespace woj
 			{
 				ASSERT_ASSUME(other != nullptr);
 				//[[assume(other != nullptr)]]
-<<<<<<< HEAD
-				IF_CONSTEVAL20
-=======
 
 				if (woj::utils::is_constant_evaluated())
->>>>>>> b8b57f4c10ab42532ba102babfd18bb58a5cebe0
 				{
 					IF_CONSTEXPR (OtherMemSize < MemSize)
 					{
@@ -633,19 +629,11 @@ namespace woj
 				}
 				else
 				{
-<<<<<<< HEAD
 					constexpr bool buffer_smaller = OtherMemSize < MemSize;
-=======
-					IF_CONSTEXPR(OtherMemSize < MemSize)
-					{
-						constexpr size_type byte_size = OtherMemSize * sizeof(Elem);
-						std::memcpy(buffer, other, byte_size);
->>>>>>> b8b57f4c10ab42532ba102babfd18bb58a5cebe0
-
 					constexpr size_type byte_size = (buffer_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
 
 
-					IF_CONSTEXPR17 (BuffersOverlap)
+					IF_CONSTEXPR (BuffersOverlap)
 					{
 						std::memmove(buffer, other, byte_size);
 					}
@@ -655,7 +643,7 @@ namespace woj
 					}
 
 
-					IF_CONSTEXPR17 (buffer_smaller)
+					IF_CONSTEXPR (buffer_smaller)
 					{
 						buffer[OtherMemSize] = 0;
 					}
