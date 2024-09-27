@@ -133,36 +133,11 @@
 	#define INDETERMINATE
 #endif
 
-namespace woj
-{
-	namespace utils
-	{
-		constexpr bool is_constant_evaluated()
-		{
-#if __cpp_if_consteval >= 202106L
-			if consteval
-			{
-				return true;
-			}
-			return false;
-#elif __cpp_lib_is_constant_evaluated >= 201811L
-			return std::is_constant_evaluated();
-#elif defined(_MSC_VER)
-			return std::_Is_constant_evaluated();
-#elif defined(__clang__) || defined(__GNUC__)
-			return __builtin_is_constant_evaluated();
-#else
-			return false;
-#endif
-		}
-	}
-}
-
 #if __has_cpp_attribute(assume) >= 202207L
 	#define ASSUME(...) [[assume(__VA_ARGS__)]]
 #elif defined(_MSC_VER) // Microsoft Visual C++
 	#define ASSUME(...) __assume(__VA_ARGS__)
-#elif defined(__clang__) // Clang
+#elif defined(__clang__) || defined(__INTEL_COMPILER) // LLVMs
 	#define ASSUME(...) __builtin_assume(__VA_ARGS__)
 #elif defined(__GNUC__)
 	#if __GNUC__ >= 13
