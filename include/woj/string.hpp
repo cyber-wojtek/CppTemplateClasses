@@ -6,8 +6,7 @@
 #endif
 
 #ifndef WOJ_DEFS_HPP
-#include "defs.hpp"
-#include "utils.hpp"
+#include "base.hpp"
 #endif
 
 #include <type_traits>
@@ -600,7 +599,7 @@ namespace woj
 			{
 				ASSERT_ASSUME(other != nullptr);
 
-				if (utils::is_constant_evaluated())
+				if (is_constant_evaluated())
 				{
 					constexpr bool m_data_smaller = OtherMemSize < MemSize;
 					constexpr size_type size = (m_data_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
@@ -653,7 +652,7 @@ namespace woj
 			{
 				ASSERT_ASSUME(other != nullptr);
 
-				if (utils::is_constant_evaluated())
+				if (is_constant_evaluated())
 				{
 					constexpr bool m_data_smaller = OtherMemSize < MemSize;
 					constexpr size_type size = (m_data_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
@@ -707,7 +706,7 @@ namespace woj
 			{
 				ASSERT_ASSUME(other != nullptr);
 
-				if (woj::utils::is_constant_evaluated())
+				if (is_constant_evaluated())
 				{
 					constexpr bool m_data_smaller = Count < MemSize;
 					constexpr size_type size = (m_data_smaller ? Count : MemSize) * sizeof(Elem);
@@ -761,7 +760,7 @@ namespace woj
 				ASSERT_ASSUME(other != nullptr);
 				//[[assume(other != nullptr)]]
 
-				if (woj::utils::is_constant_evaluated())
+				if (is_constant_evaluated())
 				{
 					constexpr bool m_data_smaller = OtherMemSize < MemSize;
 					constexpr size_type size = (m_data_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
@@ -810,7 +809,7 @@ namespace woj
 				ASSERT_ASSUME(other != nullptr);
 				//[[assume(other != nullptr)]]
 
-				if (woj::utils::is_constant_evaluated())
+				if (is_constant_evaluated())
 				{
 					const bool m_data_smaller = count < MemSize;
 					const size_type size = (m_data_smaller ? count : MemSize) * sizeof(Elem);
@@ -970,7 +969,7 @@ namespace woj
 			{
 				ASSERT_ASSUME(other != nullptr);
 
-				if (woj::utils::is_constant_evaluated())
+				if (is_constant_evaluated())
 				{
 					constexpr bool m_data_smaller = Count < MemSize;
 					constexpr size_type size = (m_data_smaller ? Count : MemSize) * sizeof(Elem);
@@ -1027,7 +1026,7 @@ namespace woj
 				ASSERT_ASSUME(other != nullptr);
 				//[[assume(other != nullptr)]]
 
-				if (woj::utils::is_constant_evaluated())
+				if (is_constant_evaluated())
 				{
 					if (count < MemSize) LIKELY
 					{
@@ -1096,7 +1095,7 @@ namespace woj
 			{
 				ASSERT_ASSUME(other != nullptr);
 
-				if (woj::utils::is_constant_evaluated())
+				if (is_constant_evaluated())
 				{
 					constexpr bool m_data_smaller = Count < MemSize;
 					constexpr size_type size = (m_data_smaller ? Count : MemSize) * sizeof(Elem);
@@ -1167,7 +1166,7 @@ namespace woj
 			{
 				ASSERT_ASSUME(other != nullptr);
 
-				if (woj::utils::is_constant_evaluated())
+				if (is_constant_evaluated())
 				{
 					const bool m_data_smaller = count < MemSize;
 					const size_type size = (m_data_smaller ? count : MemSize) * sizeof(Elem);
@@ -1276,7 +1275,7 @@ namespace woj
 			 */
 			constexpr string& fill(const Elem val) noexcept
 			{
-				if (woj::utils::is_constant_evaluated())
+				if (is_constant_evaluated())
 				{
 					for (size_type i = 0; i < MemSize; ++i)
 					{
@@ -1381,7 +1380,7 @@ namespace woj
 				IF_CONSTEXPR (MemSize == 1)
 					return static_cast<bool>(m_data[0]);
 
-				if (woj::utils::is_constant_evaluated())
+				if (is_constant_evaluated())
 				{
 					size_type len{ 0 };
 

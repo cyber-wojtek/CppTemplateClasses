@@ -47,24 +47,5 @@ namespace woj
 
 		template <long double Max>
 		using auto_float_t = typename auto_float<Max>::type;
-
-		constexpr bool is_constant_evaluated()
-		{
-#if __cpp_if_consteval >= 202106L
-			if consteval
-			{
-				return true;
-			}
-			return false;
-#elif __cpp_lib_is_constant_evaluated >= 201811L
-			return std::is_constant_evaluated();
-#elif defined(_MSC_VER)
-			return std::_Is_constant_evaluated();
-#elif (defined(__clang__) && || __clang_major__ >= 10) || (defined(__GNUC__) && __GNUC__ >= 10) || (defined(__INTEL_COMPILER) && __INTEL_COMPILER >= 2005)
-			return __builtin_is_constant_evaluated();
-#else
-			return false;
-#endif
-		}
 	}
 }
