@@ -96,7 +96,6 @@ namespace woj
 #endif
 			size_t size() noexcept
 		{
-			std::make_index_sequence<3>{};
 			return 1ull + sizeof...(Rest);
 		}
 	};
