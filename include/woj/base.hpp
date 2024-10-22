@@ -143,12 +143,26 @@
 #define ASSUME(...) __assume(__VA_ARGS__)
 #elif defined(__clang__) || defined(__INTEL_COMPILER) // LLVMs
 #define ASSUME(...) __builtin_assume(__VA_ARGS__)
+#define ALWAYS_INLINE __attribute__((always_inline))
 #elif defined(__GNUC__)
 #if __GNUC__ >= 13
 #define ASSUME(...) __attribute__((__assume__(__VA_ARGS__)))
+#define ALWAYS_INLINE __attribute__((always_inline))	
 #else
 #define ASSUME(...) do { if (!(__VA_ARGS__)) __builtin_unreachable(); } while (false);
+#define ALWAYS_INLINE __attribute__((always_inline))
 #endif
+#else
+#define ASSUME(...) void(0);
+#define ALWAYS_INLINE inline
+#endif
+
+#ifdef _MSC_VER
+#define ALWAYS_INLINE __forceinline
+#elif defined(__clang__) || defined(__INTEL_COMPILER) || defined(__GNUC__)
+#define ALWAYS_INLINE __attribute__((always_inline))
+#else
+#define ALWAYS_INLINE inline
 #endif
 
 #if __cpp_if_constexpr >= 201606L
@@ -184,7 +198,7 @@ namespace woj
 	 */
 	struct noinit_t
 	{
-		explicit constexpr noinit_t() noexcept {}
+		explicit constexpr noinit_t() noexcept = default;
 	};
 
 	/**
@@ -195,22 +209,30 @@ namespace woj
 	/**
 	 * Represents a type that is used to construct class without any value or construct builtin types with 0
 	 */
-	struct null_t
+	struct none_t
 	{
-		explicit constexpr null_t() noexcept {}
+		explicit constexpr none_t() noexcept = default;
 	};
 
 	/**
 	 * Represents a constant that is used to construct an empty value.
 	 */
-	constexpr null_t null{};
+	constexpr none_t none{};
 
 	struct in_place_t
 	{
-		explicit constexpr in_place_t() noexcept {}
+		explicit constexpr in_place_t() noexcept = default;
 	};
 
 	constexpr in_place_t in_place{};
+
+	class dynamic_states_t
+	{
+	public:
+		explicit constexpr dynamic_states_t() noexcept = default;
+	};
+
+	inline constexpr dynamic_states_t dynamic_states{};
 
 	/**
 	 * Function that checks if the function is being evaluated at compile-time.
@@ -238,20 +260,46 @@ namespace woj
 	class exception
 	{
 	public:
-		char* const message;
+		char* message;
 
 		constexpr exception() noexcept : message{ nullptr } {}
 
-		exception(const exception& other) noexcept : message{ new char[strlen(other.message)] }
+		constexpr exception(const exception& other) noexcept
+			: message{ new char[std::char_traits<char>::length(other.message) + 1] } // Allocate space for null terminator
 		{
-			strcpy(message, other.message);
+			// Ensure proper copying depending on whether we're in a constant evaluation context
+			if (is_constant_evaluated()) {
+				// Manually copy characters to ensure null termination
+				size_t i;
+				for (i = 0; other.message[i] != '\0'; ++i) {
+					message[i] = other.message[i];
+				}
+				message[i] = '\0'; // Ensure null termination
+			}
+			else {
+				std::strcpy(message, other.message); // Copy using std::strcpy which handles null termination
+			}
 		}
 
-		constexpr exception(exception&& other) noexcept : message{ other.message } {}
-
-		explicit exception(const char* const msg) noexcept : message{ new char[strlen(msg)] }
+		constexpr exception(exception&& other) noexcept : message{ other.message }
 		{
-			strcpy(message, msg);
+			other.message = nullptr;
+		}
+
+		explicit constexpr exception(const char* const msg) noexcept : message{ new char[std::char_traits<char>::length(msg) + 1] }
+		{
+			// Ensure proper copying depending on whether we're in a constant evaluation context
+			if (is_constant_evaluated()) {
+				// Manually copy characters to ensure null termination
+				size_t i;
+				for (i = 0; msg[i] != '\0'; ++i) {
+					message[i] = msg[i];
+				}
+				message[i] = '\0'; // Ensure null termination
+			}
+			else {
+				std::strcpy(message, msg); // Copy using std::strcpy which handles null termination
+			}
 		}
 
 		constexpr exception(const char* const msg, const size_t size) noexcept : message{ new char[size] }
@@ -269,13 +317,56 @@ namespace woj
 			}
 		}
 
-		explicit constexpr exception(char* const&& msg) noexcept : message{ msg } {}
+		explicit constexpr exception(char*&& msg) noexcept : message{ msg }
+		{
+			msg = nullptr;
+		}
 
-		constexpr exception(char* const&& msg, const size_t) noexcept : message{ msg } {}
+		constexpr exception(char*&& msg, const size_t) noexcept : message{ msg }
+		{
+			msg = nullptr;
+		}
 
 		virtual CONSTEXPR20 ~exception() noexcept
 		{
 			delete[] message;
+		}
+
+		constexpr exception& operator=(const exception& other) noexcept
+		{
+			delete[] message;
+
+			size_t size;
+
+			if (is_constant_evaluated())
+			{
+				for (size = 0; other.message[size]; ++size);
+			}
+			else
+			{
+				size = strlen(other.message);
+			}
+			message = new char[size];
+			if (is_constant_evaluated())
+			{
+				for (size_t i = 0; i < size; ++i)
+				{
+					message[i] = other.message[i];
+				}
+			}
+			else
+			{
+				memcpy(message, other.message, size * sizeof(char));
+			}
+
+			return *this;
+		}
+		constexpr exception& operator=(exception&& other) noexcept
+		{
+			message = other.message;
+			other.message = nullptr;
+
+			return *this;
 		}
 
 	    NODISCARD virtual const char* what() const noexcept

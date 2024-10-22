@@ -1,6 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\include",
+    "\\include\\woj"
   ],
+  "SelectedNode": "\\include\\woj\\defs.hpp",
   "PreviewInSolutionExplorer": false
 }

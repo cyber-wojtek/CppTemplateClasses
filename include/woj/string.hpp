@@ -601,8 +601,8 @@ namespace woj
 
 				if (is_constant_evaluated())
 				{
-					constexpr bool m_data_smaller = OtherMemSize < MemSize;
-					constexpr size_type size = (m_data_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
+					constexpr bool buffer_smaller = OtherMemSize < MemSize;
+					constexpr size_type size = (buffer_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
 
 
 					for (size_type i = 0; i < size; ++i)
@@ -610,15 +610,15 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					IF_CONSTEXPR (m_data_smaller)
+					IF_CONSTEXPR (buffer_smaller)
 					{
 						m_data[OtherMemSize] = 0;
 					}
 				}
 				else
 				{
-					constexpr bool m_data_smaller = OtherMemSize < MemSize;
-					constexpr size_type byte_size = (m_data_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
+					constexpr bool buffer_smaller = OtherMemSize < MemSize;
+					constexpr size_type byte_size = (buffer_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
 
 
 					IF_CONSTEXPR (BufferOverlaps)
@@ -631,7 +631,7 @@ namespace woj
 					}
 
 
-					IF_CONSTEXPR (m_data_smaller)
+					IF_CONSTEXPR (buffer_smaller)
 					{
 						m_data[OtherMemSize] = 0;
 					}
@@ -654,8 +654,8 @@ namespace woj
 
 				if (is_constant_evaluated())
 				{
-					constexpr bool m_data_smaller = OtherMemSize < MemSize;
-					constexpr size_type size = (m_data_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
+					constexpr bool buffer_smaller = OtherMemSize < MemSize;
+					constexpr size_type size = (buffer_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
 
 
 					for (size_type i = 0; i < size; ++i)
@@ -663,18 +663,18 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					IF_CONSTEXPR (m_data_smaller)
+					IF_CONSTEXPR (buffer_smaller)
 					{
 						m_data[OtherMemSize] = 0;
 					}
 				}
 				else
 				{
-					constexpr bool m_data_smaller = OtherMemSize < MemSize;
-					constexpr size_type byte_size = (m_data_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
+					constexpr bool buffer_smaller = OtherMemSize < MemSize;
+					constexpr size_type byte_size = (buffer_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
 
 
-					if (m_data_overlaps) LIKELY
+					if (buffer_overlaps) LIKELY
 					{
 						std::memmove(m_data, other, byte_size);
 					}
@@ -684,14 +684,9 @@ namespace woj
 					}
 
 
-					IF_CONSTEXPR (m_data_smaller)
-					{
-						m_data[OtherMemSize] = 0;
-					}
-
 					IF_CONSTEXPR (buffer_smaller)
 					{
-						buffer[OtherMemSize] = 0;
+						m_data[OtherMemSize] = 0;
 					}
 				}
 
@@ -717,8 +712,8 @@ namespace woj
 
 				if (is_constant_evaluated())
 				{
-					constexpr bool m_data_smaller = Count < MemSize;
-					constexpr size_type size = (m_data_smaller ? Count : MemSize) * sizeof(Elem);
+					constexpr bool buffer_smaller = Count < MemSize;
+					constexpr size_type size = (buffer_smaller ? Count : MemSize) * sizeof(Elem);
 
 					
 					for (size_type i = 0; i < size; ++i)
@@ -726,15 +721,15 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					IF_CONSTEXPR (m_data_smaller)
+					IF_CONSTEXPR (buffer_smaller)
 					{
 						m_data[Count] = 0;
 					}
 				}
 				else
 				{
-					constexpr bool m_data_smaller = Count < MemSize;
-					constexpr size_type byte_size = (m_data_smaller ? Count : MemSize) * sizeof(Elem);
+					constexpr bool buffer_smaller = Count < MemSize;
+					constexpr size_type byte_size = (buffer_smaller ? Count : MemSize) * sizeof(Elem);
 
 
 					IF_CONSTEXPR (BufferOverlaps)
@@ -747,7 +742,7 @@ namespace woj
 					}
 
 
-					IF_CONSTEXPR (m_data_smaller)
+					IF_CONSTEXPR (buffer_smaller)
 					{
 						m_data[Count] = 0;
 					}
@@ -771,8 +766,8 @@ namespace woj
 
 				if (is_constant_evaluated())
 				{
-					constexpr bool m_data_smaller = OtherMemSize < MemSize;
-					constexpr size_type size = (m_data_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
+					constexpr bool buffer_smaller = OtherMemSize < MemSize;
+					constexpr size_type size = (buffer_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
 
 
 					for (size_type i = 0; i < size; ++i)
@@ -780,7 +775,7 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					IF_CONSTEXPR(m_data_smaller)
+					IF_CONSTEXPR(buffer_smaller)
 					{
 						m_data[OtherMemSize] = 0;
 					}
@@ -808,20 +803,20 @@ namespace woj
 			 * Copy from array m_data with count of characters
 			 * @tparam OtherMemSize Size of the m_data to copy from
 			 * @param other Buffer to copy from
-			 * @param m_data_overlaps Whether the m_data overlaps with the string's m_data
+			 * @param buffer_overlaps Whether the m_data overlaps with the string's m_data
 			 * @param count Count of characters to copy
 			 * @param buffer_overlaps Whether the buffer overlaps with internal buffer
 			 * @return Self reference
 			 */
 			template <size_type OtherMemSize>
-			CONSTEXPR20 string& copy(const Elem(&other)[OtherMemSize], const bool m_data_overlaps, const size_type count) noexcept
+			CONSTEXPR20 string& copy(const Elem(&other)[OtherMemSize], const bool buffer_overlaps, const size_type count) noexcept
 			{
 				ASSERT_ASSUME(other != nullptr);
 
 				if (is_constant_evaluated())
 				{
-					const bool m_data_smaller = count < MemSize;
-					const size_type size = (m_data_smaller ? count : MemSize) * sizeof(Elem);
+					const bool buffer_smaller = count < MemSize;
+					const size_type size = (buffer_smaller ? count : MemSize) * sizeof(Elem);
 
 
 					for (size_type i = 0; i < size; ++i)
@@ -829,7 +824,7 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					if (m_data_smaller)
+					if (buffer_smaller)
 					{
 						m_data[count] = 0;
 					}
@@ -839,7 +834,7 @@ namespace woj
 					if (count < MemSize) LIKELY
 					{
 						const size_type byte_size = count * sizeof(Elem);
-						IF_CONSTEXPR (m_data_overlaps)
+						IF_CONSTEXPR (buffer_overlaps)
 						{
 							std::memmove(m_data, other, byte_size);
 						}
@@ -853,7 +848,7 @@ namespace woj
 					else UNLIKELY
 					{
 						constexpr size_type byte_size = MemSize * sizeof(Elem);
-						IF_CONSTEXPR (m_data_overlaps)
+						IF_CONSTEXPR (buffer_overlaps)
 						{
 							std::memmove(m_data, other, byte_size);
 						}
@@ -924,7 +919,7 @@ namespace woj
 			 * Copy from pointer m_data until null terminator is found or maximum size is reached (MemSize)
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
 			 * @param other Buffer to copy from
-			 * @param m_data_overlaps Whether the m_data overlaps with the string's m_data
+			 * @param buffer_overlaps Whether the m_data overlaps with the string's m_data
 			 * @return Self reference
 			 */
 			template <typename ElemPtr = const Elem* const>
@@ -936,7 +931,7 @@ namespace woj
 			 * Copy from pointer m_data until null terminator is found or maximum size is reached (MemSize)
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
 			 * @param other Buffer to copy from
-			 * @param m_data_overlaps Whether the m_data overlaps with the string's m_data
+			 * @param buffer_overlaps Whether the m_data overlaps with the string's m_data
 			 * @return Self reference
 			 */
 			template < typename ElemPtr = const Elem* const, typename = std::enable_if_t<
@@ -944,7 +939,7 @@ namespace woj
 				std::is_same<typename std::remove_const<typename std::remove_pointer<typename std::remove_const<ElemPtr>::type>::type>::type, Elem>::value &&
 				(!std::is_array<ElemPtr>::value)>>
 #endif
-				constexpr string& copy(ElemPtr other, const bool m_data_overlaps) noexcept
+				constexpr string& copy(ElemPtr other, const bool buffer_overlaps) noexcept
 			{
 				ASSERT_ASSUME(other != nullptr);
 
@@ -991,8 +986,8 @@ namespace woj
 
 				if (is_constant_evaluated())
 				{
-					constexpr bool m_data_smaller = Count < MemSize;
-					constexpr size_type size = (m_data_smaller ? Count : MemSize) * sizeof(Elem);
+					constexpr bool buffer_smaller = Count < MemSize;
+					constexpr size_type size = (buffer_smaller ? Count : MemSize) * sizeof(Elem);
 
 
 					for (size_type i = 0; i < size; ++i)
@@ -1000,7 +995,7 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					IF_CONSTEXPR (m_data_smaller)
+					IF_CONSTEXPR (buffer_smaller)
 					{
 						m_data[Count] = 0;
 					}
@@ -1018,35 +1013,6 @@ namespace woj
 					{
 						constexpr size_type byte_size = MemSize * sizeof(Elem);
 						std::memcpy(m_data, other, byte_size);
-					}
-				}
-				else
-				{
-					const size_type len = std::char_traits<Elem>::length(other);
-
-					if (len < MemSize) LIKELY
-					{
-						if (buffer_overlaps) LIKELY
-						{
-							std::memmove(buffer, other, len * sizeof(Elem));
-						}
-						else UNLIKELY
-						{
-							std::memcpy(buffer, other, len * sizeof(Elem));
-						}
-
-						buffer[len] = 0;
-					}
-					else UNLIKELY
-					{
-						if (buffer_overlaps) LIKELY
-						{
-							std::memmove(buffer, other, MemSize * sizeof(Elem));
-						}
-						else UNLIKELY
-						{
-							std::memcpy(buffer, other, MemSize * sizeof(Elem));
-						}
 					}
 				}
 
@@ -1109,41 +1075,26 @@ namespace woj
 				{
 					if (count < MemSize) LIKELY
 					{
-						const size_type byte_size = count * sizeof(Elem);
-						std::memcpy(m_data, other, byte_size);
+						IF_CONSTEXPR (BufferOverlaps)
+						{
+							std::memmove(m_data, other, count * sizeof(Elem));
+						}
+						else
+						{
+							std::memcpy(m_data, other, count * sizeof(Elem));
+						}
 
 						m_data[count] = 0;
 					}
 					else UNLIKELY
 					{
-						constexpr size_type byte_size = MemSize * sizeof(Elem);
-						std::memcpy(m_data, other, byte_size);
-					}
-				}
-				else
-				{
-					if (count < MemSize) LIKELY
-					{
-						if (buffer_overlaps) LIKELY
+						IF_CONSTEXPR (BufferOverlaps)
 						{
-							std::memmove(buffer, other, count * sizeof(Elem));
+							std::memmove(m_data, other, MemSize * sizeof(Elem));
 						}
-						else UNLIKELY
+						else
 						{
-							std::memcpy(buffer, other, count * sizeof(Elem));
-						}
-
-						buffer[count] = 0;
-					}
-					else
-					{
-						if (buffer_overlaps) LIKELY
-						{
-							std::memmove(buffer, other, MemSize * sizeof(Elem));
-						}
-						else UNLIKELY
-						{
-							std::memcpy(buffer, other, MemSize * sizeof(Elem));
+							std::memcpy(m_data, other, MemSize * sizeof(Elem));
 						}
 					}
 				}
@@ -1195,8 +1146,8 @@ namespace woj
 
 				if (is_constant_evaluated())
 				{
-					constexpr bool m_data_smaller = Count < MemSize;
-					constexpr size_type size = (m_data_smaller ? Count : MemSize) * sizeof(Elem);
+					constexpr bool buffer_smaller = Count < MemSize;
+					constexpr size_type size = (buffer_smaller ? Count : MemSize) * sizeof(Elem);
 
 
 					for (size_type i = 0; i < size; ++i)
@@ -1204,15 +1155,15 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					IF_CONSTEXPR(m_data_smaller)
+					IF_CONSTEXPR(buffer_smaller)
 					{
 						m_data[Count] = 0;
 					}
 				}
 				else
 				{
-					constexpr bool m_data_smaller = Count < MemSize;
-					constexpr size_type byte_size = (m_data_smaller ? Count : MemSize) * sizeof(Elem);
+					constexpr bool buffer_smaller = Count < MemSize;
+					constexpr size_type byte_size = (buffer_smaller ? Count : MemSize) * sizeof(Elem);
 
 
 					IF_CONSTEXPR(BufferOverlaps)
@@ -1225,7 +1176,7 @@ namespace woj
 					}
 
 
-					IF_CONSTEXPR(m_data_smaller)
+					IF_CONSTEXPR(buffer_smaller)
 					{
 						m_data[Count] = 0;
 					}
@@ -1238,7 +1189,7 @@ namespace woj
 			 * Copy from pointer m_data count of characters
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
 			 * @param other Buffer to copy from
-			 * @param m_data_overlaps Whether the m_data overlaps with the string's m_data
+			 * @param buffer_overlaps Whether the m_data overlaps with the string's m_data
 			 * @param count Count of characters to copy
 			 * @return Self reference
 			 */
@@ -1251,7 +1202,7 @@ namespace woj
 			 * Copy from pointer m_data count of characters
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
 			 * @param other Buffer to copy from
-			 * @param m_data_overlaps Whether the m_data overlaps with the string's m_data
+			 * @param buffer_overlaps Whether the m_data overlaps with the string's m_data
 			 * @param count Count of characters to copy
 			 * @return Self reference
 			 */
@@ -1260,14 +1211,14 @@ namespace woj
 				std::is_same<typename std::remove_const<typename std::remove_pointer<typename std::remove_const<ElemPtr>::type>::type>::type, Elem>::value &&
 				(!std::is_array<ElemPtr>::value)>>
 #endif
-				constexpr string& copy(ElemPtr other, const bool m_data_overlaps, const size_type count) noexcept
+				constexpr string& copy(ElemPtr other, const bool buffer_overlaps, const size_type count) noexcept
 			{
 				ASSERT_ASSUME(other != nullptr);
 
 				if (is_constant_evaluated())
 				{
-					const bool m_data_smaller = count < MemSize;
-					const size_type size = (m_data_smaller ? count : MemSize) * sizeof(Elem);
+					const bool buffer_smaller = count < MemSize;
+					const size_type size = (buffer_smaller ? count : MemSize) * sizeof(Elem);
 
 
 					for (size_type i = 0; i < size; ++i)
@@ -1275,7 +1226,7 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					IF_CONSTEXPR(m_data_smaller)
+					IF_CONSTEXPR(buffer_smaller)
 					{
 						m_data[count] = 0;
 					}
@@ -1285,7 +1236,7 @@ namespace woj
 					if (count < MemSize) LIKELY
 					{
 						const size_type byte_size = count * sizeof(Elem);
-						IF_CONSTEXPR(m_data_overlaps)
+						IF_CONSTEXPR(buffer_overlaps)
 						{
 							std::memmove(m_data, other, byte_size);
 						}
@@ -1299,7 +1250,7 @@ namespace woj
 					else UNLIKELY
 					{
 						constexpr size_type byte_size = MemSize * sizeof(Elem);
-						IF_CONSTEXPR(m_data_overlaps)
+						IF_CONSTEXPR(buffer_overlaps)
 						{
 							std::memmove(m_data, other, byte_size);
 						}
