@@ -207,7 +207,7 @@ namespace woj
 	constexpr noinit_t noinit{};
 
 	/**
-	 * Represents a type that is used to construct class without any value or construct builtin types with 0
+	 * Represents a type that is used to construct class without any value
 	 */
 	struct none_t
 	{
@@ -218,6 +218,14 @@ namespace woj
 	 * Represents a constant that is used to construct an empty value.
 	 */
 	constexpr none_t none{};
+
+	/**
+	 * Represents a type that is to be used as a placeholder for when empty constructor like '{}' may be problematic.
+	 */
+	struct empty_t
+	{
+		constexpr empty_t() noexcept = default;
+	};
 
 	struct in_place_t
 	{
