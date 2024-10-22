@@ -9,8 +9,6 @@
 
 #include "base.hpp"
 
-#include <boost/optional.hpp>
-
 namespace woj
 {
 	class bad_optional_access : std::exception
