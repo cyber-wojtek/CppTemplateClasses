@@ -86,7 +86,7 @@ namespace woj
 	class value_sequence<First, Rest...> : public value_sequence<Rest...> {
 	public:
 		// Constructor to initialize the first value
-		constexpr value_sequence() : value_sequence<Rest...>() {}
+		constexpr value_sequence() {}
 
 		static
 #ifdef HAS_CXX20
