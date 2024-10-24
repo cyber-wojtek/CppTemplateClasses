@@ -17,7 +17,7 @@
 #include <cwchar>
 #include <algorithm>
 #include <iostream>
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 #include <concepts>
 #endif
 
@@ -49,7 +49,7 @@ namespace woj
 			using base_type::sgetn;
 			using base_type::snextc;
 			using base_type::sputbackc;
-#if !defined(HAS_CXX17)
+#if !defined(WOJ_HAS_CXX17)
 			using base_type::stossc;
 #endif
 			using base_type::sungetc;
@@ -82,7 +82,7 @@ namespace woj
 		};
 	}
 
-	#if defined(HAS_CXX20)
+	#if defined(WOJ_HAS_CXX20)
 	template <typename T>
 	concept char_type = std::is_same<T, char>::value || std::is_same<T, char8_t>::value || std::is_same<T, wchar_t>::value || std::is_same<T, char16_t>::value || std::is_same<T, char32_t>::value;
 	#else
@@ -101,7 +101,7 @@ namespace woj
 
 	namespace stack
 	{
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 		/**
 		 * Class representing a stack-allocated string
 		 * @tparam Elem Type of the string's elements
@@ -146,7 +146,7 @@ namespace woj
 				std::string s;
 				std::cout << s;
 
-				if (typename ostr_type::sentry{ ostr }) LIKELY
+				if (typename ostr_type::sentry{ ostr }) WOJ_LIKELY
 				{
 					size_type pad = (ostr.width() <= 0) ? 0 : static_cast<size_type>(ostr.width());
 					ostr.rdbuf()->sputn(str.c_str(), str.str_size());
@@ -172,7 +172,7 @@ namespace woj
 				using ctype = std::ctype<IStrElem>;
 				typename istr_type::iostate state{ istr_type::goodbit };
 				
-				if (typename istr_type::sentry{ istr }) LIKELY
+				if (typename istr_type::sentry{ istr }) WOJ_LIKELY
 				{
 					const ctype& ctype_facet = std::use_facet<ctype>(istr.getloc());
 
@@ -181,20 +181,20 @@ namespace woj
 
 					size_type i = 0;
 
-					for (; i < (istr.width() > 0 ? (std::min)(str.max_size(), istr.width()) : str.max_size()); ++i, chr = istr.rdbuf()->snextc()) LIKELY
+					for (; i < (istr.width() > 0 ? (std::min)(str.max_size(), istr.width()) : str.max_size()); ++i, chr = istr.rdbuf()->snextc()) WOJ_LIKELY
 					{
-						if (IStrTraits::eq_int_type(chr, IStrTraits::eof())) UNLIKELY
+						if (IStrTraits::eq_int_type(chr, IStrTraits::eof())) WOJ_UNLIKELY
 						{
 							state |= istr_type::eofbit;
 							break;
 						}
-						if (ctype_facet.is(ctype::space, IStrTraits::to_char_type(chr))) UNLIKELY
+						if (ctype_facet.is(ctype::space, IStrTraits::to_char_type(chr))) WOJ_UNLIKELY
 						{
 							break;
 						}
 						str[i] = IStrTraits::to_char_type(chr);
 
-						if (!changed) UNLIKELY
+						if (!changed) WOJ_UNLIKELY
 						{
 							changed = true;
 						}
@@ -202,10 +202,10 @@ namespace woj
 
 					str[i] = 0;
 
-					if (!changed) UNLIKELY
+					if (!changed) WOJ_UNLIKELY
 						state |= istr_type::failbit;
 				}
-				else UNLIKELY
+				else WOJ_UNLIKELY
 					state |= istr_type::failbit;
 
 				istr.setstate(state);
@@ -241,7 +241,7 @@ namespace woj
 
 			// ----- Copy constructors from buffers -----
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			/**
 			 * Copy constructor from array buffer
 			 * @tparam OtherMemSize MemSize of the buffer to copy from
@@ -261,7 +261,7 @@ namespace woj
 				copy(other);
 			}
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			/**
 			 * Copy constructor from array buffer with count of characters
 			 * @tparam OtherMemSize MemSize of the buffer to copy from
@@ -283,7 +283,7 @@ namespace woj
 				copy(other, count);
 			}
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			/**
 			 * Copy constructor from pointer buffer until null terminator is found or maximum size is reached (MemSize)
 			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
@@ -309,7 +309,7 @@ namespace woj
 				copy(other);
 			}
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			/**
 			 * Copy constructor from pointer buffer with count of characters
 			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
@@ -361,7 +361,7 @@ namespace woj
 			 * Copy constructor from another string of different params 
 			 * @param other String to copy from
 			 */
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			template <char_type OtherElem, size_type OtherMemSize> requires (OtherMemSize != MemSize)
 #else
 			template <typename OtherElem, size_type OtherMemSize, typename = std::enable_if_t<OtherMemSize != MemSize>>
@@ -371,7 +371,7 @@ namespace woj
 				copy(other);
 			}
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			/**
 			 * Copy constructor from another string of different params count of characters
 			 * @tparam OtherElem Type of the other string's elements
@@ -403,7 +403,7 @@ namespace woj
 			/**
 			 * Destructs the string
 			 */
-			CONSTEXPR20 ~string() = default;
+			WOJ_CONSTEXPR20 ~string() = default;
 
 			// ----- Assignment operators -----
 
@@ -419,7 +419,7 @@ namespace woj
 				return copy(other);
 			}
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 				/**
 				 * Assign from pointer buffer operator
 				 * @tparam ElemPtr Type of the pointer buffer to copy from (Default: const Elem* const)
@@ -458,7 +458,7 @@ namespace woj
 			}
 
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			/**
 			 * Assign from another string of different params operator
 			 * @tparam OtherElem Type of the other string's elements
@@ -492,7 +492,7 @@ namespace woj
 			 * @param index Index of the element to access
 			 * @return Reference to the element at the index
 			 */
-			NODISCARD constexpr Elem& operator[](const size_type index) noexcept
+			WOJ_NODISCARD constexpr Elem& operator[](const size_type index) noexcept
 			{
 				return at(index);
 			}
@@ -502,7 +502,7 @@ namespace woj
 			 * @param index Index of the element to access
 			 * @return Const reference to the element at the index
 			 */
-			NODISCARD constexpr const Elem& operator[](const size_type index) const noexcept
+			WOJ_NODISCARD constexpr const Elem& operator[](const size_type index) const noexcept
 			{
 				return at(index);
 			}
@@ -513,7 +513,7 @@ namespace woj
 			 * Begin iterator
 			 * @return Iterator to the beginning of the string
 			 */
-			NODISCARD constexpr iterator begin() noexcept
+			WOJ_NODISCARD constexpr iterator begin() noexcept
 			{
 				return m_data;
 			}
@@ -522,7 +522,7 @@ namespace woj
 			 * Const begin iterator
 			 * @return Const iterator to the beginning of the string
 			 */
-			NODISCARD constexpr const_iterator begin() const noexcept
+			WOJ_NODISCARD constexpr const_iterator begin() const noexcept
 			{
 				return m_data;
 			}
@@ -531,7 +531,7 @@ namespace woj
 			 * Const begin iterator
 			 * @return Const iterator to the beginning of the string
 			 */
-			NODISCARD constexpr const_iterator cbegin() const noexcept
+			WOJ_NODISCARD constexpr const_iterator cbegin() const noexcept
 			{
 				return begin();
 			}
@@ -540,47 +540,47 @@ namespace woj
 			 * End iterator
 			 * @return Iterator to the end of the string (after the null terminator)
 			 */
-			NODISCARD constexpr iterator end() noexcept
+			WOJ_NODISCARD constexpr iterator end() noexcept
 			{
 				return m_data + MemSize;
 			}
 
-			NODISCARD constexpr const_iterator end() const noexcept
+			WOJ_NODISCARD constexpr const_iterator end() const noexcept
 			{
 				return m_data + MemSize;
 			}
 
-			NODISCARD constexpr const_iterator cend() const noexcept
+			WOJ_NODISCARD constexpr const_iterator cend() const noexcept
 			{
 				return end();
 			}
 
-			NODISCARD constexpr reverse_iterator rbegin() noexcept
+			WOJ_NODISCARD constexpr reverse_iterator rbegin() noexcept
 			{
 				return m_data + MemSize - 1;
 			}
 
-			NODISCARD constexpr const_reverse_iterator rbegin() const noexcept
+			WOJ_NODISCARD constexpr const_reverse_iterator rbegin() const noexcept
 			{
 				return m_data + MemSize - 1;
 			}
 
-			NODISCARD constexpr const_reverse_iterator crbegin() const noexcept
+			WOJ_NODISCARD constexpr const_reverse_iterator crbegin() const noexcept
 			{
 				return rbegin();
 			}
 
-			NODISCARD constexpr reverse_iterator rend() noexcept
+			WOJ_NODISCARD constexpr reverse_iterator rend() noexcept
 			{
 				return m_data - 1;
 			}
 
-			NODISCARD constexpr const_reverse_iterator rend() const noexcept
+			WOJ_NODISCARD constexpr const_reverse_iterator rend() const noexcept
 			{
 				return m_data - 1;
 			}
 
-			NODISCARD constexpr const_reverse_iterator crend() const noexcept
+			WOJ_NODISCARD constexpr const_reverse_iterator crend() const noexcept
 			{
 				return rend();
 			}
@@ -595,9 +595,9 @@ namespace woj
 			 * @return Self reference
 			 */
 			template <bool BufferOverlaps = false, size_type OtherMemSize>
-			CONSTEXPR17 string& copy(const Elem(&other)[OtherMemSize]) noexcept
+			constexpr string& copy(const Elem(&other)[OtherMemSize]) noexcept
 			{
-				ASSERT_ASSUME(other != nullptr);
+				WOJ_ASSERT_ASSUME(other != nullptr);
 
 				if (is_constant_evaluated())
 				{
@@ -610,7 +610,7 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					IF_CONSTEXPR (buffer_smaller)
+					if constexpr  (buffer_smaller)
 					{
 						m_data[OtherMemSize] = 0;
 					}
@@ -621,7 +621,7 @@ namespace woj
 					constexpr size_type byte_size = (buffer_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
 
 
-					IF_CONSTEXPR (BufferOverlaps)
+					if constexpr  (BufferOverlaps)
 					{
 						std::memmove(m_data, other, byte_size);
 					}
@@ -631,7 +631,7 @@ namespace woj
 					}
 
 
-					IF_CONSTEXPR (buffer_smaller)
+					if constexpr  (buffer_smaller)
 					{
 						m_data[OtherMemSize] = 0;
 					}
@@ -648,9 +648,9 @@ namespace woj
 			 * @return Self reference
 			 */
 			template <size_type OtherMemSize>
-			CONSTEXPR17 string& copy(const Elem(&other)[OtherMemSize], const bool buffer_overlaps) noexcept
+			constexpr string& copy(const Elem(&other)[OtherMemSize], const bool buffer_overlaps) noexcept
 			{
-				ASSERT_ASSUME(other != nullptr);
+				WOJ_ASSERT_ASSUME(other != nullptr);
 
 				if (is_constant_evaluated())
 				{
@@ -663,7 +663,7 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					IF_CONSTEXPR (buffer_smaller)
+					if constexpr  (buffer_smaller)
 					{
 						m_data[OtherMemSize] = 0;
 					}
@@ -674,17 +674,17 @@ namespace woj
 					constexpr size_type byte_size = (buffer_smaller ? OtherMemSize : MemSize) * sizeof(Elem);
 
 
-					if (buffer_overlaps) LIKELY
+					if (buffer_overlaps) WOJ_LIKELY
 					{
 						std::memmove(m_data, other, byte_size);
 					}
-					else UNLIKELY
+					else WOJ_UNLIKELY
 					{
 						std::memcpy(m_data, other, byte_size);
 					}
 
 
-					IF_CONSTEXPR (buffer_smaller)
+					if constexpr  (buffer_smaller)
 					{
 						m_data[OtherMemSize] = 0;
 					}
@@ -706,9 +706,9 @@ namespace woj
 			 * @return Self reference
 			 */
 			template <bool BufferOverlaps, size_type Count, size_type OtherMemSize>
-			CONSTEXPR17 string& copy(const Elem(&other)[OtherMemSize]) noexcept
+			constexpr string& copy(const Elem(&other)[OtherMemSize]) noexcept
 			{
-				ASSERT_ASSUME(other != nullptr);
+				WOJ_ASSERT_ASSUME(other != nullptr);
 
 				if (is_constant_evaluated())
 				{
@@ -721,7 +721,7 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					IF_CONSTEXPR (buffer_smaller)
+					if constexpr  (buffer_smaller)
 					{
 						m_data[Count] = 0;
 					}
@@ -732,17 +732,17 @@ namespace woj
 					constexpr size_type byte_size = (buffer_smaller ? Count : MemSize) * sizeof(Elem);
 
 
-					IF_CONSTEXPR (BufferOverlaps)
+					if constexpr  (BufferOverlaps)
 					{
 						std::memmove(m_data, other, byte_size);
 					}
-					else UNLIKELY
+					else WOJ_UNLIKELY
 					{
 						std::memcpy(m_data, other, byte_size);
 					}
 
 
-					IF_CONSTEXPR (buffer_smaller)
+					if constexpr  (buffer_smaller)
 					{
 						m_data[Count] = 0;
 					}
@@ -759,9 +759,9 @@ namespace woj
 			 * @return Self reference
 			 */
 			template <size_type OtherMemSize>
-			CONSTEXPR20 string& copy(const Elem(&other)[OtherMemSize], const size_type count) noexcept
+			WOJ_CONSTEXPR20 string& copy(const Elem(&other)[OtherMemSize], const size_type count) noexcept
 			{
-				ASSERT_ASSUME(other != nullptr);
+				WOJ_ASSERT_ASSUME(other != nullptr);
 				//[[assume(other != nullptr)]]
 
 				if (is_constant_evaluated())
@@ -775,21 +775,21 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					IF_CONSTEXPR(buffer_smaller)
+					if constexpr (buffer_smaller)
 					{
 						m_data[OtherMemSize] = 0;
 					}
 				}
 				else
 				{
-					if (count < MemSize) LIKELY
+					if (count < MemSize) WOJ_LIKELY
 					{
 						const size_type byte_size = count * sizeof(Elem);
 						std::memcpy(m_data, other, byte_size);
 
 						m_data[count - 1] = 0;
 					}
-					else UNLIKELY
+					else WOJ_UNLIKELY
 					{
 						constexpr size_type byte_size = MemSize * sizeof(Elem);
 						std::memcpy(m_data, other, byte_size);
@@ -809,9 +809,9 @@ namespace woj
 			 * @return Self reference
 			 */
 			template <size_type OtherMemSize>
-			CONSTEXPR20 string& copy(const Elem(&other)[OtherMemSize], const bool buffer_overlaps, const size_type count) noexcept
+			WOJ_CONSTEXPR20 string& copy(const Elem(&other)[OtherMemSize], const bool buffer_overlaps, const size_type count) noexcept
 			{
-				ASSERT_ASSUME(other != nullptr);
+				WOJ_ASSERT_ASSUME(other != nullptr);
 
 				if (is_constant_evaluated())
 				{
@@ -831,10 +831,10 @@ namespace woj
 				}
 				else
 				{
-					if (count < MemSize) LIKELY
+					if (count < MemSize) WOJ_LIKELY
 					{
 						const size_type byte_size = count * sizeof(Elem);
-						IF_CONSTEXPR (buffer_overlaps)
+						if constexpr  (buffer_overlaps)
 						{
 							std::memmove(m_data, other, byte_size);
 						}
@@ -845,10 +845,10 @@ namespace woj
 
 						m_data[count - 1] = 0;
 					}
-					else UNLIKELY
+					else WOJ_UNLIKELY
 					{
 						constexpr size_type byte_size = MemSize * sizeof(Elem);
-						IF_CONSTEXPR (buffer_overlaps)
+						if constexpr  (buffer_overlaps)
 						{
 							std::memmove(m_data, other, byte_size);
 						}
@@ -862,7 +862,7 @@ namespace woj
 				return *this;
 			}
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			/**
 			 * Copy from pointer buffer until null terminator is found or maximum size is reached (MemSize)
 			 * @tparam BufferOverlaps Whether the buffer overlaps with internal buffer
@@ -896,17 +896,17 @@ namespace woj
 			template <bool BufferOverlaps, typename ElemPtr = const Elem* const, typename = std::enable_if_t<
 				std::is_pointer<ElemPtr>::value &&
 				std::is_same<typename std::remove_const<typename std::remove_pointer<typename std::remove_const<ElemPtr>::type>::type>::type, Elem>::value &&
-				(!std::is_array<ElemPtr>::value)>>
+				(!std::is_array<ElemPtr>::value), void>>
 #endif
 				constexpr string& copy(ElemPtr other) noexcept
 			{
-				ASSERT_ASSUME(other != nullptr);
+				WOJ_ASSERT_ASSUME(other != nullptr);
 
 				size_type i = 0;
 
-				while (i < MemSize - 1 && !(m_data[i] = other[i++])) LIKELY {}
+				while (i < MemSize - 1 && !(m_data[i] = other[i++])) WOJ_LIKELY {}
 
-				if (i < MemSize - 1) LIKELY
+				if (i < MemSize - 1) WOJ_LIKELY
 				{
 					m_data[i] = 0;
 				}
@@ -914,7 +914,7 @@ namespace woj
 				return *this;
 			}
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			/**
 			 * Copy from pointer m_data until null terminator is found or maximum size is reached (MemSize)
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
@@ -941,13 +941,13 @@ namespace woj
 #endif
 				constexpr string& copy(ElemPtr other, const bool buffer_overlaps) noexcept
 			{
-				ASSERT_ASSUME(other != nullptr);
+				WOJ_ASSERT_ASSUME(other != nullptr);
 
 				size_type i = 0;
 
-				while (i < MemSize - 1 && !(m_data[i] = other[i++])) LIKELY;
+				while (i < MemSize - 1 && !(m_data[i] = other[i++])) WOJ_LIKELY;
 
-				if (i < MemSize - 1) LIKELY
+				if (i < MemSize - 1) WOJ_LIKELY
 				{
 					m_data[i] = 0;
 				}
@@ -955,7 +955,7 @@ namespace woj
 				return *this;
 			}
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			/**
 			 * Copy from pointer m_data count of characters
 			 * @tparam Count Count of characters to copy
@@ -982,7 +982,7 @@ namespace woj
 #endif
 				constexpr string& copy(ElemPtr other) noexcept
 			{
-				ASSERT_ASSUME(other != nullptr);
+				WOJ_ASSERT_ASSUME(other != nullptr);
 
 				if (is_constant_evaluated())
 				{
@@ -995,14 +995,14 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					IF_CONSTEXPR (buffer_smaller)
+					if constexpr  (buffer_smaller)
 					{
 						m_data[Count] = 0;
 					}
 				}
 				else
 				{
-					IF_CONSTEXPR(Count < MemSize)
+					if constexpr (Count < MemSize)
 					{
 						constexpr size_type byte_size = Count * sizeof(Elem);
 						std::memcpy(m_data, other, byte_size);
@@ -1019,7 +1019,7 @@ namespace woj
 				return *this;
 			}
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			/**
 			 * Copy from pointer buffer count of characters
 			 * @tparam BufferOverlaps Whether the buffer overlaps with internal buffer
@@ -1050,22 +1050,22 @@ namespace woj
 #endif
 				constexpr string& copy(ElemPtr other, const size_type count) noexcept
 			{
-				ASSERT_ASSUME(other != nullptr);
+				WOJ_ASSERT_ASSUME(other != nullptr);
 
 				if (is_constant_evaluated())
 				{
-					if (count < MemSize) LIKELY
+					if (count < MemSize) WOJ_LIKELY
 					{
-						for (size_type i = 0; i < count; ++i) LIKELY
+						for (size_type i = 0; i < count; ++i) WOJ_LIKELY
 						{
 							m_data[i] = other[i];
 						}
 
 						m_data[count - 1] = 0;
 					}
-					else UNLIKELY
+					else WOJ_UNLIKELY
 					{
-						for (size_type i = 0; i < MemSize; ++i) LIKELY
+						for (size_type i = 0; i < MemSize; ++i) WOJ_LIKELY
 						{
 							m_data[i] = other[i];
 						}
@@ -1073,9 +1073,9 @@ namespace woj
 				}
 				else
 				{
-					if (count < MemSize) LIKELY
+					if (count < MemSize) WOJ_LIKELY
 					{
-						IF_CONSTEXPR (BufferOverlaps)
+						if constexpr  (BufferOverlaps)
 						{
 							std::memmove(m_data, other, count * sizeof(Elem));
 						}
@@ -1086,9 +1086,9 @@ namespace woj
 
 						m_data[count] = 0;
 					}
-					else UNLIKELY
+					else WOJ_UNLIKELY
 					{
-						IF_CONSTEXPR (BufferOverlaps)
+						if constexpr  (BufferOverlaps)
 						{
 							std::memmove(m_data, other, MemSize * sizeof(Elem));
 						}
@@ -1102,7 +1102,7 @@ namespace woj
 				return *this;
 			}
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			/**
 			 * Copy from pointer m_data count of characters
 			 * @tparam BufferOverlaps Whether the m_data overlaps with the string's m_data
@@ -1142,7 +1142,7 @@ namespace woj
 #endif
 				constexpr string& copy(ElemPtr other) noexcept
 			{
-				ASSERT_ASSUME(other != nullptr);
+				WOJ_ASSERT_ASSUME(other != nullptr);
 
 				if (is_constant_evaluated())
 				{
@@ -1155,7 +1155,7 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					IF_CONSTEXPR(buffer_smaller)
+					if constexpr (buffer_smaller)
 					{
 						m_data[Count] = 0;
 					}
@@ -1166,7 +1166,7 @@ namespace woj
 					constexpr size_type byte_size = (buffer_smaller ? Count : MemSize) * sizeof(Elem);
 
 
-					IF_CONSTEXPR(BufferOverlaps)
+					if constexpr (BufferOverlaps)
 					{
 						std::memmove(m_data, other, byte_size);
 					}
@@ -1176,7 +1176,7 @@ namespace woj
 					}
 
 
-					IF_CONSTEXPR(buffer_smaller)
+					if constexpr (buffer_smaller)
 					{
 						m_data[Count] = 0;
 					}
@@ -1184,7 +1184,7 @@ namespace woj
 				return *this;
 			}
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			/**
 			 * Copy from pointer m_data count of characters
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
@@ -1213,7 +1213,7 @@ namespace woj
 #endif
 				constexpr string& copy(ElemPtr other, const bool buffer_overlaps, const size_type count) noexcept
 			{
-				ASSERT_ASSUME(other != nullptr);
+				WOJ_ASSERT_ASSUME(other != nullptr);
 
 				if (is_constant_evaluated())
 				{
@@ -1226,17 +1226,17 @@ namespace woj
 						m_data[i] = other[i];
 					}
 
-					IF_CONSTEXPR(buffer_smaller)
+					if constexpr (buffer_smaller)
 					{
 						m_data[count] = 0;
 					}
 				}
 				else
 				{
-					if (count < MemSize) LIKELY
+					if (count < MemSize) WOJ_LIKELY
 					{
 						const size_type byte_size = count * sizeof(Elem);
-						IF_CONSTEXPR(buffer_overlaps)
+						if constexpr (buffer_overlaps)
 						{
 							std::memmove(m_data, other, byte_size);
 						}
@@ -1247,10 +1247,10 @@ namespace woj
 
 						m_data[count - 1] = 0;
 					}
-					else UNLIKELY
+					else WOJ_UNLIKELY
 					{
 						constexpr size_type byte_size = MemSize * sizeof(Elem);
-						IF_CONSTEXPR(buffer_overlaps)
+						if constexpr (buffer_overlaps)
 						{
 							std::memmove(m_data, other, byte_size);
 						}
@@ -1264,28 +1264,28 @@ namespace woj
 				return *this;
 			}
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			template <char_type OtherElem, size_type OtherMemSize>
 #else
 			template <typename OtherElem, size_type OtherMemSize>
 #endif
 			constexpr string& copy(const string<OtherElem, OtherMemSize>& other)
 			{
-				ASSERT_ASSUME(this != &other);
+				WOJ_ASSERT_ASSUME(this != &other);
 
 				copy(other.data());
 
 				return *this;
 			}
 
-#if defined(HAS_CXX20)
+#if defined(WOJ_HAS_CXX20)
 			template <char_type OtherElem, size_type OtherMemSize>
 #else
 			template <typename OtherElem, size_type OtherMemSize>
 #endif
 			constexpr string& copy(const string<OtherElem, OtherMemSize>& other, const size_type count)
 			{
-				ASSERT_ASSUME(this != &other);
+				WOJ_ASSERT_ASSUME(this != &other);
 
 				copy(other.data(), count);
 
@@ -1297,9 +1297,9 @@ namespace woj
 			 * @param index Index of the element to access
 			 * @return Reference to the element at the index
 			 */
-			NODISCARD constexpr Elem& at(const size_type index) noexcept
+			WOJ_NODISCARD constexpr Elem& at(const size_type index) noexcept
 			{
-				ASSERT_ASSUME(index < MemSize);
+				WOJ_ASSERT_ASSUME(index < MemSize);
 
 				return m_data[index];
 			}
@@ -1309,9 +1309,9 @@ namespace woj
 			 * @param index Index of the element to access
 			 * @return Const reference to the element at the index
 			 */
-			NODISCARD constexpr const Elem& at(const size_type index) const noexcept
+			WOJ_NODISCARD constexpr const Elem& at(const size_type index) const noexcept
 			{
-				ASSERT_ASSUME(index < MemSize);
+				WOJ_ASSERT_ASSUME(index < MemSize);
 
 				return m_data[index];
 			}
@@ -1331,11 +1331,11 @@ namespace woj
 					}
 					return *this;
 				}
-				IF_CONSTEXPR (std::is_same<Elem, char>::value)
+				if constexpr  (std::is_same<Elem, char>::value)
 				{
 					std::memset(m_data, val, MemSize);
 				}
-				else IF_CONSTEXPR (std::is_same<Elem, wchar_t>::value)
+				else if constexpr  (std::is_same<Elem, wchar_t>::value)
 				{
 					std::wmemset(m_data, val, MemSize);
 				}
@@ -1355,8 +1355,8 @@ namespace woj
 			 */
 			constexpr string& swap(const size_type index1, const size_type index2) noexcept
 			{
-				ASSERT_ASSUME(index1 >= 0 && index1 < MemSize);
-				ASSERT_ASSUME(index2 >= 0 && index2 < MemSize);
+				WOJ_ASSERT_ASSUME(index1 >= 0 && index1 < MemSize);
+				WOJ_ASSERT_ASSUME(index2 >= 0 && index2 < MemSize);
 
 				m_data[index1] ^= m_data[index2];
 				m_data[index2] ^= m_data[index1];
@@ -1371,7 +1371,7 @@ namespace woj
 			 */
 			constexpr string& swap(string& other) noexcept
 			{
-				ASSERT_ASSUME(this != &other);
+				WOJ_ASSERT_ASSUME(this != &other);
 
 				for (size_type i = 0; i < MemSize; ++i)
 				{
@@ -1387,7 +1387,7 @@ namespace woj
 			 * Returns a reference to self as const, useful for const-correctness e.g. when iterating
 			 * @return Reference to self as const
 			 */
-			NODISCARD constexpr const string& as_const() const noexcept
+			WOJ_NODISCARD constexpr const string& as_const() const noexcept
 			{
 				return *this;
 			}
@@ -1395,7 +1395,7 @@ namespace woj
 			/**
 			 * @return Array representing string data
 			 */
-			NODISCARD constexpr Elem(&data() noexcept)[MemSize]
+			WOJ_NODISCARD constexpr Elem(&data() noexcept)[MemSize]
 			{
 				return m_data;
 			}
@@ -1403,7 +1403,7 @@ namespace woj
 			/**
 			 * @return Const array representing string data
 			 */
-			NODISCARD constexpr const Elem(&data() const noexcept)[MemSize]
+			WOJ_NODISCARD constexpr const Elem(&data() const noexcept)[MemSize]
 			{
 				return m_data;
 			}
@@ -1411,7 +1411,7 @@ namespace woj
 			/**
 			 * @return C-String representation of the string (not necessarily null-terminated)
 			 */
-			NODISCARD constexpr const Elem(&c_str() const noexcept)[MemSize]
+			WOJ_NODISCARD constexpr const Elem(&c_str() const noexcept)[MemSize]
 			{
 				return m_data;
 			}
@@ -1420,12 +1420,12 @@ namespace woj
 			/**
 			 * @return Size of the string (until null terminator)
 			 */
-			NODISCARD constexpr size_type str_size() const noexcept
+			WOJ_NODISCARD constexpr size_type str_size() const noexcept
 			{
-				IF_CONSTEXPR (!MemSize)
+				if constexpr  (!MemSize)
 					return 0;
 
-				IF_CONSTEXPR (MemSize == 1)
+				if constexpr  (MemSize == 1)
 					return static_cast<bool>(m_data[0]);
 
 				if (is_constant_evaluated())
@@ -1437,18 +1437,18 @@ namespace woj
 					return len;
 				}
 
-				IF_CONSTEXPR (std::is_same<Elem, char>::value)
+				if constexpr  (std::is_same<Elem, char>::value)
 				{
-#if !defined(HAS_CXX17) // C++14 fails to recognize type restriction
+#if !defined(WOJ_HAS_CXX17) // C++14 fails to recognize type restriction
 					return strnlen(reinterpret_cast<const char*>(m_data), MemSize);
 #else
 					return strnlen(m_data, MemSize);
 #endif
 				}
 
-				IF_CONSTEXPR (std::is_same<Elem, wchar_t>::value)
+				if constexpr  (std::is_same<Elem, wchar_t>::value)
 				{
-#if !defined(HAS_CXX17) // C++14 fails to recognize type restriction
+#if !defined(WOJ_HAS_CXX17) // C++14 fails to recognize type restriction
 					return wcsnlen(reinterpret_cast<const wchar_t*>(m_data), MemSize);
 #else
 					return wcsnlen(m_data, MemSize);
@@ -1465,7 +1465,7 @@ namespace woj
 			/**
 			 * @return Size of the string (until null terminator)
 			 */
-			NODISCARD constexpr size_type size() const noexcept
+			WOJ_NODISCARD constexpr size_type size() const noexcept
 			{
 				return str_size();
 			}
@@ -1473,9 +1473,9 @@ namespace woj
 			/**
 			 * @return Size of the string memory m_data
 			 */
-			NODISCARD static
-#if defined(HAS_CXX20)
-			CONSTEVAL20
+			WOJ_NODISCARD static
+#if defined(WOJ_HAS_CXX20)
+			WOJ_CONSTEVAL20
 #else
 			constexpr
 #endif
@@ -1487,9 +1487,9 @@ namespace woj
 			/**
 			 * @return Size of the string memory m_data
 			 */
-			NODISCARD static
-#if defined(HAS_CXX20)
-				CONSTEVAL20
+			WOJ_NODISCARD static
+#if defined(WOJ_HAS_CXX20)
+				WOJ_CONSTEVAL20
 #else
 				constexpr
 #endif
@@ -1500,7 +1500,7 @@ namespace woj
 		};
 
 		// ----- Deduction guides -----
-#if defined(HAS_CXX17)
+#if defined(WOJ_HAS_CXX17)
 		template <typename Elem, size_t Size>
 		string(const Elem(&)[Size]) -> string<Elem, Size - 1>;
 

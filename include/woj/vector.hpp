@@ -29,7 +29,7 @@ namespace woj
 				{
 					std::fill_n(m_data, Size, value);
 				}
-				IF_CONSTEXPR (std::is_same_v<ElementType, char> || std::is_same_v<ElementType, wchar_t> || std::is_same_v<ElementType, char8_t>)
+				if constexpr  (std::is_same_v<ElementType, char> || std::is_same_v<ElementType, wchar_t> || std::is_same_v<ElementType, char8_t>)
 				{
 					memset(m_data, value, Size);
 				}
@@ -139,13 +139,7 @@ namespace woj
 				return m_data;
 			}
 
-			static 
-#ifdef HAS_CXX20
-				CONSTEVAL20
-#else
-				CONSTEXPR
-#endif
-				size_t size() noexcept
+			static WOJ_CONSTEVAL size_t size() noexcept
 			{
 				return Size;
 			}
@@ -186,7 +180,7 @@ namespace woj
 			}
 
 #ifndef NDEBUG
-			NORETURN
+			WOJ_NORETURN
 #endif
 			constexpr ElementType operator[](const size_t) const noexcept
 			{
@@ -198,15 +192,9 @@ namespace woj
 			}
 
 #ifndef NDEBUG
-			NORETURN
+			WOJ_NORETURN
 #endif
-				static
-#ifdef HAS_CXX20
-				CONSTEVAL20
-#else
-				CONSTEXPR
-#endif
-				const ElementType(& data() noexcept)[1]
+			static WOJ_CONSTEVAL const ElementType(& data() noexcept)[1]
 			{
 #ifndef NDEBUG
 				throw std::out_of_range("woj::stack::vector<ElementType, 0ull>::data");
@@ -215,13 +203,8 @@ namespace woj
 				return reinterpret_cast<const ElementType(&)[1]>(c);
 #endif
 			}
-			static
-#ifdef HAS_CXX20
-				CONSTEVAL20
-#else
-				CONSTEXPR
-#endif
-				size_t size() noexcept
+
+			static WOJ_CONSTEVAL size_t size() noexcept
 			{
 				return 0ull;
 			}
