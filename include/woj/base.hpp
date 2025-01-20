@@ -136,6 +136,8 @@
 #include <cstring>
 #include <string>
 #include <type_traits>
+#include <boost/exception/exception.hpp>
+#include <cstdio>
 
 namespace woj
 {
@@ -148,7 +150,7 @@ namespace woj
 	};
 
 	/**
-	 * Represents a constant that is used to prevent the initialization of a variable
+	 * Represents a constant that is used to prevent the initialization of a class
 	 */
 	constexpr noinit_t noinit{};
 
@@ -189,7 +191,7 @@ namespace woj
 	inline constexpr dynamic_states_t dynamic_states{};
 
 	/**
-	 * Function that checks if the function is being evaluated at compile-time.
+	 * Function that checks if the m_function is being evaluated at compile-time.
 	 * @return True if the function is being evaluated at compile-time, false otherwise.
 	 */
 	constexpr bool is_constant_evaluated()
@@ -211,139 +213,98 @@ namespace woj
 #endif
 	}
 
-	class exception
-	{
+	class exception {
 	public:
-		char* message;
-		bool manage;
+		char* m_message;
+		char* m_file;
+		char* m_function;
+		size_t m_line;
+		bool m_manage;
+		mutable char* m_what_buffer;
 
-		constexpr exception() noexcept : message{ nullptr }, manage{ false } {}
+		constexpr exception() noexcept
+			: m_message(nullptr), m_file(nullptr), m_function(nullptr), m_line(0), m_manage(false), m_what_buffer(nullptr) {}
+
+		constexpr exception(const size_t line, const char* const msg, const char* const file, const char* const function) noexcept
+			: m_message(msg ? copy_string(msg) : nullptr), m_file(file ? copy_string(file) : nullptr), m_function(function ? copy_string(function) : nullptr), m_line(line), m_manage(true), m_what_buffer(nullptr) {}
 
 		constexpr exception(const exception& other) noexcept
-			: message{ new char[std::char_traits<char>::length(other.message) + 1] }, manage{ true } // Allocate space for null terminator
-		{
-			// Ensure proper copying depending on whether we're in a constant evaluation context
-			if (is_constant_evaluated()) {
-				// Manually copy characters to ensure null termination
-				size_t i;
-				for (i = 0; other.message[i] != '\0'; ++i) {
-					message[i] = other.message[i];
-				}
-				message[i] = '\0'; // Ensure null termination
-			}
-			else {
-				std::strcpy(message, other.message); // Copy using std::strcpy which handles null termination
-			}
+			: m_message(other.m_message ? copy_string(other.m_message) : nullptr), m_file(other.m_file ? copy_string(other.m_file) : nullptr), m_function(other.m_function ? copy_string(other.m_function) : nullptr), m_line(other.m_line), m_manage(true), m_what_buffer(nullptr) {}
+
+		constexpr exception(exception&& other) noexcept
+			: m_message(other.m_message), m_file(other.m_file), m_function(other.m_function), m_line(other.m_line), m_manage(other.m_manage), m_what_buffer(other.m_what_buffer) {
+			other.m_message = other.m_file = other.m_function = nullptr;
+			other.m_manage = false;
+			other.m_what_buffer = nullptr;
 		}
 
-		constexpr exception(exception&& other) noexcept : message{ other.message }, manage{ true }
-		{
-			other.message = nullptr;
-			other.manage = false;
+		virtual ~exception() noexcept {
+			clear();
+			delete[] m_what_buffer;
 		}
 
-		explicit constexpr exception(const char* const msg) noexcept : message{ new char[std::char_traits<char>::length(msg) + 1] }, manage{ true }
-		{
-			// Ensure proper copying depending on whether we're in a constant evaluation context
-			if (is_constant_evaluated()) {
-				// Manually copy characters to ensure null termination
-				size_t i;
-				for (i = 0; msg[i] != '\0'; ++i) {
-					message[i] = msg[i];
-				}
-				message[i] = '\0'; // Ensure null termination
+		constexpr exception& operator=(const exception& other) noexcept {
+			if (this != &other) {
+				clear();
+				m_message = copy_string(other.m_message);
+				m_file = copy_string(other.m_file);
+				m_function = copy_string(other.m_function);
+				m_line = other.m_line;
+				m_manage = true;
 			}
-			else {
-				std::strcpy(message, msg); // Copy using std::strcpy which handles null termination
-			}
-		}
-
-		constexpr exception(const char* const msg, const size_t size) noexcept : message{ new char[size] }, manage{ true }
-		{
-			if (is_constant_evaluated())
-			{
-				for (size_t i = 0; i < size; ++i)
-				{
-					message[i] = msg[i];
-				}
-			}
-			else
-			{
-				memcpy(message, msg, size * sizeof(char));
-			}
-		}
-
-		explicit constexpr exception(char*&& msg) noexcept : message{ msg }, manage{ true }
-		{
-			msg = nullptr;
-		}
-
-		constexpr exception(char*&& msg, const size_t) noexcept : message{ msg }, manage{ true }
-		{
-			msg = nullptr;
-		}
-
-		virtual WOJ_CONSTEXPR20 ~exception() noexcept
-		{
-			if (manage)
-			{
-				delete[] message;
-			}
-		}
-
-		constexpr exception& operator=(const exception& other) noexcept
-		{
-			if (this == &other)
-			{
-				return *this;
-			}
-
-			if (manage)
-			{
-				delete[] message;
-			}
-
-			manage = true;
-
-			size_t size;
-
-			if (is_constant_evaluated())
-			{
-				for (size = 0; other.message[size]; ++size);
-			}
-			else
-			{
-				size = strlen(other.message);
-			}
-			message = new char[size];
-			if (is_constant_evaluated())
-			{
-				for (size_t i = 0; i < size; ++i)
-				{
-					message[i] = other.message[i];
-				}
-			}
-			else
-			{
-				memcpy(message, other.message, size * sizeof(char));
-			}
-
-			return *this;
-		}
-		constexpr exception& operator=(exception&& other) noexcept
-		{
-			message = other.message;
-			other.message = nullptr;
-
-			manage = true;
-			other.manage = false;
-
 			return *this;
 		}
 
-	    WOJ_NODISCARD virtual const char* what() const noexcept
-		{
-			return message ? message : "Unknown exception.";
+		constexpr exception& operator=(exception&& other) noexcept {
+			if (this != &other) {
+				clear();
+				m_message = other.m_message;
+				m_file = other.m_file;
+				m_function = other.m_function;
+				m_line = other.m_line;
+				m_manage = other.m_manage;
+				m_what_buffer = other.m_what_buffer;
+
+				other.m_message = other.m_file = other.m_function = nullptr;
+				other.m_manage = false;
+				other.m_what_buffer = nullptr;
+			}
+			return *this;
+		}
+
+		WOJ_NODISCARD const char* message() const noexcept { return m_message; }
+		WOJ_NODISCARD size_t line() const noexcept { return m_line; }
+		WOJ_NODISCARD const char* file() const noexcept { return m_file; }
+		WOJ_NODISCARD const char* function() const noexcept { return m_function; }
+
+		WOJ_NODISCARD const char* what() const noexcept {
+			if (!m_what_buffer) {
+				const size_t size = std::strlen(file()) + std::strlen(function()) + std::strlen(message()) + 32;
+				m_what_buffer = new char[size];
+				std::sprintf(m_what_buffer, "%s:%zu: %s: %s", file(), line(), function(), message());
+			}
+			return m_what_buffer;
+		}
+
+	private:
+		constexpr void clear() noexcept {
+			if (m_manage) {
+				delete[] m_message;
+				delete[] m_file;
+				delete[] m_function;
+			}
+			m_message = m_file = m_function = nullptr;
+			m_manage = false;
+			m_line = 0;
+		}
+
+		static constexpr char* copy_string(const char* source) noexcept {
+			if (!source) return nullptr;
+			size_t length = std::strlen(source);
+			char* copy = new char[length + 1];
+			std::memcpy(copy, source, length);
+			copy[length] = '\0';
+			return copy;
 		}
 	};
 }

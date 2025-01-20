@@ -3,6 +3,8 @@
 #ifndef WOJ_STRING_HPP
 #define WOJ_STRING_HPP
 #include <cassert>
+
+#include "string.hpp"
 #endif
 
 #ifndef WOJ_DEFS_HPP
@@ -23,68 +25,9 @@
 
 namespace woj
 {
-	namespace impl
-	{
-		template <typename Elem, typename Traits = std::char_traits<Elem>>
-		class basic_streambuf_publicized final : public std::basic_streambuf<Elem, Traits>
-		{
-		public:
-			using base_type = std::basic_streambuf<Elem, Traits>;
-
-			// Private
-			using base_type::base_type;
-			using base_type::operator=;
-			using base_type::swap;
-
-			// Public
-			using base_type::pubseekoff;
-			using base_type::pubseekpos;
-			using base_type::pubsetbuf;
-			using base_type::pubimbue;
-			using base_type::getloc;
-			using base_type::in_avail;
-			using base_type::pubsync;
-			using base_type::sbumpc;
-			using base_type::sgetc;
-			using base_type::sgetn;
-			using base_type::snextc;
-			using base_type::sputbackc;
-#if !defined(WOJ_HAS_CXX17)
-			using base_type::stossc;
-#endif
-			using base_type::sungetc;
-			using base_type::sputc;
-			using base_type::sputn;
-
-			// Protected
-			using base_type::eback;
-			using base_type::gptr;
-			using base_type::pbase;
-			using base_type::pptr;
-			using base_type::egptr;
-			using base_type::gbump;
-			using base_type::setg;
-			using base_type::epptr;
-			using base_type::pbump;
-			using base_type::setp;
-			using base_type::overflow;
-			using base_type::pbackfail;
-			using base_type::showmanyc;
-			using base_type::underflow;
-			using base_type::uflow;
-			using base_type::xsgetn;
-			using base_type::xsputn;
-			using base_type::seekoff;
-			using base_type::seekpos;
-			using base_type::setbuf;
-			using base_type::sync;
-			using base_type::imbue;
-		};
-	}
-
 	#if defined(WOJ_HAS_CXX20)
 	template <typename T>
-	concept char_type = std::is_same<T, char>::value || std::is_same<T, char8_t>::value || std::is_same<T, wchar_t>::value || std::is_same<T, char16_t>::value || std::is_same<T, char32_t>::value;
+	concept char_type = std::is_same_v<T, char> || std::is_same_v<T, char8_t> || std::is_same_v<T, wchar_t> || std::is_same_v<T, char16_t> || std::is_same_v<T, char32_t>;
 	#else
 	template <typename T>
 	struct is_char
@@ -118,14 +61,464 @@ namespace woj
 			using size_type = size_t;
 			using difference_type = std::ptrdiff_t;
 			using pointer = Elem*;
-			using const_pointer = Elem*;
+			using const_pointer = const Elem*;
 			using reference = Elem&;
 			using const_reference = const Elem&;
 
-			using iterator = pointer;
-			using const_iterator = const_pointer;
-			using reverse_iterator = pointer;
-			using const_reverse_iterator = const_pointer;
+			class const_reverse_iterator;
+			class reverse_reverse_iterator;
+			class const_reverse_reverse_iterator;
+
+			class reverse_iterator
+			{
+			public:
+				pointer p_elem;
+
+				constexpr reverse_iterator() noexcept : p_elem(nullptr) {}
+
+				constexpr reverse_iterator(const noinit_t) noexcept {}
+
+				explicit constexpr reverse_iterator(const pointer p_elem) noexcept : p_elem(p_elem) {}
+
+				constexpr reverse_iterator(const reverse_iterator& other) noexcept : p_elem(other.p_elem) {}
+
+				constexpr reverse_iterator(reverse_iterator&& other) noexcept : p_elem(other.p_elem)
+				{
+					other.p_elem = nullptr;
+				}
+
+				WOJ_CONSTEXPR20 ~reverse_iterator() noexcept = default;
+
+				explicit constexpr operator const_reverse_iterator() const noexcept
+				{
+					return const_reverse_iterator(p_elem);
+				}
+
+				explicit constexpr operator reverse_reverse_iterator() const noexcept
+				{
+					return reverse_reverse_iterator(p_elem);
+				}
+
+				explicit constexpr operator const_reverse_reverse_iterator() const noexcept
+				{
+					return const_reverse_reverse_iterator(p_elem);
+				}
+
+				constexpr reverse_iterator& operator=(const reverse_iterator& other) noexcept = default;
+
+				constexpr reverse_iterator& operator=(reverse_iterator&& other) noexcept
+				{
+					p_elem = other.p_elem;
+					other.p_elem = nullptr;
+					return *this;
+				}
+
+				constexpr reference operator*() const noexcept
+				{
+					return *p_elem;
+				}
+
+				constexpr pointer operator->() const noexcept
+				{
+					return p_elem;
+				}
+
+				constexpr reverse_iterator& operator++() noexcept
+				{
+					++p_elem;
+					return *this;
+				}
+
+				constexpr reverse_iterator operator++(int) noexcept
+				{
+					reverse_iterator temp(*this);
+					++p_elem;
+					return temp;
+				}
+
+				constexpr reverse_iterator& operator--() noexcept
+				{
+					--p_elem;
+					return *this;
+				}
+
+				constexpr reverse_iterator operator--(int) noexcept
+				{
+					reverse_iterator temp(*this);
+					--p_elem;
+					return temp;
+				}
+
+				constexpr reverse_iterator& operator+=(const difference_type value) noexcept
+				{
+					p_elem += value;
+					return *this;
+				}
+
+				constexpr reverse_iterator operator+(const difference_type value) const noexcept
+				{
+					reverse_iterator temp(*this);
+					temp += value;
+					return *this;
+				}
+
+				constexpr reverse_iterator& operator-=(const difference_type value) noexcept
+				{
+					p_elem -= value;
+					return *this;
+				}
+
+				constexpr reverse_iterator operator-(const difference_type value) const noexcept
+				{
+					reverse_iterator temp(*this);
+					temp += value;
+					return *this;
+				}
+
+				constexpr reverse_iterator& operator-(const reverse_iterator other) const noexcept
+				{
+					return p_elem - other.p_elem;
+				}
+
+				constexpr const reverse_iterator& as_const() const noexcept
+				{
+					return *this;
+				}
+
+				constexpr const_reverse_iterator constified() const noexcept
+				{
+					return const_reverse_iterator(p_elem);
+				}
+
+				constexpr reverse_reverse_iterator reversed() const noexcept
+				{
+					return reverse_reverse_iterator(p_elem);
+				}
+
+				constexpr const_reverse_reverse_iterator creversed() const noexcept
+				{
+					return const_reverse_reverse_iterator(p_elem);
+				}
+			};
+
+			class const_reverse_iterator
+			{
+				const_pointer p_elem;
+
+				constexpr const_reverse_iterator() noexcept : p_elem(nullptr) {}
+
+				constexpr const_reverse_iterator(const noinit_t) noexcept {}
+
+				explicit constexpr const_reverse_iterator(const const_pointer p_elem) noexcept : p_elem(p_elem) {}
+
+				constexpr const_reverse_iterator(const const_reverse_iterator& other) noexcept : p_elem(other.p_elem) {}
+
+				constexpr const_reverse_iterator(const_reverse_iterator&& other) noexcept : p_elem(other.p_elem)
+				{
+					other.p_elem = nullptr;
+				}
+
+				WOJ_CONSTEXPR20 ~const_reverse_iterator() noexcept = default;
+
+				constexpr const_reverse_iterator& operator=(const const_reverse_iterator& other) noexcept = default;
+
+				constexpr const_reverse_iterator& operator=(const_reverse_iterator&& other) noexcept
+				{
+					p_elem = other.p_elem;
+					other.p_elem = nullptr;
+					return *this;
+				}
+
+				constexpr reference operator*() const noexcept
+				{
+					return *p_elem;
+				}
+
+				constexpr pointer operator->() const noexcept
+				{
+					return p_elem;
+				}
+
+				constexpr const_reverse_iterator& operator++() noexcept
+				{
+					++p_elem;
+					return *this;
+				}
+
+				constexpr const_reverse_iterator operator++(int) noexcept
+				{
+					const_reverse_iterator temp(*this);
+					++p_elem;
+					return temp;
+				}
+
+				constexpr const_reverse_iterator& operator--() noexcept
+				{
+					--p_elem;
+					return *this;
+				}
+
+				constexpr const_reverse_iterator operator--(int) noexcept
+				{
+					const_reverse_iterator temp(*this);
+					--p_elem;
+					return temp;
+				}
+
+				constexpr const_reverse_iterator& operator+=(const difference_type value) noexcept
+				{
+					p_elem += value;
+					return *this;
+				}
+
+				constexpr const_reverse_iterator operator+(const difference_type value) const noexcept
+				{
+					const_reverse_iterator temp(*this);
+					temp += value;
+					return *this;
+				}
+
+				constexpr const_reverse_iterator& operator-=(const difference_type value) noexcept
+				{
+					p_elem -= value;
+					return *this;
+				}
+
+				constexpr const_reverse_iterator operator-(const difference_type value) const noexcept
+				{
+					const_reverse_iterator temp(*this);
+					temp += value;
+					return *this;
+				}
+
+				constexpr const_reverse_iterator& operator-(const const_reverse_iterator other) const noexcept
+				{
+					return p_elem - other.p_elem;
+				}
+
+				constexpr const const_reverse_iterator& as_const() const noexcept
+				{
+					return *this;
+				}
+			};
+
+			class reverse_iterator
+			{
+			public:
+				pointer p_elem;
+
+				constexpr reverse_iterator() noexcept : p_elem(nullptr) {}
+
+				constexpr reverse_iterator(const noinit_t) noexcept {}
+
+				explicit constexpr reverse_iterator(const pointer p_elem) noexcept : p_elem(p_elem) {}
+
+				constexpr reverse_iterator(const reverse_iterator& other) noexcept : p_elem(other.p_elem) {}
+
+				constexpr reverse_iterator(reverse_iterator&& other) noexcept : p_elem(other.p_elem)
+				{
+					other.p_elem = nullptr;
+				}
+
+				WOJ_CONSTEXPR20 ~reverse_iterator() noexcept = default;
+
+				constexpr reverse_iterator& operator=(const reverse_iterator& other) noexcept = default;
+
+				constexpr reverse_iterator& operator=(reverse_iterator&& other) noexcept
+				{
+					p_elem = other.p_elem;
+					other.p_elem = nullptr;
+					return *this;
+				}
+
+				constexpr reference operator*() const noexcept
+				{
+					return *p_elem;
+				}
+
+				constexpr pointer operator->() const noexcept
+				{
+					return p_elem;
+				}
+
+				constexpr reverse_iterator& operator++() noexcept
+				{
+					++p_elem;
+					return *this;
+				}
+
+				constexpr reverse_iterator operator++(int) noexcept
+				{
+					reverse_iterator temp(*this);
+					++p_elem;
+					return temp;
+				}
+
+				constexpr reverse_iterator& operator--() noexcept
+				{
+					--p_elem;
+					return *this;
+				}
+
+				constexpr reverse_iterator operator--(int) noexcept
+				{
+					reverse_iterator temp(*this);
+					--p_elem;
+					return temp;
+				}
+
+				constexpr reverse_iterator& operator+=(const difference_type value) noexcept
+				{
+					p_elem += value;
+					return *this;
+				}
+
+				constexpr reverse_iterator operator+(const difference_type value) const noexcept
+				{
+					reverse_iterator temp(*this);
+					temp += value;
+					return *this;
+				}
+
+				constexpr reverse_iterator& operator-=(const difference_type value) noexcept
+				{
+					p_elem -= value;
+					return *this;
+				}
+
+				constexpr reverse_iterator operator-(const difference_type value) const noexcept
+				{
+					reverse_iterator temp(*this);
+					temp += value;
+					return *this;
+				}
+
+				constexpr reverse_iterator& operator-(const reverse_iterator other) const noexcept
+				{
+					return p_elem - other.p_elem;
+				}
+
+				constexpr const reverse_iterator& as_const() const noexcept
+				{
+					return *this;
+				}
+
+				constexpr const_reverse_iterator constified() const noexcept
+				{
+					return const_reverse_iterator(p_elem);
+				}
+
+				constexpr reverse_reverse_iterator reversed() const noexcept
+				{
+					return reverse_reverse_iterator(p_elem);
+				}
+
+				constexpr const_reverse_reverse_iterator creversed() const noexcept
+				{
+					return const_reverse_reverse_iterator(p_elem);
+				}
+			};
+
+			class const_reverse_iterator
+			{
+				const_pointer p_elem;
+
+				constexpr const_reverse_iterator() noexcept : p_elem(nullptr) {}
+
+				constexpr const_reverse_iterator(const noinit_t) noexcept {}
+
+				explicit constexpr const_reverse_iterator(const const_pointer p_elem) noexcept : p_elem(p_elem) {}
+
+				constexpr const_reverse_iterator(const const_reverse_iterator& other) noexcept : p_elem(other.p_elem) {}
+
+				constexpr const_reverse_iterator(const_reverse_iterator&& other) noexcept : p_elem(other.p_elem)
+				{
+					other.p_elem = nullptr;
+				}
+
+				WOJ_CONSTEXPR20 ~const_reverse_iterator() noexcept = default;
+
+				constexpr const_reverse_iterator& operator=(const const_reverse_iterator& other) noexcept = default;
+
+				constexpr const_reverse_iterator& operator=(const_reverse_iterator&& other) noexcept
+				{
+					p_elem = other.p_elem;
+					other.p_elem = nullptr;
+					return *this;
+				}
+
+				constexpr reference operator*() const noexcept
+				{
+					return *p_elem;
+				}
+
+				constexpr pointer operator->() const noexcept
+				{
+					return p_elem;
+				}
+
+				constexpr const_reverse_iterator& operator++() noexcept
+				{
+					++p_elem;
+					return *this;
+				}
+
+				constexpr const_reverse_iterator operator++(int) noexcept
+				{
+					const_reverse_iterator temp(*this);
+					++p_elem;
+					return temp;
+				}
+
+				constexpr const_reverse_iterator& operator--() noexcept
+				{
+					--p_elem;
+					return *this;
+				}
+
+				constexpr const_reverse_iterator operator--(int) noexcept
+				{
+					const_reverse_iterator temp(*this);
+					--p_elem;
+					return temp;
+				}
+
+				constexpr const_reverse_iterator& operator+=(const difference_type value) noexcept
+				{
+					p_elem += value;
+					return *this;
+				}
+
+				constexpr const_reverse_iterator operator+(const difference_type value) const noexcept
+				{
+					const_reverse_iterator temp(*this);
+					temp += value;
+					return *this;
+				}
+
+				constexpr const_reverse_iterator& operator-=(const difference_type value) noexcept
+				{
+					p_elem -= value;
+					return *this;
+				}
+
+				constexpr const_reverse_iterator operator-(const difference_type value) const noexcept
+				{
+					const_reverse_iterator temp(*this);
+					temp += value;
+					return *this;
+				}
+
+				constexpr const_reverse_iterator& operator-(const const_reverse_iterator other) const noexcept
+				{
+					return p_elem - other.p_elem;
+				}
+
+				constexpr const const_reverse_iterator& as_const() const noexcept
+				{
+					return *this;
+				}
+			};
 
 			alignas(Elem) Elem m_data[MemSize];
 
@@ -220,65 +613,27 @@ namespace woj
 			 */
 			constexpr string() = default;
 
-			/**
-			 * Constructor from array buffer
-			 * @param other Buffer to copy from
-			 */
-			constexpr string(const Elem(&other)[MemSize + 1]) noexcept : m_data{}
-			{
-				copy(other);
-			}
-
-			/**
-			 * Constructor from array buffer with count of characters
-			 * @param other Buffer to copy from
-			 * @param count Count of characters to copy
-			 */
-			constexpr string(const Elem(&other)[MemSize + 1], const size_type count) noexcept : m_data{}
-			{
-				copy(other, count);
-			}
-
 			// ----- Copy constructors from buffers -----
 
-#if defined(WOJ_HAS_CXX20)
 			/**
 			 * Copy constructor from array buffer
 			 * @tparam OtherMemSize MemSize of the buffer to copy from
 			 * @param other Buffer to copy from
 			 */
-			template <size_type OtherMemSize> requires (OtherMemSize != MemSize)
-#else
-			/**
-			 * Copy constructor from array buffer
-			 * @tparam OtherMemSize MemSize of the buffer to copy from
-			 * @param other Buffer to copy from
-			 */
-			template <size_type OtherMemSize, typename = std::enable_if_t<OtherMemSize != MemSize>>
-#endif
-				constexpr string(const Elem(&other)[OtherMemSize]) noexcept : m_data{}
+			template <size_type OtherMemSize>
+			constexpr string(const Elem(&other)[OtherMemSize]) noexcept
 			{
 				copy(other);
 			}
 
-#if defined(WOJ_HAS_CXX20)
 			/**
 			 * Copy constructor from array buffer with count of characters
 			 * @tparam OtherMemSize MemSize of the buffer to copy from
 			 * @param other Buffer to copy from
 			 * @param count Count of characters to copy
 			 */
-			template <size_type OtherMemSize> requires (OtherMemSize != MemSize)
-#else
-			/**
-			 * Copy constructor from array buffer with count of characters
-			 * @tparam OtherMemSize MemSize of the buffer to copy from
-			 * @param other Buffer to copy from
-			 * @param count Count of characters to copy
-			 */
-			template <size_type OtherMemSize, typename = std::enable_if_t<OtherMemSize != MemSize>>
-#endif
-				constexpr string(const Elem(&other)[OtherMemSize], const size_type count) noexcept : m_data{}
+			template <size_type OtherMemSize>
+			constexpr string(const Elem(&other)[OtherMemSize], const size_type count) noexcept
 			{
 				copy(other, count);
 			}
@@ -317,9 +672,9 @@ namespace woj
 			 * @param count Count of characters to copy
 			 */
 			template <typename ElemPtr = const Elem* const>
-				requires std::is_pointer<ElemPtr>::value &&
-						 std::is_same<typename std::remove_const<typename std::remove_pointer<typename std::remove_const<ElemPtr>::type>::type>::type, Elem>::value &&
-						 (!std::is_array<ElemPtr>::value)
+			requires std::is_pointer<ElemPtr>::value &&
+					 std::is_same<typename std::remove_const<typename std::remove_pointer<typename std::remove_const<ElemPtr>::type>::type>::type, Elem>::value &&
+					 (!std::is_array<ElemPtr>::value)
 #else
 			/**
 			 * Copy constructor from pointer buffer with count of characters
@@ -332,7 +687,7 @@ namespace woj
 				std::is_same<typename std::remove_const<typename std::remove_pointer<typename std::remove_const<ElemPtr>::type>::type>::type, Elem>::value &&
 				!std::is_array<ElemPtr>::value>>
 #endif
-				constexpr string(ElemPtr other, const size_type count) noexcept : m_data{}
+			constexpr string(ElemPtr other, const size_type count) noexcept : m_data{}
 			{
 				copy(other, count);
 			}
@@ -342,55 +697,22 @@ namespace woj
 			 * Copy constructor from another string
 			 * @param other String to copy from
 			 */
-			constexpr string(const string& other) noexcept : m_data{}
+			template <char_type OtherElem, size_type OtherMemSize>
+			constexpr string(const string<OtherElem, OtherMemSize>& other) noexcept : m_data{}
 			{
 				copy(other);
 			}
 
 			/**
-			 * Copy constructor from another string count of characters
-			 * @param other String to copy from
-			 * @param count Count of characters to copy
-			 */
-			constexpr string(const string& other, const size_type count) noexcept : m_data{}
-			{
-				copy(other, count);
-			}
-
-			/**
-			 * Copy constructor from another string of different params 
-			 * @param other String to copy from
-			 */
-#if defined(WOJ_HAS_CXX20)
-			template <char_type OtherElem, size_type OtherMemSize> requires (OtherMemSize != MemSize)
-#else
-			template <typename OtherElem, size_type OtherMemSize, typename = std::enable_if_t<OtherMemSize != MemSize>>
-#endif
-				constexpr string(const string<OtherElem, OtherMemSize>& other) noexcept : m_data{}
-			{
-				copy(other);
-			}
-
-#if defined(WOJ_HAS_CXX20)
-			/**
-			 * Copy constructor from another string of different params count of characters
+			 * Copy constructor from another string
 			 * @tparam OtherElem Type of the other string's elements
 			 * @tparam OtherMemSize MemSize of the other string
 			 * @param other String to copy from
 			 * @param count Count of characters to copy
 			 */
-			template <char_type OtherElem, size_type OtherMemSize> requires (OtherMemSize != MemSize)
-#else
-			/**
-			 * Copy constructor from another string of different params count of characters
-			 * @tparam OtherElem Type of the other string's elements
-			 * @tparam OtherMemSize MemSize of the other string
-			 * @param other String to copy from
-			 * @param count Count of characters to copy
-			 */
-			template <typename OtherElem, size_type OtherMemSize, typename = std::enable_if_t<OtherMemSize != MemSize>>
+			template <char_type OtherElem, size_type OtherMemSize>
 #endif
-				constexpr string(const string<OtherElem, OtherMemSize>& other, const size_type count) noexcept : m_data{}
+			constexpr string(const string<OtherElem, OtherMemSize>& other, const size_type count) noexcept : m_data{}
 			{
 				copy(other, count);
 			}
@@ -420,27 +742,27 @@ namespace woj
 			}
 
 #if defined(WOJ_HAS_CXX20)
-				/**
-				 * Assign from pointer buffer operator
-				 * @tparam ElemPtr Type of the pointer buffer to copy from (Default: const Elem* const)
-				 * @param other Buffer to copy from
-				 * @return Reference to self
-				 */
-			template <typename ElemPtr = const Elem* const>
-				requires std::is_pointer<ElemPtr>::value &&
-						 std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
-						 (!std::is_array<ElemPtr>::value)
+			/**
+			 * Assign from pointer buffer operator
+			 * @tparam ElemPtr Type of the pointer buffer to copy from (Default: const Elem* const)
+			 * @param other Buffer to copy from
+			 * @return Reference to self
+			 */
+		template <typename ElemPtr = const Elem* const>
+		requires std::is_pointer<ElemPtr>::value &&
+				 std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
+				 (!std::is_array<ElemPtr>::value)
 #else
-				/**
-				 * Assign from pointer buffer operator
-				 * @tparam ElemPtr Type of the pointer buffer to copy from (Default: const Elem* const)
-				 * @param other Buffer to copy from
-				 * @return Reference to self
-				 */
-				template <typename ElemPtr = const Elem* const, typename = std::enable_if_t<
-					std::is_pointer<ElemPtr>::value &&
-					std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
-					!std::is_array<ElemPtr>::value>>
+			/**
+			 * Assign from pointer buffer operator
+			 * @tparam ElemPtr Type of the pointer buffer to copy from (Default: const Elem* const)
+			 * @param other Buffer to copy from
+			 * @return Reference to self
+			 */
+			template <typename ElemPtr = const Elem* const, typename = std::enable_if_t<
+				std::is_pointer<ElemPtr>::value &&
+				std::is_same<std::remove_const_t<std::remove_pointer_t<std::remove_const_t<std::remove_pointer_t<ElemPtr>>>>, Elem>::value &&
+				!std::is_array<ElemPtr>::value>>
 #endif
 				constexpr string& operator=(ElemPtr other) noexcept
 			{
@@ -510,77 +832,77 @@ namespace woj
 			// ----- Iteration functions -----
 
 			/**
-			 * Begin iterator
+			 * Begin reverse_iterator
 			 * @return Iterator to the beginning of the string
 			 */
-			WOJ_NODISCARD constexpr iterator begin() noexcept
+			WOJ_NODISCARD constexpr reverse_iterator begin() noexcept
 			{
 				return m_data;
 			}
 
 			/**
-			 * Const begin iterator
-			 * @return Const iterator to the beginning of the string
+			 * Const begin reverse_iterator
+			 * @return Const reverse_iterator to the beginning of the string
 			 */
-			WOJ_NODISCARD constexpr const_iterator begin() const noexcept
+			WOJ_NODISCARD constexpr const_reverse_iterator begin() const noexcept
 			{
 				return m_data;
 			}
 
 			/**
-			 * Const begin iterator
-			 * @return Const iterator to the beginning of the string
+			 * Const begin reverse_iterator
+			 * @return Const reverse_iterator to the beginning of the string
 			 */
-			WOJ_NODISCARD constexpr const_iterator cbegin() const noexcept
+			WOJ_NODISCARD constexpr const_reverse_iterator cbegin() const noexcept
 			{
 				return begin();
 			}
 
 			/**
-			 * End iterator
+			 * End reverse_iterator
 			 * @return Iterator to the end of the string (after the null terminator)
 			 */
-			WOJ_NODISCARD constexpr iterator end() noexcept
+			WOJ_NODISCARD constexpr reverse_iterator end() noexcept
 			{
 				return m_data + MemSize;
 			}
 
-			WOJ_NODISCARD constexpr const_iterator end() const noexcept
+			WOJ_NODISCARD constexpr const_reverse_iterator end() const noexcept
 			{
 				return m_data + MemSize;
 			}
 
-			WOJ_NODISCARD constexpr const_iterator cend() const noexcept
+			WOJ_NODISCARD constexpr const_reverse_iterator cend() const noexcept
 			{
 				return end();
 			}
 
-			WOJ_NODISCARD constexpr reverse_iterator rbegin() noexcept
+			WOJ_NODISCARD constexpr reverse_reverse_iterator rbegin() noexcept
 			{
 				return m_data + MemSize - 1;
 			}
 
-			WOJ_NODISCARD constexpr const_reverse_iterator rbegin() const noexcept
+			WOJ_NODISCARD constexpr const_reverse_reverse_iterator rbegin() const noexcept
 			{
 				return m_data + MemSize - 1;
 			}
 
-			WOJ_NODISCARD constexpr const_reverse_iterator crbegin() const noexcept
+			WOJ_NODISCARD constexpr const_reverse_reverse_iterator crbegin() const noexcept
 			{
 				return rbegin();
 			}
 
-			WOJ_NODISCARD constexpr reverse_iterator rend() noexcept
+			WOJ_NODISCARD constexpr reverse_reverse_iterator rend() noexcept
 			{
 				return m_data - 1;
 			}
 
-			WOJ_NODISCARD constexpr const_reverse_iterator rend() const noexcept
+			WOJ_NODISCARD constexpr const_reverse_reverse_iterator rend() const noexcept
 			{
 				return m_data - 1;
 			}
 
-			WOJ_NODISCARD constexpr const_reverse_iterator crend() const noexcept
+			WOJ_NODISCARD constexpr const_reverse_reverse_iterator crend() const noexcept
 			{
 				return rend();
 			}
@@ -592,7 +914,7 @@ namespace woj
 			 * @tparam BufferOverlaps Whether the buffer overlaps with internal buffer
 			 * @tparam OtherMemSize Size of the buffer to copy from
 			 * @param other Buffer to copy from
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <bool BufferOverlaps = false, size_type OtherMemSize>
 			constexpr string& copy(const Elem(&other)[OtherMemSize]) noexcept
@@ -645,7 +967,7 @@ namespace woj
 			 * @tparam OtherMemSize Size of the buffer to copy from
 			 * @param other Buffer to copy from
 			 * @param buffer_overlaps Whether the buffer overlaps with internal buffer
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <size_type OtherMemSize>
 			constexpr string& copy(const Elem(&other)[OtherMemSize], const bool buffer_overlaps) noexcept
@@ -703,7 +1025,7 @@ namespace woj
 			 * @tparam OtherMemSize Size of the m_data to copy from
 			 * @param other Buffer to copy from
 			 * @param count Count of characters to copy
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <bool BufferOverlaps, size_type Count, size_type OtherMemSize>
 			constexpr string& copy(const Elem(&other)[OtherMemSize]) noexcept
@@ -756,7 +1078,7 @@ namespace woj
 			 * @tparam OtherMemSize Size of the m_data to copy from
 			 * @param other Buffer to copy from
 			 * @param count Count of characters to copy
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <size_type OtherMemSize>
 			WOJ_CONSTEXPR20 string& copy(const Elem(&other)[OtherMemSize], const size_type count) noexcept
@@ -806,7 +1128,7 @@ namespace woj
 			 * @param buffer_overlaps Whether the m_data overlaps with the string's m_data
 			 * @param count Count of characters to copy
 			 * @param buffer_overlaps Whether the buffer overlaps with internal buffer
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <size_type OtherMemSize>
 			WOJ_CONSTEXPR20 string& copy(const Elem(&other)[OtherMemSize], const bool buffer_overlaps, const size_type count) noexcept
@@ -871,7 +1193,7 @@ namespace woj
 			 * @tparam BufferOverlaps Whether the m_data overlaps with the string's m_data (unused, kept for compatibility)
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
 			 * @param other Buffer to copy from
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <bool BufferOverlaps, typename ElemPtr = const Elem* const>
 				requires std::is_pointer<ElemPtr>::value &&
@@ -883,7 +1205,7 @@ namespace woj
 			 * @tparam BufferOverlaps Whether the buffer overlaps with internal buffer
 			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
 			 * @param other Buffer to copy from
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <bool BufferOverlaps = false, typename ElemPtr = const Elem* const, typename = std::enable_if_t<
 			/**
@@ -891,7 +1213,7 @@ namespace woj
 			 * @tparam BufferOverlaps Whether the m_data overlaps with the string's m_data (unused, kept for compatibility)
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
 			 * @param other Buffer to copy from
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <bool BufferOverlaps, typename ElemPtr = const Elem* const, typename = std::enable_if_t<
 				std::is_pointer<ElemPtr>::value &&
@@ -920,7 +1242,7 @@ namespace woj
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
 			 * @param other Buffer to copy from
 			 * @param buffer_overlaps Whether the m_data overlaps with the string's m_data
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <typename ElemPtr = const Elem* const>
 				requires std::is_pointer<ElemPtr>::value &&
@@ -932,7 +1254,7 @@ namespace woj
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
 			 * @param other Buffer to copy from
 			 * @param buffer_overlaps Whether the m_data overlaps with the string's m_data
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template < typename ElemPtr = const Elem* const, typename = std::enable_if_t<
 				std::is_pointer<ElemPtr>::value&&
@@ -961,7 +1283,7 @@ namespace woj
 			 * @tparam Count Count of characters to copy
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
 			 * @param other Buffer to copy from
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <size_type Count, typename ElemPtr = const Elem* const>
 				requires std::is_pointer<ElemPtr>::value&&
@@ -973,7 +1295,7 @@ namespace woj
 			 * @tparam Count Count of characters to copy
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
 			 * @param other Buffer to copy from
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <size_type Count, typename ElemPtr, typename = std::enable_if_t<
 				std::is_pointer<ElemPtr>::value&&
@@ -1028,7 +1350,7 @@ namespace woj
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
 			 * @param other Buffer to copy from
 			 * @param count MemSize of the m_data to copy from
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <bool BufferOverlaps = false, typename ElemPtr = const Elem* const>
 				requires std::is_pointer<ElemPtr>::value &&
@@ -1041,7 +1363,7 @@ namespace woj
 			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
 			 * @param other Buffer to copy from
 			 * @param count MemSize of the buffer to copy from
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <bool BufferOverlaps = false,<typename ElemPtr = const Elem* const, typename = std::enable_if_t<
 				std::is_pointer<ElemPtr>::value&&
@@ -1111,7 +1433,7 @@ namespace woj
 			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
 			 * @param other Buffer to copy from
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <bool BufferOverlaps, size_type Count, typename ElemPtr = const Elem* const>
 				requires std::is_pointer<ElemPtr>::value &&
@@ -1124,7 +1446,7 @@ namespace woj
 			 * @tparam BufferOverlaps Whether the buffer overlaps with internal buffer
 			 * @tparam ElemPtr Type of the pointer buffer (Default: const Elem* const)
 			 * @param other Buffer to copy from
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <size_type Count, bool BufferOverlaps = false, typename ElemPtr = const Elem* const, typename = std::enable_if_t<
 			/**
@@ -1133,7 +1455,7 @@ namespace woj
 			 * @tparam Count Count of characters to copy
 			 * @tparam ElemPtr Type of the pointer m_data (Default: const Elem* const)
 			 * @param other Buffer to copy from
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <size_type Count, typename ElemPtr, typename = std::enable_if_t<
 				std::is_pointer<ElemPtr>::value &&
@@ -1191,7 +1513,7 @@ namespace woj
 			 * @param other Buffer to copy from
 			 * @param buffer_overlaps Whether the m_data overlaps with the string's m_data
 			 * @param count Count of characters to copy
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <typename ElemPtr = const Elem* const>
 				requires std::is_pointer<ElemPtr>::value&&
@@ -1204,7 +1526,7 @@ namespace woj
 			 * @param other Buffer to copy from
 			 * @param buffer_overlaps Whether the m_data overlaps with the string's m_data
 			 * @param count Count of characters to copy
-			 * @return Self reference
+			 * @return Reference to self
 			 */
 			template <size_type Count, typename ElemPtr, typename = std::enable_if_t<
 				std::is_pointer<ElemPtr>::value&&
