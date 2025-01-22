@@ -168,7 +168,7 @@ namespace woj
 	constexpr none_t none{};
 
 	/**
-	 * Represents a type that is to be used as a placeholder for when empty constructor like '{}' may be problematic.
+	 * Represents a type that is to be used as a placeholder for when empty constructor like '{}' may be desired (e.g. 'std::initializer_list' - like with no elements)
 	 */
 	struct empty_t
 	{

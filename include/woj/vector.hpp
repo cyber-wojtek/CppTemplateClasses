@@ -49,7 +49,7 @@ namespace woj
 
 				constexpr const_iterator() noexcept : m_ptr{ nullptr } {}
 
-				constexpr const_iterator(const pointer ptr) noexcept : m_ptr{ ptr } {}
+				explicit constexpr const_iterator(const pointer ptr) noexcept : m_ptr{ ptr } {}
 
 				constexpr const_iterator(const const_iterator& other) noexcept = default;
 
@@ -604,11 +604,22 @@ namespace woj
 				}
 			};
 
-			alignas(ElementType) ElementType m_data[Size];
+			union
+			{
+				alignas(ElementType) ElementType m_data[Size];
+			};
 
 			constexpr vector() noexcept : m_data{} {}
 
 			explicit constexpr vector(const none_t) noexcept : m_data{} {}
+
+			explicit constexpr vector(const noinit_t noinit) noexcept
+			{
+				if (is_constant_evaluated())
+				{
+					m_data = {};
+				}
+			}
 			
 			explicit constexpr vector(const ElementType& value) noexcept
 			{

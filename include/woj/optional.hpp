@@ -66,7 +66,7 @@ namespace woj
         using class_type = woj::optional;
         using this_type = optional;
         using value_type = ValueType;
-    	using reference = value_type&;
+        using reference = value_type&;
         using reference_type = reference;
         using const_reference = const value_type&;
         using const_reference_type = const_reference;
@@ -96,13 +96,13 @@ namespace woj
 
         /**
          * Constructs an empty optional.
-		 * @param none Used to enable the constructor.
+         * @param none Used to enable the constructor.
          */
         explicit constexpr optional(const none_t none) noexcept : m_has_value{ false } {}
 
         /**
          * Constructs an uninitialized optional.
-		 * @param noinit Used to enable the constructor.
+         * @param noinit Used to enable the constructor.
          */
         explicit constexpr optional(const noinit_t noinit) noexcept
         {
@@ -112,18 +112,18 @@ namespace woj
             }
         }
 
-		/**
-		 * Constructs an optional from another optional by copying it.
-		 * @param other The optional to copy.
-		 */
-		constexpr optional(const optional& other)
+        /**
+         * Constructs an optional from another optional by copying it.
+         * @param other The optional to copy.
+         */
+        constexpr optional(const optional& other)
             noexcept
             (
-				std::is_nothrow_copy_constructible_v<ValueType>
+                std::is_nothrow_copy_constructible_v<ValueType>
             )
-			requires
-			(
-				std::is_copy_constructible_v<ValueType>
+            requires
+            (
+                std::is_copy_constructible_v<ValueType>
             )
             : m_has_value{ other.m_has_value }
         {
@@ -133,109 +133,57 @@ namespace woj
             }
         }
 
+	    /**
+	     * Constructs an optional from another optional by copying it.
+	     * @param other_state State of the other optional.
+	     * @param other The optional to copy.
+	     */
+
+	    explicit constexpr optional(const optional_state other_state, const optional& other)
+	        noexcept
+	        (
+	            std::is_nothrow_copy_constructible_v<ValueType>
+	        )
+	        requires
+			(
+				std::is_copy_constructible_v<ValueType>
+	        )
+	    {
+	        if (other_state == optional_state::has_value)
+	        {
+	            m_has_value = true;
+	            std::construct_at(&m_value, other.m_value);
+	        }
+	        else if (other_state == optional_state::no_value)
+	        {
+	            m_has_value = false;
+	        }
+	        else if (other_state == optional_state::uninitialized)
+	        {
+	            return;
+	        }
+	        else if (other.m_has_value)
+	        {
+	            m_has_value = true;
+	            std::construct_at(&m_value, other.m_value);
+	        }
+	    }
+
         /**
          * Constructs an optional from another optional by moving it.
          * @tparam OtherOptionalType The type of the other optional.
          * @param other The optional to move.
          */
-		constexpr optional(optional&& other)
-			noexcept
-			(
-				std::is_nothrow_move_constructible_v<ValueType>
-			)
-			requires
-			(
-				std::is_move_constructible_v<ValueType>
-			)
-			: m_has_value{ other.m_has_value }
-		{
-			if (other.m_has_value)
-			{
-				std::construct_at(&m_value, std::move(other.m_value));
-				other.m_has_value = false;
-			}
-		}
-
-        /**
-         * Constructs an optional from another optional by copying it.
-		 * @tparam OtherOptionalType The type of the other optional.
-         * @param other The optional to copy.
-         */
-		template <typename OtherOptionalType>
-			requires
-			(
-				is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
-				std::is_constructible_v<ValueType, const typename OtherOptionalType::value_type&>
+        constexpr optional(optional&& other)
+            noexcept
+            (
+                std::is_nothrow_move_constructible_v<ValueType>
             )
-    	explicit constexpr optional(const OtherOptionalType& other)
-    			noexcept
-    			(
-					std::is_nothrow_constructible_v<ValueType, const typename OtherOptionalType::value_type&>
-	            )
-			: m_has_value{ other.m_has_value }
-        {
-            if (other.m_has_value)
-            {
-                std::construct_at(&m_value, other.m_value);
-            }
-        }
-
-        /**
-         * Constructs an optional from another optional by copying it.
-		 * @tparam OtherOptionalType The type of the other optional.
-         * @param other_state State of the other optional.
-         * @param other The optional to copy.
-         */
-		template <typename OtherOptionalType>
-			requires
-			(
-				is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
-				std::is_constructible_v<ValueType, const typename OtherOptionalType::value_type&>
+            requires
+            (
+                std::is_move_constructible_v<ValueType>
             )
-        explicit constexpr optional(const optional_state other_state, const OtherOptionalType& other)
-    		noexcept
-    		(
-				std::is_nothrow_constructible_v<ValueType, const typename OtherOptionalType::value_type&>
-            )
-        {
-            if (other_state == optional_state::has_value)
-            {
-                m_has_value = true;
-                std::construct_at(&m_value, other.m_value);
-            }
-            else if (other_state == optional_state::no_value)
-            {
-                m_has_value = false;
-            }
-            else if (other_state == optional_state::uninitialized)
-            {
-                return;
-            }
-            else if (other.m_has_value)
-            {
-                m_has_value = true;
-                std::construct_at(&m_value, other.m_value);
-            }
-        }
-
-        /**
-         * Constructs an optional from another optional by moving it.
-		 * @tparam OtherOptionalType The type of the other optional.
-         * @param other The optional to move.
-         */
-		template <typename OtherOptionalType>
-			requires
-			(
-				is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
-                std::is_rvalue_reference_v<OtherOptionalType> &&
-				std::is_constructible_v<ValueType, typename OtherOptionalType::value_type&&>
-            )
-		explicit constexpr optional(OtherOptionalType other)
-    		noexcept
-    		(
-				std::is_nothrow_constructible_v<ValueType, typename OtherOptionalType::value_type&&>
-            )
-			: m_has_value{ other.m_has_value }
+            : m_has_value{ other.m_has_value }
         {
             if (other.m_has_value)
             {
@@ -246,21 +194,19 @@ namespace woj
 
         /**
          * Constructs an optional from another optional by moving it.
-		 * @tparam OtherOptionalType The type of the other optional.
+         * @tparam OtherOptionalType The type of the other optional.
          * @param other_state State of the other optional.
          * @param other The optional to move.
          */
-		template <typename OtherOptionalType>
+        template <typename OtherOptionalType>
+        constexpr optional(const optional_state other_state, optional&& other)   
+            noexcept
+            (
+                std::is_nothrow_move_constructible_v<ValueType>
+            )
 			requires
 			(
-				is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
-				std::is_rvalue_reference_v<OtherOptionalType> &&
-				std::is_constructible_v<ValueType, typename OtherOptionalType::value_type&&>
-            )
-		constexpr optional(const optional_state other_state, OtherOptionalType other)   
-    		noexcept
-    		(
-				std::is_nothrow_constructible_v<ValueType, typename OtherOptionalType::value_type&&>
+				std::is_move_constructible_v<ValueType>
             )
         {
             if (other_state == optional_state::has_value)
@@ -284,18 +230,43 @@ namespace woj
 
         /**
          * Constructs an optional from a value by copying it.
+         * @param value The value to copy.
+         */
+        constexpr optional(const ValueType& value)
+            noexcept
+            (
+                std::is_nothrow_copy_constructible_v<std::remove_cvref_t<ValueType>>
+            )
+            : m_value{ value }, m_has_value{ true } {
+        }
+
+        /**
+         * Constructs an optional from a value by moving it.
+         * @param value Value to move.
+         */
+        constexpr optional(ValueType&& value)
+			noexcept
+            (
+                std::is_nothrow_move_constructible_v<std::remove_cvref_t<ValueType>>
+            )
+            : m_value{ std::move(std::forward<ValueType>(value)) }, m_has_value{ true } {
+        }
+
+        /**
+         * Constructs an optional from a value by copying it.
          * @tparam OtherValueType The type of the value to copy.
          * @param value The value to copy.
          */
         template <typename OtherValueType>
-    		requires
-    		(
+            requires
+            (
                 !std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
-				std::is_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
+				!std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<ValueType>> &&
+                std::is_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
             )
         explicit constexpr optional(const OtherValueType& value)
-    		noexcept
-    		(
+            noexcept
+            (
                 std::is_nothrow_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
             )
             : m_value{ value }, m_has_value{ true } {}
@@ -306,14 +277,15 @@ namespace woj
          * @param value Value to move.
          */
         template <typename OtherValueType>
-    		requires
-    		(
-				!std::is_same_v<std::remove_cvref_t<ValueType>, std::remove_cvref_t<this_type>> &&
+            requires
+            (
+                !std::is_same_v<std::remove_cvref_t<ValueType>, std::remove_cvref_t<this_type>> &&
+				!std::is_same_v<std::remove_cvref_t<ValueType>, std::remove_cvref_t<OtherValueType>> &&
                 std::is_constructible_v<std::remove_cvref_t<ValueType>, OtherValueType&&>
             )
         explicit constexpr optional(OtherValueType&& value)
-    		noexcept
-    		(
+            noexcept
+            (
                 std::is_nothrow_constructible_v<std::remove_cvref_t<ValueType>, OtherValueType&&>
             )
             : m_value{ std::move(std::forward<OtherValueType>(value)) }, m_has_value{ true } {}
@@ -325,22 +297,22 @@ namespace woj
          */
         template <typename... OtherValueTypes>
         explicit constexpr optional(in_place_t, OtherValueTypes&&... values)
-    		noexcept
-    		(
-	            std::is_nothrow_constructible_v<std::remove_cvref_t<ValueType>, OtherValueTypes...>
+            noexcept
+            (
+                std::is_nothrow_constructible_v<std::remove_cvref_t<ValueType>, OtherValueTypes...>
             )
             requires
-    		(
+            (
                 std::is_constructible_v<std::remove_cvref_t<ValueType>, OtherValueTypes...>
             )
-			: m_value{ std::forward<OtherValueTypes>(values)... }, m_has_value{ true } {}
+            : m_value{ std::forward<OtherValueTypes>(values)... }, m_has_value{ true } {}
 
         /**
          * Destructs the optional.
          */
         WOJ_CONSTEXPR20 ~optional()
-    		noexcept
-    		(
+            noexcept
+            (
                 std::is_nothrow_destructible_v<ValueType>
             )
         {
@@ -357,17 +329,17 @@ namespace woj
          * @param other The optional to copy.
          * @return The reference to the assigned optional.
          */
-		constexpr optional& operator=(const optional& other)
-    		noexcept
-			(
-				std::is_nothrow_copy_constructible_v<ValueType> &&
-				std::is_nothrow_copy_assignable_v<ValueType>
-			)
-			requires
-			(
-				std::is_copy_constructible_v<ValueType> &&
-				std::is_copy_assignable_v<ValueType>
-			)
+        constexpr optional& operator=(const optional& other)
+            noexcept
+            (
+                std::is_nothrow_copy_constructible_v<ValueType> &&
+                std::is_nothrow_copy_assignable_v<ValueType>
+            )
+            requires
+            (
+                std::is_copy_constructible_v<ValueType> &&
+                std::is_copy_assignable_v<ValueType>
+            )
         {
             return this->copy_from(other);
         }
@@ -378,13 +350,13 @@ namespace woj
          * @return The reference to the assigned optional.
          */
         constexpr optional& operator=(optional&& other)
-    		noexcept
-    		(
+            noexcept
+            (
                 std::is_nothrow_move_constructible_v<ValueType> &&
                 std::is_nothrow_move_assignable_v<ValueType>
             )
-    		requires
-    		(
+            requires
+            (
                 std::is_move_constructible_v<ValueType> &&
                 std::is_move_assignable_v<ValueType>
             )
@@ -393,67 +365,21 @@ namespace woj
         }
 
         /**
-         * Assigns the optional by copying another optional.
-         * @param other The optional to copy.
-         * @return The reference to the assigned optional.
-         */
-		template <typename OtherOptionalType>
-			requires
-			(
-				is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
-				std::is_constructible_v<ValueType, const typename OtherOptionalType::value_type&> &&
-				std::is_assignable_v<ValueType, const typename OtherOptionalType::value_type&>
-            )
-        constexpr optional& operator=(const OtherOptionalType& other)
-            noexcept
-            (
-                std::is_nothrow_copy_constructible_v<ValueType>&&
-                std::is_nothrow_copy_assignable_v<ValueType>
-            )
-        {
-            return this->copy_from(other);
-        }
-
-	    /**
-	     * Assigns the optional by moving another optional.
-	     * @param other The optional to move.
-	     * @return The reference to the assigned optional.
-		 */
-		template <typename OtherOptionalType>
-			requires
-			(
-				is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
-				std::is_constructible_v<ValueType, typename OtherOptionalType::value_type&&> &&
-				std::is_assignable_v<ValueType, typename OtherOptionalType::value_type&&> &&
-				std::is_rvalue_reference_v<OtherOptionalType>
-            )
-    	constexpr optional& operator=(OtherOptionalType other)
-			noexcept
-			(
-				std::is_nothrow_constructible_v<ValueType, typename OtherOptionalType::value_type&&> &&
-				std::is_nothrow_assignable_v<ValueType, typename OtherOptionalType::value_type&&>
-			)
-		{
-			return this->move_from(std::forward<OtherOptionalType>(other));
-		}
-
-
-        /**
          * Assigns the optional by copying a value.
          * @tparam OtherValueType The type of the value to copy.
          * @param value The value to copy.
          * @return The reference to the assigned optional.
          */
         template <typename OtherValueType>
-    		requires
-			(
-				!std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
-				std::is_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&> &&
-				std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
-			)   
+            requires
+            (
+                !std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
+                std::is_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&> &&
+                std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
+            )   
         constexpr optional& operator=(const OtherValueType& value)
-    		noexcept
-    		(
+            noexcept
+            (
                 std::is_nothrow_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&> &&
                 std::is_nothrow_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
             )
@@ -468,15 +394,15 @@ namespace woj
          * @return The reference to the assigned optional.
          */
         template <typename OtherValueType>
-    		requires
-			(
-				!std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>>&&
-				std::is_constructible_v<std::remove_cvref_t<ValueType>, OtherValueType&&>&
-				std::is_assignable_v<std::remove_cvref_t<ValueType>, OtherValueType&&>
-			)
-		constexpr optional& operator=(OtherValueType&& value)
-    		noexcept
-    		(
+            requires
+            (
+                !std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>>&&
+                std::is_constructible_v<std::remove_cvref_t<ValueType>, OtherValueType&&>&
+                std::is_assignable_v<std::remove_cvref_t<ValueType>, OtherValueType&&>
+            )
+        constexpr optional& operator=(OtherValueType&& value)
+            noexcept
+            (
                 std::is_nothrow_constructible_v<std::remove_cvref_t<ValueType>, OtherValueType&&> &&
                 std::is_nothrow_assignable_v<std::remove_cvref_t<ValueType>, OtherValueType&&>
             )
@@ -489,10 +415,10 @@ namespace woj
          * @return Reference to optional.
          */
         constexpr optional& operator=(const none_t)
-    		noexcept
-    		(
+            noexcept
+            (
                 std::is_nothrow_destructible_v<ValueType>
-			)
+            )
         {
             return this->reset();
         }
@@ -502,7 +428,7 @@ namespace woj
          * @return Reference to optional.
          */
         constexpr optional& operator=(const noinit_t)
-    		noexcept
+            noexcept
         {
             return *this;
         }
@@ -512,7 +438,7 @@ namespace woj
          * @return True if the optional has a value, false otherwise.
          */
         WOJ_NODISCARD explicit constexpr operator bool() const
-    		noexcept
+            noexcept
         {
             return this->has_value();
         }
@@ -522,9 +448,9 @@ namespace woj
          * @return The pointer to the value.
          */
         WOJ_NODISCARD constexpr ValueType* operator->()
-    		noexcept
+            noexcept
 #ifndef NDEBUG
-			(
+            (
                 false
             )
 #endif
@@ -542,11 +468,11 @@ namespace woj
          * @return The const pointer to the value.
          */
         WOJ_NODISCARD constexpr const ValueType* operator->() const
-    		noexcept
+            noexcept
 #ifndef NDEBUG
-			(
+            (
                 false
-			)
+            )
 #endif
         {
 #if !defined(NDEBUG)
@@ -562,10 +488,10 @@ namespace woj
          * @return The lvalue reference to the value.
          */
         WOJ_NODISCARD constexpr ValueType& operator*()
-    		noexcept
+            noexcept
 #ifndef NDEBUG
-			(
-				false
+            (
+                false
             )
 #endif
         {
@@ -582,9 +508,9 @@ namespace woj
          * @return The const lvalue reference to the value.
          */
         WOJ_NODISCARD constexpr const ValueType& operator*() const
-    		noexcept
+            noexcept
 #ifndef NDEBUG
-			(
+            (
                 false
             )
 #endif
@@ -605,41 +531,54 @@ namespace woj
          * @return The lvalue reference to optional.
          */
         template <optional_state State = optional_state::unknown, optional_state OtherState = optional_state::unknown, typename OtherValueType = ValueType>
-    		requires
+            /*requires
             (
                 !std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
                 (
                     (
-						(
+                        (
                             State == optional_state::no_value ||
                             State == optional_state::uninitialized
                         ) &&
                         std::is_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
                     ) ||
                     (
-						State == optional_state::has_value &&
+                        State == optional_state::has_value &&
                         (
-							std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&> ||
+                            std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&> ||
                             (!std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&> && std::is_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&>)
                         )
+                    ) ||
+                    (
+						State == optional_state::unknown &&
+						(
+							std::is_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&> &&
+							std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
+						)
                     )
                 )
-            )
+            )*/
         constexpr optional& copy_from(const OtherValueType& other)
-    		noexcept
+            noexcept
             (
                 (
                     (
                         State == optional_state::no_value ||
-						State == optional_state::uninitialized
-					) && 
+                        State == optional_state::uninitialized
+                    ) && 
                     std::is_nothrow_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
                 ) || 
                 (
                     State == optional_state::has_value &&
                     (
-						(std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&> && std::is_nothrow_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&>) ||
-                        (!std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&> && std::is_nothrow_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&>)
+                        (
+                            std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&> && 
+                            std::is_nothrow_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
+                        ) ||
+                        (
+                            !std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&> && 
+                            std::is_nothrow_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
+                        )
                     )
                 )
             )
@@ -650,11 +589,12 @@ namespace woj
                 // ----->> SELF: 1 (CEVAL) ASSIGN <<--------
                 if constexpr (std::is_assignable_v<std::remove_cvref_t<ValueType>, OtherValueType>)
                 {
-					m_value = other;
+                    m_value = other;
                 }
                 // ----->> SELF: 1 (CEVAL) CONSTRUCT <<-----
                 else
                 {
+                    std::destroy_at(&m_value);
                     std::construct_at(&m_value, other);
                 }
             }
@@ -675,6 +615,7 @@ namespace woj
                 // ----->> SELF: 1 (REVAL) CONSTRUCT <<-----
                 else
                 {
+					std::destroy_at(&m_value);
                     std::construct_at(&m_value, other);
                 }
             }
@@ -690,66 +631,68 @@ namespace woj
 
         /**
          * Copies from another value to this optional.
-		 * @tparam DynamicStates Used to enable the function.
+         * @tparam DynamicStates Used to enable the function.
          * @param state State of the current optional.
          * @param other_state UNUSED. State of the other optional.
          * @param other The value to copy from.
          * @return The lvalue reference to optional.
          */
         template <dynamic_states_t DynamicStates = dynamic_states, typename OtherValueType = ValueType>
-    		requires
-    		(
+            /*requires
+            (
                 !std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
-				std::is_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&> &&
-				std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
-            )
+                std::is_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&> &&
+                std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
+            )*/
         constexpr optional& copy_from(const optional_state state, const optional_state other_state, const OtherValueType& other)
-    		noexcept
+            noexcept
             (
                 std::is_nothrow_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&> && 
                 std::is_nothrow_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
             )
         {
-			// ----------> SELF: 1 (CEVAL) <----------------
-			if (state == optional_state::has_value)
-			{
-				// ---->> *SELF: 1 (CEVAL) ASSIGN <<--------
-				if (std::is_assignable_v<std::remove_cvref_t<ValueType>, OtherValueType>)
-				{
-					m_value = other;
-				}
-				// ---->> *SELF: 1 (CEVAL) CONSTRUCT <<-----
-				else
-				{
-					std::construct_at(&m_value, other);
-				}
-			}
-			// ----------> SELF: 0 (CEVAL) <----------------
-			else if (state == optional_state::no_value || state == optional_state::uninitialized)
-			{
-				std::construct_at(&m_value, other);
-				m_has_value = true;
-			}
-			// ----------> SELF: 1 (REVAL) <----------------
-			else if (*this)
-			{
-				// ---->> *SELF: 1 (REVAL) ASSIGN <<--------
-				if (std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&>)
-				{
-					m_value = other;
-				}
-				// ---->> *SELF: 1 (REVAL) CONSTRUCT <<-----
-				else
-				{
-					std::construct_at(&m_value, other);
-				}
-			}
-			// ----------> SELF: 0 (REVAL) <----------------
-			else
-			{
-				std::construct_at(&m_value, other);
-				m_has_value = true;
-			}
+            // ----------> SELF: 1 (CEVAL) <----------------
+            if (state == optional_state::has_value)
+            {
+                // ---->> *SELF: 1 (CEVAL) ASSIGN <<--------
+                if (std::is_assignable_v<std::remove_cvref_t<ValueType>, OtherValueType>)
+                {
+                    m_value = other;
+                }
+                // ---->> *SELF: 1 (CEVAL) CONSTRUCT <<-----
+                else
+                {
+                    std::destroy_at(&m_value);
+                    std::construct_at(&m_value, other);
+                }
+            }
+            // ----------> SELF: 0 (CEVAL) <----------------
+            else if (state == optional_state::no_value || state == optional_state::uninitialized)
+            {
+                std::construct_at(&m_value, other);
+                m_has_value = true;
+            }
+            // ----------> SELF: 1 (REVAL) <----------------
+            else if (*this)
+            {
+                // ---->> *SELF: 1 (REVAL) ASSIGN <<--------
+                if (std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&>)
+                {
+                    m_value = other;
+                }
+                // ---->> *SELF: 1 (REVAL) CONSTRUCT <<-----
+                else
+                {
+					std::destroy_at(&m_value);
+                    std::construct_at(&m_value, other);
+                }
+            }
+            // ----------> SELF: 0 (REVAL) <----------------
+            else
+            {
+                std::construct_at(&m_value, other);
+                m_has_value = true;
+            }
 
             return *this;
         }
@@ -761,59 +704,66 @@ namespace woj
          * @param other The optional to copy from.
          * @return The lvalue reference to optional.
          */
-        template <optional_state State = optional_state::unknown, optional_state OtherState = optional_state::unknown, typename OtherOptionalType>
-			requires
-			(
-				is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
+        template <optional_state State = optional_state::unknown, optional_state OtherState = optional_state::unknown>
+            /*requires
+            (
+                OtherState == optional_state::no_value ||
+                OtherState == optional_state::uninitialized ||
                 (
-                    OtherState == optional_state::no_value ||
-					OtherState == optional_state::uninitialized ||
-					(
-						(
-							State == optional_state::no_value ||
-							State == optional_state::uninitialized
-						) &&
-						std::is_constructible_v<ValueType, typename OtherOptionalType::value_type>
-					) ||
-					(
-						State == optional_state::has_value &&
-						(
-							(
-								OtherState == optional_state::has_value &&
-								(
-									std::is_assignable_v<ValueType, typename OtherOptionalType::value_type> ||
-									std::is_constructible_v<ValueType, typename OtherOptionalType::value_type>
-									)
-								) ||
-							(
-								OtherState == optional_state::unknown &&
-								std::is_assignable_v<ValueType, typename OtherOptionalType::value_type> &&
-								std::is_constructible_v<ValueType, typename OtherOptionalType::value_type>
-								)
-							)
-						)
-                )
-			)
-        constexpr optional& copy_from(const OtherOptionalType& other)
-    		noexcept
-			(
-				OtherState == optional_state::no_value ||
-				OtherState == optional_state::uninitialized ||
-				(
-					(
-						State == optional_state::no_value ||
-						State == optional_state::uninitialized
-					) &&
-					std::is_nothrow_constructible_v<ValueType, typename OtherOptionalType::value_type>
+                    (
+                        State == optional_state::no_value ||
+                        State == optional_state::uninitialized
+                    ) &&
+                    std::is_copy_constructible_v<ValueType>
+                ) ||
+                (
+                    State == optional_state::has_value &&
+                    (
+                        (
+                            OtherState == optional_state::has_value &&
+                            (
+                                std::is_copy_assignable_v<ValueType> ||
+                                std::is_copy_constructible_v<ValueType>
+                            )
+						) ||
+                        (
+                            OtherState == optional_state::unknown &&
+                            std::is_copy_assignable_v<ValueType> &&
+                            std::is_copy_constructible_v<ValueType>
+                        )
+                    )
 				) ||
 				(
-					State == optional_state::has_value &&
-					(
-						std::is_assignable_v<ValueType, typename OtherOptionalType::value_type> &&
-						std::is_constructible_v<ValueType, typename OtherOptionalType::value_type>
-					)
+					State == optional_state::unknown &&
+					std::is_copy_assignable_v<ValueType> &&
+					std::is_copy_constructible_v<ValueType>
+                )
+            )*/
+        constexpr optional& copy_from(const optional& other)
+            noexcept
+            (
+                OtherState == optional_state::no_value ||
+                OtherState == optional_state::uninitialized ||
+                (
+                    (
+                        State == optional_state::no_value ||
+                        State == optional_state::uninitialized
+                    ) &&
+                    std::is_nothrow_copy_constructible_v<ValueType>
+                ) ||
+                (
+                    State == optional_state::has_value &&
+                    (
+                        std::is_nothrow_copy_assignable_v<ValueType> ||
+                        std::is_nothrow_copy_constructible_v<ValueType>
+                    )
+				) ||
+				(
+					State == optional_state::unknown &&
+					std::is_nothrow_copy_assignable_v<ValueType> &&
+					std::is_nothrow_copy_constructible_v<ValueType>
 				)
-			)
+            )
 
         {
             // ---------------- OTHER: 1 (CEVAL) ----------------
@@ -823,13 +773,14 @@ namespace woj
                 if constexpr (State == optional_state::has_value)
                 {
                     // ----->> *OTHER: 1 (CEVAL), SELF: 1 (CEVAL) ASSIGN <<--------
-                    if constexpr (std::is_assignable_v<ValueType, typename OtherOptionalType::value_type>)
+                    if constexpr (std::is_copy_assignable_v<ValueType>)
                     {
-						m_value = other.m_value;
+                        m_value = other.m_value;
                     }
                     // ----->> *OTHER: 1 (CEVAL), SELF: 1 (CEVAL) CONSTRUCT <<-----
                     else
                     {
+						std::destroy_at(&m_value);
                         std::construct_at(&m_value, other.m_value);
                     }
                 }
@@ -842,16 +793,17 @@ namespace woj
                 // ----------> *OTHER: 1 (CEVAL), SELF: 1 (REVAL) <----------------
                 else if (*this)
                 {
-					// ----->> *OTHER: 1 (REVAL) ASSIGN <<--------
-					if (std::is_assignable_v<ValueType, typename OtherOptionalType::value_type>)
-					{
-						m_value = other.m_value;
-					}
-					// ----->> *OTHER: 1 (REVAL) CONSTRUCT <<-----
-					else
-					{
-						std::construct_at(&m_value, other.m_value);
-					}
+                    // ----->> *OTHER: 1 (REVAL) ASSIGN <<--------
+                    if (std::is_copy_assignable_v<ValueType>)
+                    {
+                        m_value = other.m_value;
+                    }
+                    // ----->> *OTHER: 1 (REVAL) CONSTRUCT <<-----
+                    else
+                    {
+						std::destroy_at(&m_value);
+                        std::construct_at(&m_value, other.m_value);
+                    }
                 }
                 // ----------> *OTHER: 1 (CEVAL), SELF: 0 (REVAL) <----------------
                 else
@@ -880,16 +832,17 @@ namespace woj
                     // ------>> *OTHER: 1 (REVAL), SELF: 1 (CEVAL) <<---------------
                     if constexpr (State == optional_state::has_value)
                     {
-						// ->>> *OTHER: 1 (CEVAL), *SELF: 1 (CEVAL) ASSIGN <<<------
-						if constexpr (std::is_assignable_v<ValueType, typename OtherOptionalType::value_type>)
-						{
-							m_value = other.m_value;
-						}
-						// ->>> *OTHER: 1 (CEVAL), *SELF: 1 (CEVAL) CONSTRUCT <<<---
-						else
-						{
-							std::construct_at(&m_value, other.m_value);
-						}
+                        // ->>> *OTHER: 1 (CEVAL), *SELF: 1 (CEVAL) ASSIGN <<<------
+                        if constexpr (std::is_copy_assignable_v<ValueType>)
+                        {
+                            m_value = other.m_value;
+                        }
+                        // ->>> *OTHER: 1 (CEVAL), *SELF: 1 (CEVAL) CONSTRUCT <<<---
+                        else
+                        {
+							std::destroy_at(&m_value);
+                            std::construct_at(&m_value, other.m_value);
+                        }
                     }
                     // ------>> *OTHER: 1 (REVAL), SELF: 0|- (CEVAL) <----------------
                     else if constexpr (State == optional_state::no_value || State == optional_state::uninitialized)
@@ -901,13 +854,14 @@ namespace woj
                     else if (*this)
                     {
                         // ->>> *OTHER: 1 (REVAL), *SELF: 1 (REVAL) ASSIGN <<<------
-                        if constexpr (std::is_assignable_v<ValueType, typename OtherOptionalType::value_type>)
+                        if constexpr (std::is_copy_assignable_v<ValueType>)
                         {
                             m_value = other.m_value;
                         }
                         // ->>> *OTHER: 1 (REVAL), *SELF: 1 (REVAL) CONSTRUCT <<<---
                         else
                         {
+							std::destroy_at(&m_value);
                             std::construct_at(&m_value, other.m_value);
                         }
                     }
@@ -935,241 +889,250 @@ namespace woj
 
         /**
          * Copies from another optional to this optional.
-		 * @tparam DynamicStates Used to enable the function.
-		 * @tparam OtherOptionalType The type of the optional to copy from.
+         * @tparam DynamicStates Used to enable the function.
+         * @tparam OtherOptionalType The type of the optional to copy from.
          * @param state State of the current optional.
-		 * @param other_state State of the current optional to copy from.
+         * @param other_state State of the current optional to copy from.
          * @param other The optional to copy from.
          * @return The lvalue reference to optional.
          */
-        template <dynamic_states_t DynamicStates = dynamic_states, typename OtherOptionalType>
-			requires
-			(
-				is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
-                std::is_assignable_v<ValueType, typename OtherOptionalType::value_type> &&
-                std::is_constructible_v<ValueType, typename OtherOptionalType::value_type>
-            )
-        constexpr optional& copy_from(const optional_state state, const optional_state other_state, const OtherOptionalType& other)
-    		noexcept
+        template <dynamic_states_t DynamicStates = dynamic_states>
+			/*requires
             (
-                std::is_nothrow_constructible_v<ValueType, typename OtherOptionalType::value_type> &&
-                std::is_nothrow_assignable_v<ValueType, typename OtherOptionalType::value_type>
+				std::is_copy_constructible_v<ValueType> &&
+				std::is_copy_assignable_v<ValueType>
+            )*/
+        constexpr optional& copy_from(const optional_state state, const optional_state other_state, const optional& other)
+            noexcept
+            (
+                std::is_nothrow_copy_constructible_v<ValueType> &&
+                std::is_nothrow_copy_assignable_v<ValueType>
             )
         {
-			// ---------------- OTHER: 1 (CEVAL) ----------------
-			if (other_state == optional_state::has_value)
-			{
-				// ----------> *OTHER: 1 (CEVAL), SELF: 1 (CEVAL) <----------------
-				if (state == optional_state::has_value)
-				{
-					// ----->> *OTHER: 1 (CEVAL), SELF: 1 (CEVAL) ASSIGN <<--------
-					if (std::is_assignable_v<ValueType, typename OtherOptionalType::value_type>)
-					{
-						m_value = other.m_value;
-					}
-					// ----->> *OTHER: 1 (CEVAL), SELF: 1 (CEVAL) CONSTRUCT <<-----
-					else
-					{
-						std::construct_at(&m_value, other.m_value);
-					}
-				}
-				// ----------> *OTHER: 1 (CEVAL), SELF: 0 (CEVAL) <----------------
-				else if (state == optional_state::no_value || state == optional_state::uninitialized)
-				{
-					std::construct_at(&m_value, other.m_value);
-					m_has_value = true;
-				}
-				// ----------> *OTHER: 1 (CEVAL), SELF: 1 (REVAL) <----------------
-				else if (*this)
-				{
-					// ----->> *OTHER: 1 (REVAL) ASSIGN <<--------
-					if (std::is_assignable_v<ValueType, typename OtherOptionalType::value_type>)
-					{
-						m_value = other.m_value;
-					}
-					// ----->> *OTHER: 1 (REVAL) CONSTRUCT <<-----
-					else
-					{
-						std::construct_at(&m_value, other.m_value);
-					}
-				}
-				// ----------> *OTHER: 1 (CEVAL), SELF: 0 (REVAL) <----------------
-				else
-				{
-					std::construct_at(&m_value, other.m_value);
-					m_has_value = true;
-				}
-			}
-			// ----------------- OTHER: 0 (CEVAL) -----------------
-			else if (other_state == optional_state::no_value)
-			{
-				// -----------> *OTHER: 0 (CEVAL), SELF: 1|? (CEVAL) <----------------
-				if (state == optional_state::has_value || state == optional_state::unknown || state == optional_state::uninitialized)
-				{
-					m_has_value = false;
-				}
-				// -----------> *OTHER: 0 (CEVAL), SELF: 0 (CEVAL) <---------------- OMITTED
-			}
-			// ----------------- OTHER: - (CEVAL) ----------------- OMITTED
-			// ----------------- OTHER: ? (CEVAL) -----------------
-			else if (other_state != optional_state::uninitialized)
-			{
-				// ------------> OTHER: 1 (REVAL) <----------------
-				if (other.m_has_value)
-				{
-					// ------>> *OTHER: 1 (REVAL), SELF: 1 (CEVAL) <<---------------
-					if (state == optional_state::has_value)
-					{
-						// ->>> *OTHER: 1 (CEVAL), *SELF: 1 (CEVAL) ASSIGN <<<------
-						if (std::is_assignable_v<ValueType, typename OtherOptionalType::value_type>)
-						{
-							m_value = other.m_value;
-						}
-						// ->>> *OTHER: 1 (CEVAL), *SELF: 1 (CEVAL) CONSTRUCT <<<---
-						else
-						{
-							std::construct_at(&m_value, other.m_value);
-						}
-					} 
-					// ------>> *OTHER: 1 (REVAL), SELF: 0|- (CEVAL) <----------------
-					else if (state == optional_state::no_value || state == optional_state::uninitialized)
-					{
-						m_has_value = true;
-						std::construct_at(&m_value, other.m_value);
-					}
-					// ------>> *OTHER: 1 (REVAL), SELF: 1 (REVAL) <----------------
-					else if (*this)
-					{
+            // ---------------- OTHER: 1 (CEVAL) ----------------
+            if (other_state == optional_state::has_value)
+            {
+                // ----------> *OTHER: 1 (CEVAL), SELF: 1 (CEVAL) <----------------
+                if (state == optional_state::has_value)
+                {
+                    // ----->> *OTHER: 1 (CEVAL), SELF: 1 (CEVAL) ASSIGN <<--------
+                    if (std::is_copy_assignable_v<ValueType>)
+                    {
+                        m_value = other.m_value;
+                    }
+                    // ----->> *OTHER: 1 (CEVAL), SELF: 1 (CEVAL) CONSTRUCT <<-----
+                    else
+                    {
+						std::destroy_at(&m_value);
+                        std::construct_at(&m_value, other.m_value);
+                    }
+                }
+                // ----------> *OTHER: 1 (CEVAL), SELF: 0 (CEVAL) <----------------
+                else if (state == optional_state::no_value || state == optional_state::uninitialized)
+                {
+                    std::construct_at(&m_value, other.m_value);
+                    m_has_value = true;
+                }
+                // ----------> *OTHER: 1 (CEVAL), SELF: 1 (REVAL) <----------------
+                else if (*this)
+                {
+                    // ----->> *OTHER: 1 (REVAL) ASSIGN <<--------
+                    if (std::is_copy_assignable_v<ValueType>)
+                    {
+                        m_value = other.m_value;
+                    }
+                    // ----->> *OTHER: 1 (REVAL) CONSTRUCT <<-----
+                    else
+                    {
+						std::destroy_at(&m_value);
+                        std::construct_at(&m_value, other.m_value);
+                    }
+                }
+                // ----------> *OTHER: 1 (CEVAL), SELF: 0 (REVAL) <----------------
+                else
+                {
+                    std::construct_at(&m_value, other.m_value);
+                    m_has_value = true;
+                }
+            }
+            // ----------------- OTHER: 0 (CEVAL) -----------------
+            else if (other_state == optional_state::no_value)
+            {
+                // -----------> *OTHER: 0 (CEVAL), SELF: 1|? (CEVAL) <----------------
+                if (state == optional_state::has_value || state == optional_state::unknown || state == optional_state::uninitialized)
+                {
+                    m_has_value = false;
+                }
+                // -----------> *OTHER: 0 (CEVAL), SELF: 0 (CEVAL) <---------------- OMITTED
+            }
+            // ----------------- OTHER: - (CEVAL) ----------------- OMITTED
+            // ----------------- OTHER: ? (CEVAL) -----------------
+            else if (other_state != optional_state::uninitialized)
+            {
+                // ------------> OTHER: 1 (REVAL) <----------------
+                if (other.m_has_value)
+                {
+                    // ------>> *OTHER: 1 (REVAL), SELF: 1 (CEVAL) <<---------------
+                    if (state == optional_state::has_value)
+                    {
+                        // ->>> *OTHER: 1 (CEVAL), *SELF: 1 (CEVAL) ASSIGN <<<------
+                        if (std::is_copy_assignable_v<ValueType>)
+                        {
+                            m_value = other.m_value;
+                        }
+                        // ->>> *OTHER: 1 (CEVAL), *SELF: 1 (CEVAL) CONSTRUCT <<<---
+                        else
+                        {
+							std::destroy_at(&m_value);
+                            std::construct_at(&m_value, other.m_value);
+                        }
+                    } 
+                    // ------>> *OTHER: 1 (REVAL), SELF: 0|- (CEVAL) <----------------
+                    else if (state == optional_state::no_value || state == optional_state::uninitialized)
+                    {
+                        m_has_value = true;
+                        std::construct_at(&m_value, other.m_value);
+                    }
+                    // ------>> *OTHER: 1 (REVAL), SELF: 1 (REVAL) <----------------
+                    else if (*this)
+                    {
                         // ->>> *OTHER: 1 (REVAL), *SELF: 1 (REVAL) ASSIGN <<<------ 
-						if (std::is_assignable_v<ValueType, typename OtherOptionalType::value_type>)
-						{
-							m_value = other.m_value;
-						}
+                        if (std::is_copy_assignable_v<ValueType>)
+                        {
+                            m_value = other.m_value;
+                        }
                         // ->>> *OTHER: 1 (REVAL), *SELF: 1 (REVAL) CONSTRUCT <<<---
-						else
-						{
-							std::construct_at(&m_value, other.m_value);
-						}
-					}
-					// ------>> *OTHER: 1 (REVAL), SELF: 0 (REVAL) <----------------
-					else
-					{
-						m_has_value = true;
-						std::construct_at(&m_value, other.m_value);
-					}
-				}
-				// ------------> OTHER: 0 (REVAL) <----------------
-				else
-				{
-					// ------>> *OTHER: 0 (REVAL), SELF: 1|? (CEVAL) <----------------
-					if (state == optional_state::has_value || state == optional_state::unknown || state == optional_state::uninitialized)
-					{
-						m_has_value = false;
-					}
-					// ------>> *OTHER: 0 (REVAL), SELF: 0|- (CEVAL) <---------------- OMITTED
-				}
-			}
+                        else
+                        {
+							std::destroy_at(&m_value);
+                            std::construct_at(&m_value, other.m_value);
+                        }
+                    }
+                    // ------>> *OTHER: 1 (REVAL), SELF: 0 (REVAL) <----------------
+                    else
+                    {
+                        m_has_value = true;
+                        std::construct_at(&m_value, other.m_value);
+                    }
+                }
+                // ------------> OTHER: 0 (REVAL) <----------------
+                else
+                {
+                    // ------>> *OTHER: 0 (REVAL), SELF: 1|? (CEVAL) <----------------
+                    if (state == optional_state::has_value || state == optional_state::unknown || state == optional_state::uninitialized)
+                    {
+                        m_has_value = false;
+                    }
+                    // ------>> *OTHER: 0 (REVAL), SELF: 0|- (CEVAL) <---------------- OMITTED
+                }
+            }
 
             return *this;
         }
 
         /**
          * Copies from another value to new optional.
-		 * @tparam OtherState UNUSED. State of the current optional to copy from.
-		 * @tparam OtherValueType The type of the value to copy.
+         * @tparam OtherState UNUSED. State of the current optional to copy from.
+         * @tparam OtherValueType The type of the value to copy.
          * @param other The value to copy from.
          * @return The new optional.
          */
         template <optional_state OtherState = optional_state::unknown, typename OtherValueType = ValueType>
-			requires
-			(
-				!std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
-	            std::is_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&> 
-			)
+            /*requires
+            (
+                !std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
+                std::is_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&> 
+            )*/
         static constexpr optional copied_from(const OtherValueType& other)
-			noexcept
-			(
-				(std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&> && std::is_nothrow_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&>) ||
-				(!std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&> && std::is_nothrow_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&>)
+            noexcept
+            (
+                (
+                    std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&> && 
+                    std::is_nothrow_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
+                ) ||
+                (
+                    !std::is_assignable_v<std::remove_cvref_t<ValueType>, const OtherValueType&> && 
+                    std::is_nothrow_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
+                )
             )
         {
-			optional temp{ noinit };
-			temp.template copy_from<optional_state::uninitialized, OtherState>(other);
+            optional temp{ noinit };
+            temp.template copy_from<optional_state::uninitialized, OtherState>(other);
             return std::move(temp);
         }
 
         /**
          * Copies from another value to new optional.
          * @tparam DynamicStates Used to enable the function.
-		 * @tparam OtherValueType The type of the value to copy.
-		 * @param other_state UNUSED. State of the current optional to copy from.
+         * @tparam OtherValueType The type of the value to copy.
+         * @param other_state UNUSED. State of the current optional to copy from.
          * @param other The value to copy from.
          * @return The new optional.
          */
         template <dynamic_states_t DynamicStates = dynamic_states, typename OtherValueType = ValueType>
-			requires
-			(
-				!std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
-				std::is_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
-            )
+            /*requires
+            (
+                !std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
+                std::is_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
+            )*/
         static constexpr optional copied_from(const optional_state other_state, const OtherValueType& other)
-    		noexcept
+            noexcept
             (
                 std::is_nothrow_constructible_v<std::remove_cvref_t<ValueType>, const OtherValueType&>
             )
         {
-			optional temp{ noinit };
+            optional temp{ noinit };
 			temp.copy_from(optional_state::uninitialized, other_state, other);
             return std::move(temp);
         }
 
         /**
          * Copies from another optional to new optional.
-		 * @tparam OtherState State of the current optional to copy from.
-		 * @tparam OtherOptionalType Type of the optional to copy from.
+         * @tparam OtherState State of the current optional to copy from.
+         * @tparam OtherOptionalType Type of the optional to copy from.
          * @param other The optional to copy from.
          * @return The new optional.
          */
-        template <optional_state OtherState = optional_state::unknown, typename OtherOptionalType>
-			requires
-			(
-				is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
-				(
-					OtherState == optional_state::no_value ||
-					OtherState == optional_state::uninitialized ||
-					std::is_constructible_v<ValueType, typename OtherOptionalType::value_type>
-				)
-			)
-		static constexpr optional copied_from(const OtherOptionalType& other)
-    		noexcept
-    		(
-				OtherState == optional_state::no_value ||
-				OtherState == optional_state::uninitialized ||
-				std::is_nothrow_constructible_v<ValueType, typename OtherOptionalType::value_type>
+        template <optional_state OtherState = optional_state::unknown>
+            /*requires
+            (
+                is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
+                (
+                    OtherState == optional_state::no_value ||
+                    OtherState == optional_state::uninitialized ||
+                    std::is_constructible_v<ValueType, typename OtherOptionalType::value_type>
+                )
+            )*/
+        static constexpr optional copied_from(const optional& other)
+            noexcept
+            (
+                OtherState == optional_state::no_value ||
+                OtherState == optional_state::uninitialized ||
+                std::is_nothrow_copy_constructible_v<ValueType>
             )
         {
-			optional temp{ noinit };
-			temp.template copy_from<optional_state::uninitialized, OtherState>(other);
+            optional temp{ noinit };
+            temp.copy_from<optional_state::uninitialized, OtherState>(other);
             return std::move(temp);
         }
 
         /**
          * Copies from another optional to new optional.
-		 * @tparam DynamicStates Used to enable the function.
-		 * @tparam OtherOptionalType Type of the optional to copy from.
-		 * @param other_state State of the current optional to copy from.
+         * @tparam DynamicStates Used to enable the function.
+         * @tparam OtherOptionalType Type of the optional to copy from.
+         * @param other_state State of the current optional to copy from.
          * @param other The optional to copy from.
          * @return The new optional.
          */
-		template <dynamic_states_t DynamicStates = dynamic_states, typename OtherOptionalType>
-			requires
-		    (
-				std::is_constructible_v<ValueType, const typename OtherOptionalType::value_type&>
+        template <dynamic_states_t DynamicStates = dynamic_states, typename OtherOptionalType>
+            requires
+            (
+                std::is_constructible_v<ValueType, const typename OtherOptionalType::value_type&>
             )
-		static constexpr optional copied_from(const optional_state other_state, const OtherOptionalType& other)
-    		noexcept
-    		(
-				std::is_nothrow_constructible_v<ValueType, const typename OtherOptionalType::value_type&>
+        static constexpr optional copied_from(const optional_state other_state, const OtherOptionalType& other)
+            noexcept
+            (
+                std::is_nothrow_constructible_v<ValueType, const typename OtherOptionalType::value_type&>
             )
         {
             optional temp{ noinit };
@@ -1187,39 +1150,39 @@ namespace woj
          */
         template <optional_state State = optional_state::unknown, typename OtherValueType>
         constexpr void copy_to_helper(OtherValueType&& other) const
-    		noexcept
+            noexcept
 #ifndef NDEBUG
-			(
+            (
                 State == optional_state::has_value && 
                 (
                     std::is_nothrow_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> ||
-					(
+                    (
                         !std::is_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> &&
-						std::is_nothrow_constructible_v<std::remove_cvref_t<OtherValueType>, ValueType>
-					)
-				)
-			)
+                        std::is_nothrow_constructible_v<std::remove_cvref_t<OtherValueType>, ValueType>
+                    )
+                )
+            )
 #else
-				(
-					std::is_nothrow_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> ||
-					(
-						!std::is_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> &&
-						std::is_nothrow_constructible_v<std::remove_cvref_t<OtherValueType>, ValueType>
-					)
-				)
+                (
+                    std::is_nothrow_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> ||
+                    (
+                        !std::is_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> &&
+                        std::is_nothrow_constructible_v<std::remove_cvref_t<OtherValueType>, ValueType>
+                    )
+                )
 #endif
         {
             // ---------------- SELF: 1 (CEVAL) ----------------
             if constexpr (State == optional_state::has_value)
             {
-				if constexpr (std::is_assignable_v<OtherValueType&&, const ValueType&>)
-				{
-					other = m_value;
-				}
-				else
-				{
-					std::construct_at(&other, m_value);
-				}
+                if constexpr (std::is_assignable_v<OtherValueType&&, const ValueType&>)
+                {
+                    other = m_value;
+                }
+                else
+                {
+                    std::construct_at(&other, m_value);
+                }
             }
 
             /*if constexpr (State == optional_state::no_value || State == optional_state::uninitialized)
@@ -1239,24 +1202,26 @@ namespace woj
                     {
                         other = m_value;
                     }
-					else
-					{
-						std::construct_at(&other, m_value);
-					}
+                    else
+                    {
+						std::destroy_at(&other);
+                        std::construct_at(&other, m_value);
+                    }
                 }
                 else
                 {
 #ifndef NDEBUG
                     throw bad_optional_access{ 763ull, "optional.hpp", "copy_to_helper" };
 #else
-					if constexpr (std::is_assignable_v<OtherValueType&&, const ValueType&>)
-					{
-						other = m_value;
-					}
-					else
-					{
-						std::construct_at(&other, m_value);
-					}
+                    if constexpr (std::is_assignable_v<OtherValueType&&, const ValueType&>)
+                    {
+                        other = m_value;
+                    }
+                    else
+                    {
+						std::destroy_at(&other);
+                        std::construct_at(&other, m_value);
+                    }
 #endif
                 }
             }
@@ -1272,45 +1237,45 @@ namespace woj
          * @return The lvalue reference to optional.
          */
         template <optional_state State = optional_state::unknown, optional_state OtherState = optional_state::unknown, typename OtherValueType>
-			requires
-			(
-				!std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
-				(
+            /*requires
+            (
+                !std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
+                (
                     (
-						State == optional_state::unknown &&&
-						std::is_assignable_v<OtherValueType&&, const ValueType&> &&
-						std::is_constructible_v<OtherValueType&&, const ValueType&>
-					) ||
-					(
-						State == optional_state::has_value &&
+                        State == optional_state::unknown &&&
+                        std::is_assignable_v<OtherValueType&&, const ValueType&> &&
+                        std::is_constructible_v<OtherValueType&&, const ValueType&>
+                    ) ||
+                    (
+                        State == optional_state::has_value &&
                         (
-							std::is_assignable_v<OtherValueType&&, const ValueType&> ||
-							std::is_constructible_v<OtherValueType&&, const ValueType&>
+                            std::is_assignable_v<OtherValueType&&, const ValueType&> ||
+                            std::is_constructible_v<OtherValueType&&, const ValueType&>
                         )
                     )
                 )
-			)
+            )*/
         constexpr const optional& copy_to(OtherValueType&& other) const
-    		noexcept
+            noexcept
 #ifndef NDEBUG
-			(
-				State == optional_state::has_value &&
-				(
-					std::is_nothrow_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> ||
-					(
-						!std::is_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> &&
-						std::is_nothrow_constructible_v<std::remove_cvref_t<OtherValueType>, ValueType>
-					)
-				)
-			)
+            (
+                State == optional_state::has_value &&
+                (
+                    std::is_nothrow_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> ||
+                    (
+                        !std::is_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> &&
+                        std::is_nothrow_constructible_v<std::remove_cvref_t<OtherValueType>, ValueType>
+                    )
+                )
+            )
 #else
-				(
-					std::is_nothrow_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> ||
-					(
-						!std::is_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> &&
-						std::is_nothrow_constructible_v<std::remove_cvref_t<OtherValueType>, ValueType>
-					)
-				)
+                (
+                    std::is_nothrow_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> ||
+                    (
+                        !std::is_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> &&
+                        std::is_nothrow_constructible_v<std::remove_cvref_t<OtherValueType>, ValueType>
+                    )
+                )
 #endif
         {
             this->copy_to_helper<State, OtherValueType>(std::forward<OtherValueType>(other));
@@ -1326,45 +1291,45 @@ namespace woj
          * @return The lvalue reference to optional.
          */
         template <optional_state State = optional_state::unknown, optional_state OtherState = optional_state::unknown, typename OtherValueType>
-			requires
-			(
-				!std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
-				(
-					(
-						State == optional_state::unknown && &
-						std::is_assignable_v<OtherValueType&&, const ValueType&>&&
-						std::is_constructible_v<OtherValueType&&, const ValueType&>
-						) ||
-					(
-						State == optional_state::has_value &&
-						(
-							std::is_assignable_v<OtherValueType&&, const ValueType&> ||
-							std::is_constructible_v<OtherValueType&&, const ValueType&>
-						)
-					)
-				)
-			)
+            /*requires
+            (
+                !std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
+                (
+                    (
+                        State == optional_state::unknown && &
+                        std::is_assignable_v<OtherValueType&&, const ValueType&>&&
+                        std::is_constructible_v<OtherValueType&&, const ValueType&>
+                        ) ||
+                    (
+                        State == optional_state::has_value &&
+                        (
+                            std::is_assignable_v<OtherValueType&&, const ValueType&> ||
+                            std::is_constructible_v<OtherValueType&&, const ValueType&>
+                        )
+                    )
+                )
+            )*/
         constexpr optional& copy_to(OtherValueType&& other)
-    		noexcept
+            noexcept
 #ifndef NDEBUG
             (
-				State == optional_state::has_value &&
-				(
-					std::is_nothrow_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> ||
-					(
-						!std::is_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> &&
-						std::is_nothrow_constructible_v<std::remove_cvref_t<OtherValueType>, ValueType>
-					)
-				)
+                State == optional_state::has_value &&
+                (
+                    std::is_nothrow_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> ||
+                    (
+                        !std::is_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> &&
+                        std::is_nothrow_constructible_v<std::remove_cvref_t<OtherValueType>, ValueType>
+                    )
+                )
             )
 #else
-			(
-				std::is_nothrow_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> ||
+            (
+                std::is_nothrow_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> ||
                 (
-					!std::is_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> &&
-					std::is_nothrow_constructible_v<std::remove_cvref_t<OtherValueType>, ValueType>
+                    !std::is_assignable_v<std::remove_cvref_t<OtherValueType>, ValueType> &&
+                    std::is_nothrow_constructible_v<std::remove_cvref_t<OtherValueType>, ValueType>
                 )
-			)
+            )
 #endif
         {
             this->copy_to_helper<State, OtherValueType>(std::forward<OtherValueType>(other));
@@ -1376,24 +1341,24 @@ namespace woj
 
         /**
          * Copies from optional to another value.
-		 * @tparam DynamicStates Used to enable the function.
+         * @tparam DynamicStates Used to enable the function.
          * @param state State of the current optional.
          * @param other The value to copy to.
          * @return The lvalue reference to optional.
          */
         template <dynamic_states_t DynamicStates = dynamic_states, typename OtherValueType>
         constexpr void copy_to_helper(const optional_state state, OtherValueType&& other) const
-    		noexcept
+            noexcept
 #ifndef NDEBUG
             (
                 false
-			)
+            )
 #else
-			(
-				std::is_nothrow_assignable_v<OtherValueType&&, ValueType> ||
+            (
+                std::is_nothrow_assignable_v<OtherValueType&&, ValueType> ||
                 (
-					!std::is_assignable_v<OtherValueType&&, ValueType> &&
-					std::is_nothrow_constructible_v<OtherValueType&&, ValueType>
+                    !std::is_assignable_v<OtherValueType&&, ValueType> &&
+                    std::is_nothrow_constructible_v<OtherValueType&&, ValueType>
                 )
             )
 #endif
@@ -1401,14 +1366,15 @@ namespace woj
             // ---------------- SELF: 1 (CEVAL) ----------------
             if (state == optional_state::has_value)
             {
-				if constexpr (std::is_assignable_v<OtherValueType&&, ValueType>)
-				{
-					other = m_value;
-				}
-				else
-				{
-					std::construct_at(&other, m_value);
-				}
+                if constexpr (std::is_assignable_v<OtherValueType&&, ValueType>)
+                {
+                    other = m_value;
+                }
+                else
+                {
+					std::destroy_at(&other);
+                    std::construct_at(&other, m_value);
+                }
             }
 
             if (state == optional_state::no_value || state == optional_state::uninitialized)
@@ -1416,14 +1382,15 @@ namespace woj
 #ifndef NDEBUG
                 throw bad_optional_access{ 832ull, "optional.hpp", "copy_to_helper" };
 #else
-				if constexpr (std::is_assignable_v<OtherValueType&&, ValueType>)
-				{
-					other = m_value;
-				}
-				else
-				{
-					std::construct_at(&other, m_value);
-				}
+                if constexpr (std::is_assignable_v<OtherValueType&&, ValueType>)
+                {
+                    other = m_value;
+                }
+                else
+                {
+                    std::destroy_at(&other);
+                    std::construct_at(&other, m_value);
+                }
 #endif
             }
 
@@ -1435,24 +1402,26 @@ namespace woj
                     {
                         other = m_value;
                     }
-					else
-					{
-						std::construct_at(&other, m_value);
-					}
+                    else
+                    {
+						std::destroy_at(&other);
+                        std::construct_at(&other, m_value);
+                    }
                 }
                 else
                 {
 #ifndef NDEBUG
                     throw bad_optional_access{ 847ull, "optional.hpp", "copy_to_helper" };
 #else
-					if constexpr (std::is_assignable_v<OtherValueType&&, ValueType>)
-					{
-						other = m_value;
-					}
-					else
-					{
-						std::construct_at(&other, m_value);
-					}
+                    if constexpr (std::is_assignable_v<OtherValueType&&, ValueType>)
+                    {
+                        other = m_value;
+                    }
+                    else
+                    {
+						std::destroy_at(&other);
+                        std::construct_at(&other, m_value);
+                    }
 #endif
                 }
             }
@@ -1462,33 +1431,33 @@ namespace woj
 
         /**
          * Copies from optional to another value.
-		 * @tparam DynamicStates Used to enable the function.
+         * @tparam DynamicStates Used to enable the function.
          * @param state State of the current optional.
          * @param other_state UNUSED. State of the other optional.
          * @param other The value to copy to.
          * @return The lvalue reference to optional.
          */
         template <dynamic_states_t DynamicStates = dynamic_states, typename OtherValueType>
-    		requires
-    		(
-				!std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
-				std::is_assignable_v<OtherValueType&&, ValueType> &&
-				std::is_constructible_v<OtherValueType&&, ValueType>
+            requires
+            (
+                !std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
+                std::is_assignable_v<OtherValueType&&, ValueType> &&
+                std::is_constructible_v<OtherValueType&&, ValueType>
             )
         constexpr const optional& copy_to(const optional_state state, const optional_state other_state, OtherValueType&& other) const
-    		noexcept
+            noexcept
 #ifndef NDEBUG
             (
                 false
-			)
+            )
 #else
-			(
-				std::is_nothrow_assignable_v<OtherValueType&&, ValueType> ||
-				(
-					!std::is_assignable_v<OtherValueType&&, ValueType> &&
-					std::is_nothrow_constructible_v<OtherValueType&&, ValueType>
-				)
-			)
+            (
+                std::is_nothrow_assignable_v<OtherValueType&&, ValueType> ||
+                (
+                    !std::is_assignable_v<OtherValueType&&, ValueType> &&
+                    std::is_nothrow_constructible_v<OtherValueType&&, ValueType>
+                )
+            )
 #endif
         {
             this->copy_to_helper<dynamic_states, OtherValueType>(state, std::forward<OtherValueType>(other));
@@ -1498,35 +1467,35 @@ namespace woj
 
         /**
          * Copies from optional to another value.
-		 * @tparam DynamicStates Used to enable the function.
-		 * @tparam OtherValueType The type of the value to copy.
+         * @tparam DynamicStates Used to enable the function.
+         * @tparam OtherValueType The type of the value to copy.
          * @param state State of the current optional.
          * @param other_state UNUSED. State of the other optional.
          * @param other The value to copy to.
          * @return The lvalue reference to optional.
          */
         template <dynamic_states_t DynamicStates = dynamic_states, typename OtherValueType>
-			requires
-			(
-				!std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
-				(
-					!std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>>&&
-					std::is_assignable_v<OtherValueType&&, ValueType>&&
-					std::is_constructible_v<OtherValueType&&, ValueType>
-				)
-			)
+            requires
+            (
+                !std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>> &&
+                (
+                    !std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>>&&
+                    std::is_assignable_v<OtherValueType&&, ValueType>&&
+                    std::is_constructible_v<OtherValueType&&, ValueType>
+                )
+            )
         constexpr optional& copy_to(const optional_state state, const optional_state other_state, OtherValueType&& other) noexcept
 #ifndef NDEBUG
             (
                 false
-			)
+            )
 #else
-			(
-				std::is_nothrow_assignable_v<OtherValueType&&, ValueType> ||
-				(
-					!std::is_assignable_v<OtherValueType&&, ValueType> &&
-					std::is_nothrow_constructible_v<OtherValueType&&, ValueType>
-				)
+            (
+                std::is_nothrow_assignable_v<OtherValueType&&, ValueType> ||
+                (
+                    !std::is_assignable_v<OtherValueType&&, ValueType> &&
+                    std::is_nothrow_constructible_v<OtherValueType&&, ValueType>
+                )
             )
 #endif
         {
@@ -1541,43 +1510,46 @@ namespace woj
          * Copies from optional to another optional.
          * @tparam State State of the current optional.
          * @tparam OtherState State of the other optional.
-		 * @tparam OtherOptionalType The type of the optional to copy to.
+         * @tparam OtherOptionalType The type of the optional to copy to.
          * @param other The optional to copy to.
          */
         template <optional_state State = optional_state::unknown, optional_state OtherState = optional_state::unknown, typename OtherOptionalType>
-        constexpr void copy_to_helper(OtherOptionalType&& other) const
-    		noexcept
+			requires
 			(
-				is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
-				(
-					State == optional_state::has_value &&
-					(
-						(
-							(
-								OtherState == optional_state::no_value ||
-								OtherState == optional_state::uninitialized
-							) &&
-							std::is_nothrow_constructible_v<typename OtherOptionalType::value_type, ValueType>
-						) ||
-						(
-							OtherState == optional_state::has_value &&
-							(
-								std::is_nothrow_assignable_v<typename OtherOptionalType::value_type, ValueType> ||
+				std::is_same_v<std::remove_cvref_t<OtherOptionalType>, std::remove_cvref_t<this_type>>
+            )
+        constexpr void copy_to_helper(OtherOptionalType&& other) const
+            noexcept
+            (
+                (
+                    State == optional_state::has_value &&
+                    (
+                        (
+                            (
+                                OtherState == optional_state::no_value ||
+                                OtherState == optional_state::uninitialized
+                            ) &&
+                            std::is_nothrow_move_constructible_v<ValueType>
+                        ) ||
+                        (
+                            OtherState == optional_state::has_value &&
+                            (
+                                std::is_nothrow_move_assignable_v<ValueType> ||
                                 (
-									!std::is_assignable_v<typename OtherOptionalType::value_type, ValueType> &&
-                                    std::is_nothrow_constructible_v<typename OtherOptionalType::value_type, ValueType>
+                                    !std::is_move_assignable_v<ValueType> &&
+                                    std::is_nothrow_move_constructible_v<ValueType>
                                 )
-							)
-						) ||
-						(
-							OtherState == optional_state::unknown &&
-							(
-								std::is_nothrow_assignable_v<typename OtherOptionalType::value_type, ValueType> &&
-								std::is_nothrow_constructible_v<typename OtherOptionalType::value_type, ValueType>
-							)
-						)
-					)
-				)
+                            )
+                        ) ||
+                        (
+                            OtherState == optional_state::unknown &&
+                            (
+                                std::is_nothrow_move_assignable_v<ValueType> &&
+                                std::is_nothrow_move_constructible_v<ValueType>
+                            )
+                        )
+                    )
+                )
             )
         {
             // ---------------- SELF: 1 (CEVAL) ----------------
@@ -1586,7 +1558,15 @@ namespace woj
                 // ----------> *SELF: 1 (CEVAL), OTHER: 1 (CEVAL) <----------------
                 if constexpr (OtherState == optional_state::has_value)
                 {
-                    other.m_value = m_value;
+					if constexpr (std::is_move_assignable_v<ValueType>)
+					{
+						other.m_value = m_value;
+					}
+                    else
+                    {
+                        std::destroy_at(&other.m_value);
+                        std::construct_at(&other.m_value, m_value);
+					}
                 }
                 // ----------> *SELF: 1 (CEVAL), OTHER: 0 (CEVAL) <----------------
                 else if constexpr (OtherState == optional_state::no_value || OtherState == optional_state::uninitialized)
@@ -1597,7 +1577,15 @@ namespace woj
                 // ----------> *SELF: 1 (CEVAL), OTHER: 1 (REVAL) <----------------
                 else if (other.m_has_value)
                 {
-                    other.m_value = m_value;
+                    if constexpr (std::is_move_assignable_v<ValueType>)
+                    {
+                        other.m_value = m_value;
+                    }
+					else
+					{
+						std::destroy_at(&other.m_value);
+						std::construct_at(&other.m_value, m_value);
+					}
                 }
                 // ----------> *SELF: 1 (CEVAL), OTHER: 0 (REVAL) <----------------
                 else
@@ -1626,7 +1614,15 @@ namespace woj
                     // ------>> *SELF: 1 (REVAL), OTHER: 1 (CEVAL) <----------------
                     if constexpr (OtherState == optional_state::has_value)
                     {
-                        other.m_value = m_value;
+                        if constexpr (std::is_move_assignable_v<ValueType>)
+                        {
+                            other.m_value = m_value;
+                        }
+						else
+						{
+							std::destroy_at(&other.m_value);
+							std::construct_at(&other.m_value, m_value);
+						}
                     }
                     // ------>> *SELF: 1 (REVAL), OTHER: 0 (CEVAL) <----------------
                     else if constexpr (OtherState == optional_state::no_value || OtherState == optional_state::uninitialized)
@@ -1637,7 +1633,15 @@ namespace woj
                     // ------>> *SELF: 1 (REVAL), OTHER: 1 (REVAL) <----------------
                     else if (other.m_has_value1)
                     {
-                        other.m_value = m_value;
+                        if constexpr (std::is_move_assignable_v<ValueType>)
+                        {
+                            other.m_value = m_value;
+                        }
+                        else
+						{
+							std::destroy_at(&other.m_value);
+							std::construct_at(&other.m_value, m_value);
+						}
                     }
                     // ------>> *SELF: 1 (REVAL), OTHER: 0 (REVAL) <----------------
                     else
@@ -1665,100 +1669,14 @@ namespace woj
          * Copies from optional to another optional.
          * @tparam State State of the current optional.
          * @tparam OtherState State of the other optional.
-		 * @tparam OtherOptionalType Type of the optional to copy to.
+         * @tparam OtherOptionalType Type of the optional to copy to.
          * @param other The optional to copy to.
          * @return The lvalue reference to optional.
          */
         template <optional_state State = optional_state::unknown, optional_state OtherState = optional_state::unknown, typename OtherOptionalType>
-			requires
-			(
-				is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
-				(
-					State == optional_state::no_value ||
-					State == optional_state::uninitialized ||
-					(
-						(
-							State == optional_state::has_value ||
-							State == optional_state::unknown
-							) &&
-						(
-							(
-								(
-									OtherState == optional_state::no_value ||
-									OtherState == optional_state::uninitialized
-									) &&
-								std::is_constructible_v<typename OtherOptionalType::value_type, ValueType>
-								) ||
-							(
-								OtherState == optional_state::has_value &&
-								(
-									std::is_assignable_v<typename OtherOptionalType::value_type, ValueType> ||
-									std::is_constructible_v<typename OtherOptionalType::value_type, ValueType>
-									)
-								) ||
-							(
-								OtherState == optional_state::unknown &&
-								(
-									std::is_assignable_v<typename OtherOptionalType::value_type, ValueType> &&
-									std::is_constructible_v<typename OtherOptionalType::value_type, ValueType>
-								)
-							)
-						)
-					)
-				)
-			)
-        constexpr const optional& copy_to(OtherOptionalType&& other) const
-			noexcept
-			(
-				is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
-				(
-					State == optional_state::has_value &&
-					(
-						(
-							(
-								OtherState == optional_state::no_value ||
-								OtherState == optional_state::uninitialized
-								) &&
-							std::is_nothrow_constructible_v<typename OtherOptionalType::value_type, ValueType>
-							) ||
-						(
-							OtherState == optional_state::has_value &&
-							(
-								std::is_nothrow_assignable_v<typename OtherOptionalType::value_type, ValueType> ||
-								(
-									!std::is_assignable_v<typename OtherOptionalType::value_type, ValueType> &&
-									std::is_nothrow_constructible_v<typename OtherOptionalType::value_type, ValueType>
-									)
-								)
-							) ||
-						(
-							OtherState == optional_state::unknown &&
-							(
-								std::is_nothrow_assignable_v<typename OtherOptionalType::value_type, ValueType> &&
-								std::is_nothrow_constructible_v<typename OtherOptionalType::value_type, ValueType>
-								)
-							)
-						)
-					)
-				)
-        {
-            this->template copy_to_helper<State, OtherState, OtherOptionalType>(std::forward<OtherOptionalType>(other));
-
-            return *this;
-        }
-
-            /**
-             * Copies from optional to another optional.
-             * @tparam State State of the current optional.
-             * @tparam OtherState State of the other optional.
-             * @tparam OtherOptionalType Type of the optional to copy to.
-             * @param other The optional to copy to.
-             * @return The lvalue reference to optional.
-             */
-            template <optional_state State = optional_state::unknown, optional_state OtherState = optional_state::unknown, typename OtherOptionalType>
-                requires
+            requires
             (
-                is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
+                /*is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
                 (
                     State == optional_state::no_value ||
                     State == optional_state::uninitialized ||
@@ -1787,68 +1705,158 @@ namespace woj
                                 (
                                     std::is_assignable_v<typename OtherOptionalType::value_type, ValueType> &&
                                     std::is_constructible_v<typename OtherOptionalType::value_type, ValueType>
-                                    )
                                 )
+                            )
+                        )
+                    )
+                )*/
+				std::is_same_v<std::remove_cvref_t<OtherOptionalType>, std::remove_cvref_t<this_type>>
+            )
+        constexpr const optional& copy_to(OtherOptionalType&& other) const
+			noexcept
+			(
+				(
+					State == optional_state::has_value &&
+					(
+						(
+							(
+								OtherState == optional_state::no_value ||
+								OtherState == optional_state::uninitialized
+							) &&
+							std::is_nothrow_move_constructible_v<ValueType>
+						) ||
+						(
+							OtherState == optional_state::has_value &&
+							(
+								std::is_nothrow_move_assignable_v<ValueType> ||
+								(
+									!std::is_move_assignable_v<ValueType> &&
+									std::is_nothrow_move_constructible_v<ValueType>
+								)
+							)
+						) ||
+						(
+							OtherState == optional_state::unknown &&
+							(
+								std::is_nothrow_move_assignable_v<ValueType> &&
+								std::is_nothrow_move_constructible_v<ValueType>
+							)
+						)
+					)
+				)
+			)
+        {
+            this->copy_to_helper<State, OtherState, OtherOptionalType>(std::forward<OtherOptionalType>(other));
+
+            return *this;
+        }
+
+        /**
+         * Copies from optional to another optional.
+         * @tparam State State of the current optional.
+         * @tparam OtherState State of the other optional.
+         * @tparam OtherOptionalType Type of the optional to copy to.
+         * @param other The optional to copy to.
+         * @return The lvalue reference to optional.
+         */
+        template <optional_state State = optional_state::unknown, optional_state OtherState = optional_state::unknown, typename OtherOptionalType>
+            requires
+			(
+            /*is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
+            (
+                State == optional_state::no_value ||
+                State == optional_state::uninitialized ||
+                (
+                    (
+                        State == optional_state::has_value ||
+                        State == optional_state::unknown
+                        ) &&
+                    (
+                        (
+                            (
+                                OtherState == optional_state::no_value ||
+                                OtherState == optional_state::uninitialized
+                                ) &&
+                            std::is_constructible_v<typename OtherOptionalType::value_type, ValueType>
+                            ) ||
+                        (
+                            OtherState == optional_state::has_value &&
+                            (
+                                std::is_assignable_v<typename OtherOptionalType::value_type, ValueType> ||
+                                std::is_constructible_v<typename OtherOptionalType::value_type, ValueType>
+                                )
+                            ) ||
+                        (
+                            OtherState == optional_state::unknown &&
+                            (
+                                std::is_assignable_v<typename OtherOptionalType::value_type, ValueType> &&
+                                std::is_constructible_v<typename OtherOptionalType::value_type, ValueType>
                             )
                         )
                     )
                 )
-                constexpr const optional& copy_to(OtherOptionalType&& other)
-                noexcept
+            )*/
+				std::is_same_v<std::remove_cvref_t<OtherOptionalType>, std::remove_cvref_t<this_type>>
+            )
+        constexpr const optional& copy_to(OtherOptionalType&& other)
+            noexcept
+            (
                 (
-                    is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
+                    State == optional_state::has_value &&
                     (
-                        State == optional_state::has_value &&
                         (
                             (
+                                OtherState == optional_state::no_value ||
+                                OtherState == optional_state::uninitialized
+                            ) &&
+                            std::is_nothrow_move_constructible_v<ValueType>
+                        ) ||
+						(
+							OtherState == optional_state::has_value &&
+							(
+								std::is_nothrow_move_assignable_v<ValueType> ||
                                 (
-                                    OtherState == optional_state::no_value ||
-                                    OtherState == optional_state::uninitialized
-                                    ) &&
-                                std::is_nothrow_constructible_v<typename OtherOptionalType::value_type, ValueType>
-                                ) ||
-                            (
-                                OtherState == optional_state::has_value &&
-                                (
-                                    std::is_nothrow_assignable_v<typename OtherOptionalType::value_type, ValueType> ||
-                                    (
-                                        !std::is_assignable_v<typename OtherOptionalType::value_type, ValueType> &&
-                                        std::is_nothrow_constructible_v<typename OtherOptionalType::value_type, ValueType>
-                                        )
-                                    )
-                                ) ||
-                            (
-                                OtherState == optional_state::unknown &&
-                                (
-                                    std::is_nothrow_assignable_v<typename OtherOptionalType::value_type, ValueType> &&
-                                    std::is_nothrow_constructible_v<typename OtherOptionalType::value_type, ValueType>
-                                    )
+                                    !std::is_move_assignable_v<ValueType> &&
+                                    std::is_nothrow_move_constructible_v<ValueType>
                                 )
+                            )
+                        ) ||
+                        (
+                            OtherState == optional_state::unknown &&
+                            (
+                                std::is_nothrow_move_assignable_v<ValueType> &&
+                                std::is_nothrow_move_constructible_v<ValueType>
                             )
                         )
                     )
-            {
-                this->template copy_to_helper<State, OtherState, OtherOptionalType>(std::forward<OtherOptionalType>(other));
+                )
+            )
+        {
+            this->copy_to_helper<State, OtherState, OtherOptionalType>(std::forward<OtherOptionalType>(other));
 
-                return *this;
-            }
+            return *this;
+        }
 
     private:
 
         /**
          * Copies from optional to another optional.
-		 * @tparam DynamicStates Used to enable the function.
-		 * @tparam OtherOptionalType Type of the optional to copy to.
+         * @tparam DynamicStates Used to enable the function.
+         * @tparam OtherOptionalType Type of the optional to copy to.
          * @param state State of the current optional.
          * @param other_state State of the other optional.
          * @param other The optional to copy to.
          */
         template <dynamic_states_t DynamicStates, typename OtherOptionalType>
-        constexpr void copy_to_helper(const optional_state state, const optional_state other_state, OtherOptionalType&& other) const
-    		noexcept
+			requires
 			(
-				std::is_nothrow_constructible_v<ValueType, const typename OtherOptionalType::value_type&> &&
-				std::is_nothrow_assignable_v<ValueType, typename OtherOptionalType::value_type>
+				std::is_same_v<std::remove_cvref_t<OtherOptionalType>, std::remove_cvref_t<this_type>>
+            )
+        constexpr void copy_to_helper(const optional_state state, const optional_state other_state, OtherOptionalType&& other) const
+            noexcept
+            (
+                std::is_nothrow_constructible_v<ValueType, const typename OtherOptionalType::value_type&> &&
+                std::is_nothrow_assignable_v<ValueType, typename OtherOptionalType::value_type>
             )
         {
             // ---------------- SELF: 1 (CEVAL) ----------------
@@ -1857,7 +1865,15 @@ namespace woj
                 // ----------> *SELF: 1 (CEVAL), OTHER: 1 (CEVAL) <----------------
                 if (other_state == optional_state::has_value)
                 {
-                    other.m_value = m_value;
+					if constexpr (std::is_assignable_v<ValueType, const typename OtherOptionalType::value_type&>)
+					{
+						other.m_value = m_value;
+					}
+					else
+					{
+						std::destroy_at(&other.m_value);
+						std::construct_at(&other.m_value, m_value);
+					}
                 }
                 // ----------> *SELF: 1 (CEVAL), OTHER: 0 (CEVAL) <----------------
                 else if (other_state == optional_state::no_value || other_state == optional_state::uninitialized)
@@ -1868,7 +1884,15 @@ namespace woj
                 // ----------> *SELF: 1 (CEVAL), OTHER: 1 (REVAL) <----------------
                 else if (other.m_has_value)
                 {
-                    other.m_value = m_value;
+					if constexpr (std::is_assignable_v<ValueType, const typename OtherOptionalType::value_type&>)
+					{
+						other.m_value = m_value;
+					}
+					else
+					{
+						std::destroy_at(&other.m_value);
+						std::construct_at(&other.m_value, m_value);
+					}
                 }
                 // ----------> *SELF: 1 (CEVAL), OTHER: 0 (REVAL) <----------------
                 else
@@ -1897,7 +1921,15 @@ namespace woj
                     // ------>> *SELF: 1 (REVAL), OTHER: 1 (CEVAL) <----------------
                     if (other_state == optional_state::has_value)
                     {
-                        other.m_value = m_value;
+                        if constexpr (std::is_assignable_v<ValueType, const typename OtherOptionalType::value_type&>)
+                        {
+                            other.m_value = m_value;
+                        }
+						else
+						{
+							std::destroy_at(&other.m_value);
+							std::construct_at(&other.m_value, m_value);
+						}
                     }
                     // ------>> *SELF: 1 (REVAL), OTHER: 0 (CEVAL) <----------------
                     else if (other_state == optional_state::no_value || other_state == optional_state::uninitialized)
@@ -1908,7 +1940,15 @@ namespace woj
                     // ------>> *SELF: 1 (REVAL), OTHER: 1 (REVAL) <----------------
                     else if (other.m_has_value)
                     {
-                        other.m_value = m_value;
+						if constexpr (std::is_assignable_v<ValueType, const typename OtherOptionalType::value_type&>)
+						{
+							other.m_value = m_value;
+						}
+                        else
+                        {
+                            std::destroy_at(&other.m_value);
+                            std::construct_at(&other.m_value, m_value);
+                        }
                     }
                     // ------>> *SELF: 1 (REVAL), OTHER: 0 (REVAL) <----------------
                     else
@@ -1935,22 +1975,20 @@ namespace woj
         /**
          * Copies from optional to another optional.
          * @param state State of the current optional.
-		 * @param other_state State of the current optional to copy to.
+         * @param other_state State of the current optional to copy to.
          * @param other The optional to copy to.
          * @return The lvalue reference to optional.
          */
         template <dynamic_states_t, typename OtherOptionalType>
-			requires
-			(
-				is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
-				std::is_constructible_v<ValueType, const typename OtherOptionalType::value_type&> &&
-				std::is_assignable_v<ValueType, typename OtherOptionalType::value_type>
+            requires
+            (
+				std::is_same_v<std::remove_cvref_t<OtherOptionalType>, std::remove_cvref_t<this_type>>
             )
         constexpr const optional& copy_to(const optional_state state, const optional_state other_state, OtherOptionalType&& other) const
-    		noexcept
-			(
-				std::is_nothrow_constructible_v<ValueType, const typename OtherOptionalType::value_type&> &&
-				std::is_nothrow_assignable_v<ValueType, typename OtherOptionalType::value_type>
+            noexcept
+            (
+                std::is_nothrow_constructible_v<ValueType, const typename OtherOptionalType::value_type&> &&
+                std::is_nothrow_assignable_v<ValueType, typename OtherOptionalType::value_type>
             )
         {
             this->template copy_to_helper<dynamic_states>(state, other_state, std::forward<OtherOptionalType>(other));
@@ -1960,22 +1998,20 @@ namespace woj
         /**
          * Copies from optional to another optional.
          * @param state State of the current optional.
-		 * @param other_state State of the current optional to copy to.
+         * @param other_state State of the current optional to copy to.
          * @param other The optional to copy to.
          * @return The lvalue reference to optional.
          */
         template <dynamic_states_t, typename OtherOptionalType> 
-			requires
-			(
-				is_optional_v<std::remove_cvref_t<OtherOptionalType>> &&
-				std::is_constructible_v<ValueType, const typename OtherOptionalType::value_type&> &&
-				std::is_assignable_v<ValueType, typename OtherOptionalType::value_type>
+            requires
+            (
+				std::is_same_v<std::remove_cvref_t<OtherOptionalType>, std::remove_cvref_t<this_type>>
             )
         constexpr optional& copy_to(const optional_state state, const optional_state other_state, OtherOptionalType&& other)
-    		noexcept
-			(
-				std::is_nothrow_constructible_v<ValueType, const typename OtherOptionalType::value_type&> &&
-				std::is_nothrow_assignable_v<ValueType, typename OtherOptionalType::value_type>
+            noexcept
+            (
+                std::is_nothrow_constructible_v<ValueType, const typename OtherOptionalType::value_type&> &&
+                std::is_nothrow_assignable_v<ValueType, typename OtherOptionalType::value_type>
             )
         {
             this->template copy_to_helper<dynamic_states>(state, other_state, std::forward<OtherOptionalType>(other));
@@ -2000,7 +2036,7 @@ namespace woj
         {
             using others_tuple = std::tuple<std::remove_cvref_t<OtherValueTypes>...>;
 
-            constexpr auto res = (0 + ... + static_cast<size_t>(is_optional<std::tuple_element_t<Indexes, others_tuple>>::value));
+			constexpr auto res = (0 + ... + static_cast<size_t>(std::is_same_v<std::tuple_element_t<Indexes, others_tuple>, this_type>));
             return res;
         }
 
@@ -2009,7 +2045,7 @@ namespace woj
          * @tparam State The state of the source optional.
          * @tparam Index The index of the current value in the tuple.
          * @tparam OthersValueTypes The types of other values to copy.
-		 * @tparam OthersStates The states of optionals to copy to.
+         * @tparam OthersStates The states of optionals to copy to.
          * @param other The other value to copy to.
          * @return A reference to the current optional.
          */
@@ -2019,75 +2055,111 @@ namespace woj
 #ifndef NDEBUG
 			(
 				(
-					is_optional_v<std::remove_cvref_t<decltype(other)>> &&
+					true && ... &&
+					(
+						(
+							is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
+							(
+								(
+									State == optional_state::has_value &&
+									(
+										std::is_nothrow_assignable_v<typename OthersValueTypes::value_type, const ValueType&> ||
+										(
+											!std::is_assignable_v<typename OthersValueTypes::value_type, const ValueType&> &&
+											std::is_nothrow_constructible_v<typename OthersValueTypes::value_type, const ValueType&>
+										)
+									)
+								) ||
+								(
+									State == optional_state::no_value ||
+									State == optional_state::uninitialized
+								)
+							)
+						) ||
+						(
+							!is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
+							std::is_nothrow_assignable_v<OthersValueTypes, const ValueType&> ||
+							(
+								std::is_assignable_v<OthersValueTypes, const ValueType&> &&
+								std::is_nothrow_constructible_v<OthersValueTypes, const ValueType&>
+							)
+						)
+					)
+				)
+			)
+#else
+			(
+				(
+					true && ... &&
 					(
 						(
 							State == optional_state::has_value &&
 							(
-								std::is_nothrow_assignable_v<typename decltype(other)::value_type, const ValueType&> ||
-								(!std::is_assignable_v<typename decltype(other)::value_type, const ValueType&> && std::is_nothrow_constructible_v<std::remove_cvref_t<decltype(other)>, const ValueType&>)
-							) ||
-							(
-								State == optional_state::no_value ||
-								State == optional_state::uninitialized
-							)
-						)
-					) ||
-					(
-						!is_optional_v<std::remove_cvref_t<decltype(other)>> &&
-						std::is_nothrow_assignable_v<std::remove_cvref_t<decltype(other)>, const ValueType&> ||
-						(!std::is_assignable_v<std::remove_cvref_t<decltype(other)>, const ValueType&> && std::is_constructible_v<std::remove_cvref_t<decltype(other)>, const ValueType&>)
-					)  
-				)
-			)
-#else
-            (
-				State == optional_state::has_value &&
-				(
-					std::is_nothrow_assignable_v<typename decltype(other)::value_type, const ValueType&> ||
-					(!std::is_assignable_v<typename decltype(other)::value_type, const ValueType&> && std::is_nothrow_constructible_v<std::remove_cvref_t<decltype(other)>, const ValueType&>)
-				) ||
-				(
-					State == optional_state::no_value ||
-					State == optional_state::uninitialized
-				)
-			)
-#endif
-			requires
-	        (
-	            (
-					is_optional_v<std::remove_cvref_t<decltype(other)>> &&
-                    (
-	                    (
-	                        State == optional_state::has_value &&
-							(
-								std::is_assignable_v<typename decltype(other)::value_type, const ValueType& > ||
-								std::is_constructible_v<std::remove_cvref_t<decltype(other)>, const ValueType&>
+								(
+									std::is_same_v<std::remove_cvref_t<OthersValueTypes>, std::remove_cvref_t<this_type>> &&
+									(
+										std::is_nothrow_assignable_v<typename OthersValueTypes::value_type, const ValueType&> ||
+										(
+											!std::is_assignable_v<typename OthersValueTypes::value_type, const ValueType&> &&
+											std::is_nothrow_constructible_v<typename OthersValueTypes::value_type, const ValueType&>
+										)
+									)
+								) ||
+								(
+									!std::is_same_v<std::remove_cvref_t<OthersValueTypes>, std::remove_cvref_t<this_type>> &&
+									(
+										std::is_nothrow_assignable_v<OthersValueTypes, const ValueType&> ||
+										(
+											!std::is_assignable_v<OthersValueTypes, const ValueType&> &&
+											std::is_nothrow_constructible_v<OthersValueTypes, const ValueType&>
+										)
+									)
+								)
 							)
 						) ||
 						(
 							State == optional_state::no_value ||
 							State == optional_state::uninitialized
+							)
 						)
+					)
+				)
+#endif
+            /*requires
+            (
+                (
+                    is_optional_v<std::remove_cvref_t<decltype(other)>> &&
+                    (
+                        (
+                            State == optional_state::has_value &&
+                            (
+                                std::is_assignable_v<typename decltype(other)::value_type, const ValueType& > ||
+                                std::is_constructible_v<std::remove_cvref_t<decltype(other)>, const ValueType&>
+                            )
+                        ) ||
+                        (
+                            State == optional_state::no_value ||
+                            State == optional_state::uninitialized
+                        )
                     )
-				) ||
-		        (
-					!is_optional_v<std::remove_cvref_t<decltype(other)>> &&
-					State == optional_state::has_value &&
-					(
-						std::is_assignable_v<std::remove_cvref_t<decltype(other)>, const ValueType&> ||
-						std::is_constructible_v<std::remove_cvref_t<decltype(other)>, const ValueType&>
-					)           
-		        )
-		    )
+                ) ||
+                (
+                    !is_optional_v<std::remove_cvref_t<decltype(other)>> &&
+                    State == optional_state::has_value &&
+                    (
+                        std::is_assignable_v<std::remove_cvref_t<decltype(other)>, const ValueType&> ||
+                        std::is_constructible_v<std::remove_cvref_t<decltype(other)>, const ValueType&>
+                    )           
+                )
+            )*/
         {
             constexpr size_t number_optionals = this->template helper_count_optionals<std::remove_cvref_t<OthersValueTypes>...>(std::make_index_sequence<Index>{});
 
-            if constexpr (is_optional_v<std::remove_cvref_t<decltype(other)>>)
+			if constexpr (std::is_same_v<std::remove_cvref_t<decltype(other)>, std::remove_cvref_t<this_type>>)
             {
                 if constexpr (number_optionals < sizeof...(OthersStates))
                 {
-                    constexpr stack::vector<optional_state, sizeof...(OthersStates)> others_states{ std::forward<decltype(OthersStates)>(OthersStates)... };
+                    constexpr woj::stack::vector<optional_state, sizeof...(OthersStates)> others_states{ std::forward<decltype(OthersStates)>(OthersStates)... };
                     constexpr optional_state other_state = others_states[number_optionals];
 
                     this->template copy_to<State, other_state>(std::forward<decltype(other)>(other));
@@ -2107,109 +2179,164 @@ namespace woj
          * Copies values from one optional to other values.
          * @tparam State The state of the source optional.
          * @tparam OthersValueTypes The types of the other values.
-		 * @tparam OthersStates The states of the optionals to copy to.
+         * @tparam OthersStates The states of the optionals to copy to.
          * @tparam Indexes The index sequence for the tuples.
          * @param others The other values or optionals to copy to.
-		 * @param cont The container of the states of the optionals to copy to.
+         * @param cont The container of the states of the optionals to copy to.
          * @param indexes The index sequence for the tuples.
          * @return A reference to the current optional.
          */
         template <optional_state State, typename... OthersValueTypes, optional_state... OthersStates, size_t... Indexes>
-			requires
-	        (
-	            true && ... &&
-	            (
-	                (
-	                    is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
-	                    (
-	                        (
-	                            State == optional_state::has_value &&
-	                            (
-	                                std::is_assignable_v<typename std::remove_cvref_t<OthersValueTypes>::value_type, const ValueType&> ||
-	                                std::is_constructible_v<std::remove_cvref_t<OthersValueTypes>, const ValueType&>
-	                            )
-	                        ) ||
-	                        (
-	                            State == optional_state::no_value ||
-	                            State == optional_state::uninitialized
-	                        )
-	                    )
-	                ) ||
-	                (
-	                    !is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
-	                    State == optional_state::has_value &&
-	                    (
-	                        std::is_assignable_v<std::remove_cvref_t<OthersValueTypes>, const ValueType&> ||
-	                        std::is_constructible_v<std::remove_cvref_t<OthersValueTypes>, const ValueType&>
-	                    )
-	                )
-	            )
-	        )
-            WOJ_ALWAYS_INLINE constexpr void copy_to_helper(OthersValueTypes&&... others, meta::value_sequence<OthersStates...> cont, std::index_sequence<Indexes...> indexes) const
+            /*requires
+            (
+                true && ... &&
+                (
+                    (
+                        is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
+                        (
+                            (
+                                State == optional_state::has_value &&
+                                (
+                                    std::is_assignable_v<typename std::remove_cvref_t<OthersValueTypes>::value_type, const ValueType&> ||
+                                    std::is_constructible_v<std::remove_cvref_t<OthersValueTypes>, const ValueType&>
+                                )
+                            ) ||
+                            (
+                                State == optional_state::no_value ||
+                                State == optional_state::uninitialized
+                            )
+                        )
+                    ) ||
+                    (
+                        !is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
+                        State == optional_state::has_value &&
+                        (
+                            std::is_assignable_v<std::remove_cvref_t<OthersValueTypes>, const ValueType&> ||
+                            std::is_constructible_v<std::remove_cvref_t<OthersValueTypes>, const ValueType&>
+                        )
+                    )
+                )
+            )*/
+        WOJ_ALWAYS_INLINE constexpr void copy_to_helper(OthersValueTypes&&... others, meta::value_sequence<OthersStates...> cont, std::index_sequence<Indexes...> indexes) const
             noexcept
 #ifndef NDEBUG
             (
                 (
                     true && ... &&
                     (
-						(
-							is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
-							(
-								(
-									State == optional_state::has_value &&
-									(
-										std::is_nothrow_assignable_v<typename OthersValueTypes::value_type, const ValueType&> ||
-										(!std::is_assignable_v<typename OthersValueTypes::value_type, const ValueType&> && std::is_nothrow_constructible_v<typename OthersValueTypes::value_type, const ValueType&>)
-									)
-								) ||
-								(
-									State == optional_state::no_value ||
-									State == optional_state::uninitialized
-								)
-							)
-						) ||
-						(
-							!is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
-							std::is_nothrow_assignable_v<typename OthersValueTypes::value_type, const ValueType&> ||
-							(!std::is_assignable_v<typename OthersValueTypes::value_type, const ValueType&> && std::is_nothrow_constructible_v<typename OthersValueTypes::value_type, const ValueType&>)
-						)
-					)
-				)
-			)
+                        (
+                            is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
+                            (
+                                (
+                                    State == optional_state::has_value &&
+                                    (
+                                        std::is_nothrow_assignable_v<typename OthersValueTypes::value_type, const ValueType&> ||
+                                        (
+                                            !std::is_assignable_v<typename OthersValueTypes::value_type, const ValueType&> && 
+                                            std::is_nothrow_constructible_v<typename OthersValueTypes::value_type, const ValueType&>
+                                        )
+                                    )
+                                ) ||
+                                (
+                                    State == optional_state::no_value ||
+                                    State == optional_state::uninitialized
+                                )
+                            )
+                        ) ||
+                        (
+                            !is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
+                            std::is_nothrow_assignable_v<OthersValueTypes, const ValueType&> ||
+                            (
+                                std::is_assignable_v<OthersValueTypes, const ValueType&> && 
+                                std::is_nothrow_constructible_v<OthersValueTypes, const ValueType&>
+                            )
+                        )
+                    )
+                )
+            )
 #else
-				(
+                (
                     (
-						true && ... &&
-						(
-							(
-								State == optional_state::has_value &&
-								(
-									std::is_nothrow_assignable_v<typename OthersValueTypes::value_type, const ValueType&> ||
-									(!std::is_assignable_v<typename OthersValueTypes::value_type, const ValueType&> && std::is_nothrow_constructible_v<typename OthersValueTypes::value_type, const ValueType&>)
+                        true && ... &&
+                        (
+                            (
+                                State == optional_state::has_value &&
+	                            (
+									(
+	                                    std::is_same_v<std::remove_cvref_t<OthersValueTypes>, std::remove_cvref_t<this_type>> &&
+										(
+											std::is_nothrow_assignable_v<typename OthersValueTypes::value_type, const ValueType&> ||
+											(
+												!std::is_assignable_v<typename OthersValueTypes::value_type, const ValueType&> &&
+												std::is_nothrow_constructible_v<typename OthersValueTypes::value_type, const ValueType&>
+											)
+										)
+	                                ) ||
+	                                (
+										!std::is_same_v<std::remove_cvref_t<OthersValueTypes>, std::remove_cvref_t<this_type>> &&
+                                        (
+											std::is_nothrow_assignable_v<OthersValueTypes, const ValueType&> ||
+											(
+												!std::is_assignable_v<OthersValueTypes, const ValueType&> &&
+												std::is_nothrow_constructible_v<OthersValueTypes, const ValueType&>
+											)
+                                        )
+									)
 								)
-							) ||
+                            ) ||
 							(
 								State == optional_state::no_value ||
 								State == optional_state::uninitialized
 							)
-                        )
+						)
                     )
                 )
 #endif
         {
-            (void(0), ..., copy_to_impl<State, Indexes, OthersValueTypes...>(std::forward<OthersValueTypes>(others), meta::value_sequence<OthersStates...>()));
+            (void(0), ..., this->template copy_to_impl<State, Indexes, OthersValueTypes...>(std::forward<OthersValueTypes>(others), meta::value_sequence<OthersStates...>()));
         }
     public:
 
         /**
-         * Copies values from this optional to multiple other values.
+         * Copies value from this optional to multiple other values.
          * @tparam State The state of the source optional (default is unknown).
-		 * @tparam OthersStates The states of the optionals to copy to.
-         * @param others The other values to copy values to.
+         * @tparam OthersStates The states of the optionals to copy to.
+         * @param others The values to copy to.
          * @return A reference to the current optional.
          */
-        template <optional_state State = optional_state::unknown, optional_state... OthersStates>
-        WOJ_ALWAYS_INLINE constexpr const optional& copy_to(auto&&... others) const 
+        template <optional_state State = optional_state::unknown, optional_state... OthersStates, typename... OthersValueTypes>
+            /*requires
+            (
+                true && ... &&
+                (
+                    (
+                        is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
+                        (
+                            (
+                                State == optional_state::has_value &&
+                                (
+                                    std::is_assignable_v<typename std::remove_cvref_t<OthersValueTypes>::value_type, const ValueType&> ||
+                                    std::is_constructible_v<std::remove_cvref_t<OthersValueTypes>, const ValueType&>
+                                )
+                            ) ||
+                            (
+                                State == optional_state::no_value ||
+                                State == optional_state::uninitialized
+                            )
+                        )
+                    ) ||
+                    (
+                        !is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
+                        State == optional_state::has_value &&
+                        (
+                            std::is_assignable_v<std::remove_cvref_t<OthersValueTypes>, const ValueType&> ||
+                            std::is_constructible_v<std::remove_cvref_t<OthersValueTypes>, const ValueType&>
+                        )
+                    )
+
+                )
+            )*/
+        WOJ_ALWAYS_INLINE constexpr const optional& copy_to(OthersValueTypes&&... others) const
 			noexcept
 #ifndef NDEBUG
 			(
@@ -2217,27 +2344,33 @@ namespace woj
 					true && ... &&
 					(
 						(
-							is_optional_v<std::remove_cvref_t<decltype(others)>> &&
+							is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
 							(
 								(
 									State == optional_state::has_value &&
 									(
-										std::is_nothrow_assignable_v<typename decltype(others)::value_type, const ValueType&> ||
-										(!std::is_assignable_v<typename decltype(others)::value_type, const ValueType&> && std::is_nothrow_constructible_v<typename decltype(others)::value_type, const ValueType&>)
-									)
-								) ||
+										std::is_nothrow_assignable_v<typename OthersValueTypes::value_type, const ValueType&> ||
+										(
+											!std::is_assignable_v<typename OthersValueTypes::value_type, const ValueType&> &&
+											std::is_nothrow_constructible_v<typename OthersValueTypes::value_type, const ValueType&>
+											)
+										)
+									) ||
 								(
 									State == optional_state::no_value ||
 									State == optional_state::uninitialized
+									)
 								)
-							)
-						) ||
+							) ||
 						(
-							!is_optional_v<std::remove_cvref_t<decltype(others)>> &&
-							std::is_nothrow_assignable_v<typename decltype(others)::value_type, const ValueType&> ||
-							(!std::is_assignable_v<typename decltype(others)::value_type, const ValueType&> && std::is_nothrow_constructible_v<typename decltype(others)::value_type, const ValueType&>)
+							!is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
+							std::is_nothrow_assignable_v<OthersValueTypes, const ValueType&> ||
+							(
+								std::is_assignable_v<OthersValueTypes, const ValueType&> &&
+								std::is_nothrow_constructible_v<OthersValueTypes, const ValueType&>
+							)
 						)
-					)   
+					)
 				)
 			)
 #else
@@ -2248,38 +2381,157 @@ namespace woj
 						(
 							State == optional_state::has_value &&
 							(
-								std::is_nothrow_assignable_v<typename decltype(others)::value_type, const ValueType&> ||
-								(!std::is_assignable_v<typename decltype(others)::value_type, const ValueType&> && std::is_nothrow_constructible_v<typename decltype(others)::value_type, const ValueType&>)
+								(
+									std::is_same_v<std::remove_cvref_t<OthersValueTypes>, std::remove_cvref_t<this_type>> &&
+									(
+										std::is_nothrow_assignable_v<typename OthersValueTypes::value_type, const ValueType&> ||
+										(
+											!std::is_assignable_v<typename OthersValueTypes::value_type, const ValueType&> &&
+											std::is_nothrow_constructible_v<typename OthersValueTypes::value_type, const ValueType&>
+											)
+										)
+									) ||
+								(
+									!std::is_same_v<std::remove_cvref_t<OthersValueTypes>, std::remove_cvref_t<this_type>> &&
+									(
+										std::is_nothrow_assignable_v<OthersValueTypes, const ValueType&> ||
+										(
+											!std::is_assignable_v<OthersValueTypes, const ValueType&> &&
+											std::is_nothrow_constructible_v<OthersValueTypes, const ValueType&>
+										)
+									)
 								)
-							) ||
+							)
+						) ||
 						(
 							State == optional_state::no_value ||
 							State == optional_state::uninitialized
 						)
 					)
 				)
-            )
+			)
 #endif
         {
-            copy_to_helper<State, decltype(others)...>(std::forward<decltype(others)&&>(others)..., meta::value_sequence<OthersStates...>(), std::make_index_sequence<sizeof...(others)>{});
+            this->template copy_to_helper<State, decltype(others)...>(std::forward<std::remove_cvref_t<decltype(others)>>(others)..., meta::value_sequence<OthersStates...>(), std::make_index_sequence<sizeof...(others)>{});
             return *this;
         }
 
         /**
-         * Copies values from this optional to multiple other values.
+         * Copies value from this optional to multiple other values.
          * @tparam State The state of the source optional (default is unknown).
-		 * @tparam OthersStates The states of the optionals to copy to.
-         * @param others The other values to copy values to.
+         * @tparam OthersStates The states of the optionals to copy to.
+         * @param others The values to copy to.
          * @return A reference to the current optional.
          */
-        template <optional_state State = optional_state::unknown, optional_state... OthersStates>
-        WOJ_ALWAYS_INLINE constexpr optional& copy_to(auto&&... others) noexcept
+        template <optional_state State = optional_state::unknown, optional_state... OthersStates, typename... OthersValueTypes>
+            /*requires
+            (
+                true && ... &&
+                (
+                    (
+                        is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
+                        (
+                            (
+                                State == optional_state::has_value &&
+                                (
+                                    std::is_assignable_v<typename std::remove_cvref_t<OthersValueTypes>::value_type, const ValueType&> ||
+                                    std::is_constructible_v<std::remove_cvref_t<OthersValueTypes>, const ValueType&>
+                                )
+                            ) ||
+                            (
+                                State == optional_state::no_value ||
+                                State == optional_state::uninitialized
+                            )
+                        )
+                    ) ||
+                    (
+                        !is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
+                        State == optional_state::has_value &&
+                        (
+                            std::is_assignable_v<std::remove_cvref_t<OthersValueTypes>, const ValueType&> ||
+                            std::is_constructible_v<std::remove_cvref_t<OthersValueTypes>, const ValueType&>
+                        )
+                    )
+
+                )
+            )*/
+            WOJ_ALWAYS_INLINE constexpr const optional& copy_to(OthersValueTypes&&... others)
+            noexcept
 #ifndef NDEBUG
-        ((State == optional_state::has_value && ((is_optional_v<std::remove_cvref_t<decltype(others)>> || std::is_nothrow_assignable_v<decltype(others), ValueType>) && ...) ||
-            ((State == optional_state::no_value || State == optional_state::uninitialized) && (is_optional_v<decltype(others)> && ...))))
+			(
+				(
+					true && ... &&
+					(
+						(
+							is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
+							(
+								(
+									State == optional_state::has_value &&
+									(
+										std::is_nothrow_assignable_v<typename OthersValueTypes::value_type, const ValueType&> ||
+										(
+											!std::is_assignable_v<typename OthersValueTypes::value_type, const ValueType&> &&
+											std::is_nothrow_constructible_v<typename OthersValueTypes::value_type, const ValueType&>
+										)
+									)
+								) ||
+								(
+									State == optional_state::no_value ||
+									State == optional_state::uninitialized
+								)
+							)
+						) ||
+						(
+							!is_optional_v<std::remove_cvref_t<OthersValueTypes>> &&
+							std::is_nothrow_assignable_v<OthersValueTypes, const ValueType&> ||
+							(
+								std::is_assignable_v<OthersValueTypes, const ValueType&> &&
+								std::is_nothrow_constructible_v<OthersValueTypes, const ValueType&>
+							)
+						)
+					)
+				)
+			)
+#else
+				(
+					(
+						true && ... &&
+						(
+							(
+								State == optional_state::has_value &&
+								(
+									(
+										std::is_same_v<std::remove_cvref_t<OthersValueTypes>, std::remove_cvref_t<this_type>> &&
+										(
+											std::is_nothrow_assignable_v<typename OthersValueTypes::value_type, const ValueType&> ||
+											(
+												!std::is_assignable_v<typename OthersValueTypes::value_type, const ValueType&> &&
+												std::is_nothrow_constructible_v<typename OthersValueTypes::value_type, const ValueType&>
+											)
+										)
+									) ||
+									(
+										!std::is_same_v<std::remove_cvref_t<OthersValueTypes>, std::remove_cvref_t<this_type>> &&
+										(
+											std::is_nothrow_assignable_v<OthersValueTypes, const ValueType&> ||
+											(
+												!std::is_assignable_v<OthersValueTypes, const ValueType&> &&
+												std::is_nothrow_constructible_v<OthersValueTypes, const ValueType&>
+											)
+										)
+									)
+								)
+							) ||
+							(
+								State == optional_state::no_value ||
+								State == optional_state::uninitialized
+							)
+						)
+					)
+				)
 #endif
         {
-            copy_to_helper<State, decltype(others)...>(std::forward<decltype(others)&&>(others)..., meta::value_sequence<OthersStates...>(), std::make_index_sequence<sizeof...(others)>{});
+            this->template copy_to_helper<State, decltype(others)...>(std::forward<std::remove_cvref_t<decltype(others)>>(others)..., meta::value_sequence<OthersStates...>(), std::make_index_sequence<sizeof...(others)>{});
             return *this;
         }
 
@@ -2287,16 +2539,28 @@ namespace woj
 
         /**
          * Copies values from one optional to other values.
+         * @tparam DynamicStates Used to enable the function.
          * @tparam Index The index of the current value in the tuple.
          * @tparam OthersValueTypes The types of other values to copy.
          * @param state The state of the source optional.
-		 * @param others_states The states of optionals to copy to.
+         * @param others_states The states of optionals to copy to.
          * @param other The other value to copy to.
          */
-        template <dynamic_states_t = dynamic_states, size_t SizeOthersStates, size_t Index, typename... OthersValueTypes>
-        WOJ_ALWAYS_INLINE constexpr void copy_to_impl(const optional_state state, const optional_state(&others_states)[SizeOthersStates], auto&& other) const noexcept
+        template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, size_t Index, typename... OthersValueTypes>
+        WOJ_ALWAYS_INLINE constexpr void copy_to_impl(const optional_state state, const optional_state(&others_states)[SizeOthersStates], auto&& other) const
+            noexcept
 #ifndef NDEBUG
-        (false)
+            (
+                false
+            )
+#else
+            (
+                std::is_nothrow_assignable_v<std::remove_cvref_t<decltype(other)>, ValueType> ||
+                (
+                    !std::is_assignable_v<std::remove_cvref_t<decltype(other)>, ValueType> &&
+                    std::is_nothrow_constructible_v<std::remove_cvref_t<decltype(other)>, ValueType>
+                )
+            )
 #endif
         {
             constexpr size_t number_optionals = helper_count_optionals<std::remove_cvref_t<OthersValueTypes>...>(std::make_index_sequence<Index>{});
@@ -2305,198 +2569,675 @@ namespace woj
             {
                 if constexpr (number_optionals < SizeOthersStates)
                 {
-                    copy_to<dynamic_states>(state, others_states[number_optionals], std::forward<decltype(other)>(other));
+                    this->template copy_to<dynamic_states>(state, others_states[number_optionals], std::forward<decltype(other)>(other));
                 }
                 else
                 {
-                    copy_to<dynamic_states>(state, optional_state::unknown, std::forward<decltype(other)>(other));
+                    this->template copy_to<dynamic_states>(state, optional_state::unknown, std::forward<decltype(other)>(other));
                 }
             }
             else
             {
-                copy_to<dynamic_states>(state, optional_state::unknown, std::forward<decltype(other)>(other));
+                this->template copy_to<dynamic_states>(state, optional_state::unknown, std::forward<decltype(other)>(other));
             }
         }
 
         /**
          * Copies values from one optional to other values.
+         * @tparam DynamicStates Used to enable the function.
          * @tparam Index The index of the current value in the tuple.
-		 * @tparam OthersValueTypes The types of values to copy.
+         * @tparam OthersValueTypes The types of values to copy.
          * @param state The state of the source optional.
          * @param other The other value to copy to.
          */
-        template <dynamic_states_t = dynamic_states, size_t Index, typename... OthersValueTypes>
+        template <dynamic_states_t DynamicStates = dynamic_states, size_t Index, typename... OthersValueTypes>
         WOJ_ALWAYS_INLINE constexpr void copy_to_impl(const optional_state state, auto&& other) const noexcept
 #ifndef NDEBUG
-        (false)
+            (
+                false
+            )
+#else
+            (
+                std::is_nothrow_assignable_v<std::remove_cvref_t<decltype(other)>, ValueType> ||
+                (
+                    !std::is_assignable_v<std::remove_cvref_t<decltype(other)>, ValueType> &&
+                    std::is_nothrow_constructible_v<std::remove_cvref_t<decltype(other)>, ValueType>
+                )
+            )
 #endif
         {
-            copy_to<dynamic_states>(state, optional_state::unknown, std::forward<decltype(other)>(other));
+            this->template copy_to<dynamic_states>(state, optional_state::unknown, std::forward<decltype(other)>(other));
         }
 
         /**
          * Copies values from one optional to other values.
-         * @tparam OthersValueTypes The types of the other values.
-         * @tparam Indexes The index sequence for the tuples.
+         * @tparam DynamicStates Used to enable the function.
+         * @tparam TypeOthersStatesBegin The type of the begin iterator of the states of optionals to copy to.
+         * @tparam TypeOthersStatesEnd The type of the end iterator of the states of optionals to copy to.
+         * @tparam TypeCategoryOtherStates The category of the iterator of the states of optionals to copy to.
+         * @tparam Index The index of the current value in the tuple.
+         * @tparam OthersValueTypes The types of other values to copy.
          * @param state The state of the source optional.
-		 * @param others_states The states of optionals to copy to.
-         * @param others The other values or optionals to copy to.
-		 * @param cont The container of the states of the optionals to copy to.
-         * @param indexes The index sequence for the tuples.
-         * @return A reference to the current optional.
+         * @param others_states_begin The begin iterator of the states of optionals to copy to.
+         * @param others_states_size The size of the states of optionals to copy to.
+         * @param other The other value to copy to.
          */
-        template <dynamic_states_t = dynamic_states, size_t SizeOthersStates, typename... OthersValueTypes, size_t... Indexes>
-        WOJ_ALWAYS_INLINE constexpr void copy_to_helper(const optional_state state, const optional_state(&others_states)[SizeOthersStates], OthersValueTypes&&... others, std::index_sequence<Indexes...>) const noexcept
+        template <dynamic_states_t DynamicStates = dynamic_states, typename TypeOthersStatesBegin, typename TypeOthersStatesEnd, typename TypeCategoryOtherStates, size_t Index, typename... OthersValueTypes>
+        WOJ_ALWAYS_INLINE constexpr void copy_to_impl(const optional_state state, TypeOthersStatesBegin&& others_states_begin, const size_t others_states_size, auto&& other) const
+            noexcept
 #ifndef NDEBUG
-        (false)
+            (
+                false
+            )
+#else
+            (
+                std::is_nothrow_assignable_v<std::remove_cvref_t<decltype(other)>, ValueType> ||
+                (
+                    !std::is_assignable_v<std::remove_cvref_t<decltype(other)>, ValueType> &&
+                    std::is_nothrow_constructible_v<std::remove_cvref_t<decltype(other)>, ValueType>
+                )
+            )
 #endif
         {
-            (void(0), ..., copy_to_impl<dynamic_states, SizeOthersStates, Indexes, OthersValueTypes...>(state, others_states, std::forward<decltype(others)>(others)));
+            constexpr size_t number_optionals = helper_count_optionals<std::remove_cvref_t<OthersValueTypes>...>(std::make_index_sequence<Index>{});
+
+            if constexpr (is_optional_v<std::remove_cvref_t<decltype(other)>>)
+            {
+                if (number_optionals < others_states_size)
+                {
+                    // If supports addition
+                    if constexpr (std::is_same_v<std::remove_cvref_t<TypeCategoryOtherStates>, std::random_access_iterator_tag>)
+                    {
+                        this->template copy_to<dynamic_states>(state, *(others_states_begin + number_optionals), std::forward<decltype(other)>(other));
+                    }
+                    else
+                    {
+                        // Manually increment with ++ to deal with not having operator+.
+                        auto it = others_states_begin;
+                        for (size_t i = 0; i < number_optionals; ++i)
+                        {
+                            ++it;
+                        }
+                        this->template copy_to<dynamic_states>(state, *it, std::forward<decltype(other)>(other));
+                    }
+                }
+                else
+                {
+                    this->template copy_to<dynamic_states>(state, optional_state::unknown, std::forward<decltype(other)>(other));
+                }
+            }
+            else
+            {
+                this->template copy_to<dynamic_states>(state, optional_state::unknown, std::forward<decltype(other)>(other));
+            }
         }
 
         /**
          * Copies values from one optional to other values.
+         * @tparam DynamicStates Used to enable the function.
+         * @tparam TypeOthersStates The type of the states of optionals to copy to.
+         * @tparam Index The index of the current value in the tuple.
+         * @tparam OthersValueTypes The types of other values to copy.
+         * @param state The state of the source optional.
+         * @param others_states The states of optionals to copy to.
+         * @param other The other value to copy to.
+         */
+        template <dynamic_states_t DynamicStates = dynamic_states, typename TypeOthersStates, size_t Index, typename... OthersValueTypes>
+            requires
+            (
+                !std::is_array_v<TypeOthersStates>
+            )
+        WOJ_ALWAYS_INLINE constexpr void copy_to_impl(const optional_state state, const TypeOthersStates& others_states, auto&& other) const
+            noexcept
+#ifndef NDEBUG
+            (
+                false
+            )
+#else
+            (
+                std::is_nothrow_assignable_v<std::remove_cvref_t<decltype(other)>, ValueType> ||
+                (
+                    !std::is_assignable_v<std::remove_cvref_t<decltype(other)>, ValueType> &&
+                    std::is_nothrow_constructible_v<std::remove_cvref_t<decltype(other)>, ValueType>
+                )
+            )
+#endif
+        {
+            constexpr size_t number_optionals = helper_count_optionals<std::remove_cvref_t<OthersValueTypes>...>(std::make_index_sequence<Index>{});
+
+            if constexpr (is_optional_v<std::remove_cvref_t<decltype(other)>>)
+            {
+                if constexpr (number_optionals < others_states.size())
+                {
+                    this->template copy_to<dynamic_states>(state, others_states[number_optionals], std::forward<decltype(other)>(other));
+                }
+                else
+                {
+                    this->template copy_to<dynamic_states>(state, optional_state::unknown, std::forward<decltype(other)>(other));
+                }
+            }
+            else
+            {
+                this->template copy_to<dynamic_states>(state, optional_state::unknown, std::forward<decltype(other)>(other));
+            }
+        }
+
+        /**
+         * Copies values from one optional to other values.
+         * @tparam DynamicStates Used to enable the function.
+         * @tparam OthersValueTypes The types of the other values.
+         * @tparam Indexes The index sequence for the tuples.
+         * @param state The state of the source optional.
+         * @param others_states The states of optionals to copy to.
+         * @param others The other values or optionals to copy to.
+         * @param indexes The index sequence for the tuples.
+         * @return A reference to the current optional.
+         */
+        template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename... OthersValueTypes, size_t... Indexes>
+        WOJ_ALWAYS_INLINE constexpr void copy_to_helper(const optional_state state, const optional_state(&others_states)[SizeOthersStates], OthersValueTypes&&... others, std::index_sequence<Indexes...> indexes) const
+            noexcept
+#ifndef NDEBUG
+            (
+                false
+            )
+#else
+            (
+                (
+                    true && ... &&
+                    (
+                        std::is_nothrow_assignable_v<std::remove_cvref_t<OthersValueTypes>, ValueType> ||
+                        (
+                            !std::is_assignable_v<std::remove_cvref_t<OthersValueTypes>, ValueType> &&
+                            std::is_nothrow_constructible_v<std::remove_cvref_t<OthersValueTypes>, ValueType>
+                        )   
+                    )
+                )
+            )
+#endif
+        {
+            (void(0), ..., this->template copy_to_impl<dynamic_states, SizeOthersStates, Indexes, OthersValueTypes...>(state, others_states, std::forward<std::remove_cvref_t<decltype(others)>>(others)));
+        }
+
+        /**
+         * Copies values from one optional to other values.
+         * @tparam DynamicStates Used to enable the function.
          * @tparam OthersValueTypes The types of the other values.
          * @tparam Indexes The index sequence for the tuples.
          * @param state The state of the source optional.
          * @param others The other values or optionals to copy to.
-		 * @param cont The container of the states of the optionals to copy to.
          * @param indexes The index sequence for the tuples.
          * @return A reference to the current optional.
          */
-        template <dynamic_states_t = dynamic_states, typename... OthersValueTypes, size_t... Indexes>
-        WOJ_ALWAYS_INLINE constexpr void copy_to_helper(const optional_state state, OthersValueTypes&&... others, std::index_sequence<Indexes...>) const noexcept
+        template <dynamic_states_t DynamicStates = dynamic_states, typename... OthersValueTypes, size_t... Indexes>
+        WOJ_ALWAYS_INLINE constexpr void copy_to_helper(const optional_state state, OthersValueTypes&&... others, std::index_sequence<Indexes...> indexes) const
+            noexcept
 #ifndef NDEBUG
-        (false)
+            (
+                false
+            )
+#else
+            (
+                (
+                    true && ... &&
+                    (
+                        std::is_nothrow_assignable_v<std::remove_cvref_t<OthersValueTypes>, ValueType> ||
+                        (
+                            !std::is_assignable_v<std::remove_cvref_t<OthersValueTypes>, ValueType> &&
+                            std::is_nothrow_constructible_v<std::remove_cvref_t<OthersValueTypes>, ValueType>
+                        )
+                    )
+                )
+            )
 #endif
         {
-            (void(0), ..., copy_to_impl<dynamic_states, Indexes, OthersValueTypes...>(state, std::forward<decltype(others)>(others)));
+            (void(0), ..., this->template copy_to_impl<dynamic_states, Indexes, OthersValueTypes...>(state, std::forward<std::remove_cvref_t<decltype(others)>>(others)));
+        }
+
+        /**
+         * Copies values from one optional to other values.
+         * @tparam DynamicStates Used to enable the function.
+         * @tparam OthersValueTypes The types of the other values.
+         * @tparam Indexes The index sequence for the tuples.
+         * @param state The state of the source optional.
+         * @param others_states_begin The begin iterator of the states of optionals to copy to.
+         * @param others_states_size The size of the states of optionals to copy to.
+         * @param others The other values or optionals to copy to.
+         * @param indexes The index sequence for the tuples.
+         * @return A reference to the current optional.
+         */
+        template <dynamic_states_t DynamicStates = dynamic_states, typename TypeOthersStatesBegin, typename TypeOthersStatesEnd, typename TypeCategoryOtherStates, typename... OthersValueTypes, size_t... Indexes>
+        WOJ_ALWAYS_INLINE constexpr void copy_to_helper(const optional_state state, TypeOthersStatesBegin&& others_states_begin, const size_t others_states_size, OthersValueTypes&&... others, std::index_sequence<Indexes...> indexes) const
+            noexcept
+#ifndef NDEBUG
+            (
+                false
+            )
+#else
+            (
+                (
+                    true && ... &&
+                    (
+                        std::is_nothrow_assignable_v<std::remove_cvref_t<OthersValueTypes>, ValueType> ||
+                        (
+                            !std::is_assignable_v<std::remove_cvref_t<OthersValueTypes>, ValueType> &&
+                            std::is_nothrow_constructible_v<std::remove_cvref_t<OthersValueTypes>, ValueType>
+                        )
+                    )
+                )
+            )
+#endif
+        {
+            (void(0), ..., this->template copy_to_impl<dynamic_states, TypeOthersStatesBegin, TypeOthersStatesEnd, TypeCategoryOtherStates, Indexes, OthersValueTypes...>(state, std::forward<TypeOthersStatesBegin>(others_states_begin), others_states_size, std::forward<std::remove_cvref_t<decltype(others)>>(others)));
+        }
+
+        /**
+         * Copies values from one optional to other values.
+         * @tparam DynamicStates Used to enable the function.
+         * @tparam OthersValueTypes The types of the other values.
+         * @tparam Indexes The index sequence for the tuples.
+         * @param state The state of the source optional.
+         * @param others_states The states of optionals to copy to.
+         * @param others The other values or optionals to copy to.
+         * @param indexes The index sequence for the tuples.
+         * @return A reference to the current optional.
+         */
+        template <dynamic_states_t DynamicStates = dynamic_states, typename TypeOthersStates, typename... OthersValueTypes, size_t... Indexes>
+			requires
+			(
+				!std::is_array_v<TypeOthersStates>
+            )
+        WOJ_ALWAYS_INLINE constexpr void copy_to_helper(const optional_state state, TypeOthersStates&& others_states, OthersValueTypes&&... others, std::index_sequence<Indexes...> indexes) const
+            noexcept
+#ifndef NDEBUG
+            (
+                false
+            )
+#else
+            (
+                (
+                    true && ... &&
+                    (
+                        std::is_nothrow_assignable_v<std::remove_cvref_t<OthersValueTypes>, ValueType> ||
+                        (
+                            !std::is_assignable_v<std::remove_cvref_t<OthersValueTypes>, ValueType> &&
+                            std::is_nothrow_constructible_v<std::remove_cvref_t<OthersValueTypes>, ValueType>
+                        )
+                    )
+                )
+            )
+#endif
+        {
+			(void(0), ..., this->template copy_to_impl<dynamic_states, TypeOthersStates, Indexes, OthersValueTypes...>(state, others_states, std::forward<std::remove_cvref_t<decltype(others)>>(others)));
         }
 
     public:
 
         /**
-         * Copies values from this optional to multiple other values.
-         * @param state The state of the source optional (default is unknown).
-		 * @param others_states The states of the optionals to copy to.
-         * @param others The other values to copy values to.
-         * @return A reference to the current optional.
-         */
-        template <dynamic_states_t, size_t SizeOthersStates>
-        WOJ_ALWAYS_INLINE constexpr const optional& copy_to(const optional_state state, const optional_state(&others_states)[SizeOthersStates], auto&&... others) const noexcept
-#ifndef NDEBUG
-        (false)
-#endif
-        {
-            copy_to_helper<dynamic_states, SizeOthersStates, decltype(others)...>(state, others_states, std::forward<decltype(others)&&>(others)..., std::make_index_sequence<sizeof...(others)>{});
-            return *this;
-        }
-
-        /**
-         * Copies values from this optional to multiple other values.
-         * @param state The state of the source optional (default is unknown).
-		 * @param others_states The states of the optionals to copy to.
-         * @param others The other values to copy values to.
-         * @return A reference to the current optional.
-         */
-        template <dynamic_states_t, size_t SizeOthersStates>
-        WOJ_ALWAYS_INLINE constexpr optional& copy_to(const optional_state state, const stack::vector<optional_state, SizeOthersStates>& others_states, auto&&... others) noexcept
-#ifndef NDEBUG
-        (false)
-#endif
-        {
-            copy_to_helper<dynamic_states, SizeOthersStates, decltype(others)...>(state, others_states.data(), std::forward<decltype(others)&&>(others)..., std::make_index_sequence<sizeof...(others)>{});
-            return *this;
-        }
-
-        /**
-         * Copies values from this optional to multiple other values.
-         * @param state The state of the source optional (default is unknown).
-		 * @param others_states The states of the optionals to copy to.
-         * @param others The other values to copy values to.
-         * @return A reference to the current optional.
-         */
-        template <dynamic_states_t, size_t SizeOthersStates>
-        WOJ_ALWAYS_INLINE constexpr const optional& copy_to(const optional_state state, const stack::vector<optional_state, SizeOthersStates>& others_states, auto&&... others) const noexcept
-#ifndef NDEBUG
-        (false)
-#endif
-        {
-            copy_to_helper<dynamic_states, SizeOthersStates, decltype(others)...>(state, others_states.data(), std::forward<decltype(others)&&>(others)..., std::make_index_sequence<sizeof...(others)>{});
-            return *this;
-        }
-
-        /**
-         * Copies values from this optional to multiple other values.
-         * @param state The state of the source optional (default is unknown).
-		 * @param others_states The states of the optionals to copy to.
-         * @param others The other values to copy values to.
-         * @return A reference to the current optional.
-         */
-        template <dynamic_states_t, size_t SizeOthersStates>
-        WOJ_ALWAYS_INLINE constexpr optional& copy_to(const optional_state state, const optional_state(&others_states)[SizeOthersStates], auto&&... others) noexcept
-#ifndef NDEBUG
-        (false)
-#endif
-        {
-
-            this->template copy_to_helper<dynamic_states, SizeOthersStates, decltype(others)...>(state, others_states, std::forward<decltype(others)&&>(others)..., std::make_index_sequence<sizeof...(others)>{});
-            return *this;
-        }
-
-        /**
-         * Copies values from this optional to multiple other values.
+         * Copies value from this optional to multiple other values.
          * @tparam DynamicStates Used to enable the function.
          * @param state The state of the source optional (default is unknown).
-		 * @param others_states UNUSED. The states of the optionals to copy to.
-         * @param others The other values to copy values to.
+         * @param others_states The states of the optionals to copy to.
+         * @param others The values to copy to.
+         * @return A reference to the current optional.
+         */
+        template <dynamic_states_t DynamicStates, size_t SizeOthersStates>
+        WOJ_ALWAYS_INLINE constexpr const optional& copy_to(const optional_state state, const optional_state(&others_states)[SizeOthersStates], auto&&... others) const
+            noexcept
+#ifndef NDEBUG
+            (
+                false
+            )
+#else
+            (
+                (
+                    true && ... &&
+                    (
+                        std::is_nothrow_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> ||
+                        (
+                            !std::is_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> &&
+                            std::is_nothrow_constructible_v<std::remove_cvref_t<decltype(others)>, ValueType>
+                        )
+                    )
+                )
+            )
+#endif
+        {
+            this->template copy_to_helper<dynamic_states, SizeOthersStates, decltype(others)...>(state, others_states, std::forward<std::remove_cvref_t<decltype(others)>>(others)..., std::make_index_sequence<sizeof...(others)>{});
+            return *this;
+        }
+
+        /**
+         * Copies value from this optional to multiple other values.
+         * @tparam DynamicStates Used to enable the function.
+         * @param state The state of the source optional (default is unknown).
+         * @param others_states The states of the optionals to copy to.
+         * @param others The values to copy to.
+         * @return A reference to the current optional.
+         */
+        template <dynamic_states_t DynamicStates, size_t SizeOthersStates>
+        WOJ_ALWAYS_INLINE constexpr optional& copy_to(const optional_state state, const stack::vector<optional_state, SizeOthersStates>& others_states, auto&&... others)
+            noexcept
+#ifndef NDEBUG
+            (
+                false
+            )
+#else
+            (
+                (
+                    true && ... &&
+                    (
+                        std::is_nothrow_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> ||
+                        (
+                            !std::is_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> &&
+                            std::is_nothrow_constructible_v<std::remove_cvref_t<decltype(others)>, ValueType>
+                        )
+                    )
+                )
+            )
+#endif
+        {
+            this->template copy_to_helper<dynamic_states, SizeOthersStates, decltype(others)...>(state, others_states.data(), std::forward<std::remove_cvref_t<decltype(others)>>(others)..., std::make_index_sequence<sizeof...(others)>{});
+            return *this;
+        }
+
+        /**
+         * Copies value from this optional to multiple other values.
+         * @tparam DynamicStates Used to enable the function.
+         * @param state The state of the source optional (default is unknown).
+         * @param others_states The states of the optionals to copy to.
+         * @param others The values to copy to.
          * @return A reference to the current optional.
          */
         template <dynamic_states_t DynamicStates>
         WOJ_ALWAYS_INLINE constexpr const optional& copy_to(const optional_state state, const empty_t others_states, auto&&... others) const noexcept
 #ifndef NDEBUG
-        (false)
+        (
+            false
+		)
+#else
+		(
+			(
+				true && ... &&
+				(
+					std::is_nothrow_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> ||
+					(
+						!std::is_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> &&
+						std::is_nothrow_constructible_v<std::remove_cvref_t<decltype(others)>, ValueType>
+					)
+				)
+			)
+		)
 #endif
         {
-            this->template copy_to_helper<dynamic_states, decltype(others)...>(state, std::forward<decltype(others)&&>(others)..., std::make_index_sequence<sizeof...(others)>{});
+            this->template copy_to_helper<dynamic_states, decltype(others)...>(state, std::forward<std::remove_cvref_t<decltype(others)>>(others)..., std::make_index_sequence<sizeof...(others)>{});
             return *this;
         }
 
         /**
-         * Copies values from this optional to multiple other values.
+         * Copies value from this optional to multiple other values.
          * @tparam DynamicStates Used to enable the function.
          * @param state The state of the source optional (default is unknown).
-		 * @param others_states UNUSED. The states of the optionals to copy to.
-         * @param others The other values to copy values to.
+         * @param others_states The states of the optionals to copy to.
+         * @param others The values to copy to.
          * @return A reference to the current optional.
          */
         template <dynamic_states_t DynamicStates>
         WOJ_ALWAYS_INLINE constexpr optional& copy_to(const optional_state state, const empty_t others_states, auto&&... others) noexcept
 #ifndef NDEBUG
-        (false)
+        (
+            false
+        )
+#else
+		(
+			(
+				true && ... &&
+				(
+					std::is_nothrow_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> ||
+					(
+						!std::is_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> &&
+						std::is_nothrow_constructible_v<std::remove_cvref_t<decltype(others)>, ValueType>
+					)
+				)
+			)
+		)
 #endif
         {
-            this->template copy_to_helper<dynamic_states, decltype(others)...>(state, std::forward<decltype(others)&&>(others)..., std::make_index_sequence<sizeof...(others)>{});
+            this->template copy_to_helper<dynamic_states, decltype(others)...>(state, std::forward<std::remove_cvref_t<decltype(others)>>(others)..., std::make_index_sequence<sizeof...(others)>{});
             return *this;
         }
 
         /**
+         * Copies value from this optional to multiple other values.
+         * @tparam DynamicStates Used to enable the function.
+         * @tparam TypeOthersStates The type of the container of the states of the optionals to copy to.
+         * @param state The state of the source optional (default is unknown).
+         * @param others_states The container of the states of the optionals to copy to.
+         * @param others The values to copy to.
+         * @return 
+         */
+        template <dynamic_states_t DynamicStates, typename TypeOthersStates>
+            requires
+            (
+                requires (const TypeOthersStates& others_states)
+                {
+                    { *others_states.begin() } -> std::same_as<optional_state>;
+                } &&
+                (
+                    requires (const TypeOthersStates& others_states)
+                    {
+                        others_states.begin() += 69;
+                    } ||
+                    requires (const TypeOthersStates & others_states)
+                    {
+                        ++others_states.begin();
+                    }
+                )
+            )
+            WOJ_ALWAYS_INLINE constexpr optional& copy_to(const optional_state state, const TypeOthersStates& others_states, auto&&... others)
+            noexcept
+#ifndef NDEBUG
+            (
+                false
+            )
+#else
+            (
+                (
+                    true &&... &&
+                    (
+                        std::is_nothrow_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> ||
+                        (
+                            !std::is_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> &&
+                            std::is_nothrow_constructible_v<std::remove_cvref_t<decltype(others)>, ValueType>
+                            )
+                        )
+                    )
+                )
+#endif
+        {
+            this->template copy_to_helper<dynamic_states, decltype(others)...>(state, others_states.begin(), others_states.end(), std::forward<std::remove_cvref_t<decltype(others)>>(others)..., std::make_index_sequence<sizeof...(others)>{});
+            return *this;
+        }
+
+        /**
+	     * Copies value from this optional to multiple other values.
+	     * @tparam DynamicStates Used to enable the function.
+	     * @tparam TypeOthersStates The type of the container of the states of the optionals to copy to.
+	     * @param state The state of the source optional (default is unknown).
+	     * @param others_states The container of the states of the optionals to copy to.
+	     * @param others The values to copy to.
+	     * @return
+	     */
+        template <dynamic_states_t DynamicStates, typename TypeOthersStates>
+            requires
+			(
+				requires (const TypeOthersStates& others_states)
+				{
+					{ *others_states.begin() } -> std::same_as<optional_state>;
+				} &&
+				(
+					requires (const TypeOthersStates& others_states)
+					{
+						others_states.begin() += 69;
+					} ||
+					requires (const TypeOthersStates & others_states)
+					{
+						++others_states.begin();
+					}
+				)
+            )
+            WOJ_ALWAYS_INLINE constexpr optional& copy_to(const optional_state state, const TypeOthersStates& others_states, auto&&... others) const
+            noexcept
+#ifndef NDEBUG
+            (
+                false
+            )
+#else
+            (
+                (
+                    true &&... &&
+                    (
+                        std::is_nothrow_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> ||
+                        (
+                            !std::is_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> &&
+                            std::is_nothrow_constructible_v<std::remove_cvref_t<decltype(others)>, ValueType>
+                        )
+                    )
+                )
+            )
+#endif
+        {
+            this->template copy_to_helper<dynamic_states, decltype(others)...>(state, others_states.begin(), others_states.size(), std::forward<std::remove_cvref_t<decltype(others)>>(others)..., std::make_index_sequence<sizeof...(others)>{});
+            return *this;
+        }
+
+        /**
+		 * Copies value from this optional to multiple other values.
+		 * @tparam DynamicStates Used to enable the function.
+		 * @param state The state of the source optional (default is unknown).
+		 * @param others_states The states of the optionals to copy to.
+		 * @param others The values to copy to.
+		 * @return A reference to the current optional.
+		 */
+        template <dynamic_states_t DynamicStates, typename TypeOthersStates>
+			requires
+			(
+				!std::is_array_v<TypeOthersStates> &&
+				requires (const TypeOthersStates &others_states)
+				{
+					{ others_states.size() } -> std::convertible_to<size_t>;
+					{ others_states[0] } -> std::same_as<optional_state>;
+				}
+			)
+		WOJ_ALWAYS_INLINE constexpr const optional& copy_to(const optional_state state, const TypeOthersStates& others_states, auto&&... others) const
+            noexcept
+#ifndef NDEBUG
+            (
+                false
+            )
+#else
+            (
+                (
+                    true && ... &&
+                    (
+                        std::is_nothrow_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> ||
+                        (
+                            !std::is_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> &&
+                            std::is_nothrow_constructible_v<std::remove_cvref_t<decltype(others)>, ValueType>
+                        )
+                    )
+                )
+            )
+#endif
+        {
+			this->template copy_to_helper<dynamic_states, TypeOthersStates, decltype(others)...>(state, others_states, std::forward<std::remove_cvref_t<decltype(others)>>(others)..., std::make_index_sequence<sizeof...(others)>{});
+            return *this;
+        }
+
+        /**
+     * Copies value from this optional to multiple other values.
+     * @tparam DynamicStates Used to enable the function.
+     * @param state The state of the source optional (default is unknown).
+     * @param others_states The states of the optionals to copy to.
+     * @param others The values to copy to.
+     * @return A reference to the current optional.
+     */
+		template <dynamic_states_t DynamicStates, typename TypeOthersStates>
+			requires
+			(
+				!std::is_array_v<TypeOthersStates>&&
+				requires (const TypeOthersStates& others_states)
+				{
+					{ others_states.size() } -> std::convertible_to<size_t>;
+					{ others_states[0] } -> std::same_as<optional_state>;
+				}
+			)
+			WOJ_ALWAYS_INLINE constexpr const optional& copy_to(const optional_state state, const TypeOthersStates& others_states, auto&&... others)
+			noexcept
+	#ifndef NDEBUG
+			(
+				false
+			)
+	#else
+			(
+				(
+					true && ... &&
+					(
+						std::is_nothrow_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> ||
+						(
+							!std::is_assignable_v<std::remove_cvref_t<decltype(others)>, ValueType> &&
+							std::is_nothrow_constructible_v<std::remove_cvref_t<decltype(others)>, ValueType>
+						)
+					)
+				)
+			)
+	#endif
+		{
+			this->template copy_to_helper<dynamic_states, TypeOthersStates, decltype(others)...>(state, others_states, std::forward<std::remove_cvref_t<decltype(others)>>(others)..., std::make_index_sequence<sizeof...(others)>{});
+			return *this;
+		}
+
+        /**
          * Moves from another value to this optional.
          * @tparam State State of the current optional.
-		 * @tparam OtherState UNUSED. State of the current optional to move from.
+         * @tparam OtherState UNUSED. State of the current optional to move from.
          * @param other The value to moves from.
          * @return The lvalue reference to optional.
          */
         template <optional_state State = optional_state::unknown, optional_state OtherState = optional_state::unknown>
-        constexpr optional& move_from(ValueType&& other) noexcept(
-                (State == optional_state::no_value  && std::is_nothrow_copy_constructible_v<ValueType>) || 
-                (State == optional_state::has_value && std::is_nothrow_copy_assignable_v   <ValueType>)
-            )
+        constexpr optional& move_from(ValueType&& other)
+			noexcept
+			(
+				(
+					(
+						State == optional_state::no_value ||
+						State == optional_state::uninitialized
+					) &&
+					std::is_nothrow_move_constructible_v<ValueType>
+				) ||
+				(
+					State == optional_state::has_value &&
+					(
+						std::is_nothrow_move_assignable_v<ValueType> ||
+						(
+							!std::is_move_assignable_v<ValueType> &&
+							std::is_nothrow_move_constructible_v<ValueType>
+						)
+					)
+				)
+			)
         {
             // ----------> SELF: 1 (CEVAL) <----------------
             if constexpr (State == optional_state::has_value)
             {
-                m_value = std::move(other);
+				if constexpr (std::is_move_assignable_v<ValueType>)
+				{
+					m_value = std::move(other);
+				}
+				else
+				{
+					std::destroy_at(&m_value);
+					std::construct_at(&m_value, std::move(other));
+				}
             }
             // ----------> SELF: 0 (CEVAL) <----------------
             else if constexpr (State == optional_state::no_value || State == optional_state::uninitialized)
@@ -2507,7 +3248,15 @@ namespace woj
             // ----------> SELF: 1 (REVAL) <----------------
             else if (*this)
             {
-                m_value = std::move(other);
+				if constexpr (std::is_move_assignable_v<ValueType>)
+				{
+					m_value = std::move(other);
+				}
+				else
+				{
+					std::destroy_at(&m_value);
+					std::construct_at(&m_value, std::move(other));
+				}
             }
             // ----------> SELF: 0 (REVAL) <----------------
             else
@@ -2522,18 +3271,30 @@ namespace woj
         /**
          * Moves from another value to this optional.
          * @param state State of the current optional.
-		 * @param other_state UNUSED. State of the current optional to move from.
+         * @param other_state UNUSED. State of the current optional to move from.
          * @param other The value to moves from.
          * @return The lvalue reference to optional.
          */
-        template <dynamic_states_t = dynamic_states>
-        constexpr optional& move_from(const optional_state state, const optional_state other_state, ValueType&& other) noexcept(
-                std::is_nothrow_move_constructible_v<ValueType> && std::is_nothrow_move_assignable_v<ValueType>
-            )
+        template <dynamic_states_t DynamicStates = dynamic_states>
+        constexpr optional& move_from(const optional_state state, const optional_state other_state, ValueType&& other)
+			noexcept
+			(
+				std::is_nothrow_move_assignable_v<ValueType> &&
+				std::is_nothrow_move_constructible_v<ValueType>
+			)
         {
             // ----------> SELF: 1 (CEVAL) <----------------
             if (state == optional_state::has_value)
             {
+				if constexpr (std::is_move_assignable_v<ValueType>)
+				{
+					m_value = std::move(other);
+				}
+				else
+				{
+					std::destroy_at(&m_value);
+					std::construct_at(&m_value, std::move(other));
+				}
                 m_value = std::move(other);
             }
             // ----------> SELF: 0 (CEVAL) <----------------
@@ -2542,12 +3303,20 @@ namespace woj
                 std::construct_at(&m_value, std::move(other));
                 m_has_value = true;
             }
-                // ----------> SELF: 1 (REVAL) <----------------
+            // ----------> SELF: 1 (REVAL) <----------------
             else if (*this)
             {
-                m_value = std::move(other);
+				if constexpr (std::is_move_assignable_v<ValueType>)
+				{
+					m_value = std::move(other);
+				}
+				else
+				{
+					std::destroy_at(&m_value);
+					std::construct_at(&m_value, std::move(other));
+				}
             }
-                // ----------> SELF: 0 (REVAL) <----------------
+            // ----------> SELF: 0 (REVAL) <----------------
             else
             {
                 std::construct_at(&m_value, std::move(other));
@@ -2560,18 +3329,36 @@ namespace woj
         /**
          * Moves from another optional to this optional.
          * @tparam State State of the current optional.
-		 * @tparam OtherState State of the current optional to move from.
+         * @tparam OtherState State of the current optional to move from.
          * @param other The optional to move from.
          * @return The lvalue reference to optional.
          */
         template <optional_state State = optional_state::unknown, optional_state OtherState = optional_state::unknown>
-            constexpr optional& move_from(optional&& other) noexcept(
-                (OtherState == optional_state::has_value && (
-                    ( State == optional_state::has_value && std::is_nothrow_move_assignable_v   <ValueType>) ||
-                    ((State == optional_state::no_value  || State == optional_state::uninitialized)         && std::is_nothrow_move_constructible_v<ValueType>) ||
-                    ( State == optional_state::unknown   && std::is_nothrow_move_constructible_v<ValueType> && std::is_nothrow_move_assignable_v<ValueType>))
-                ) ||
-                OtherState == optional_state::no_value)
+        constexpr optional& move_from(optional&& other)
+			noexcept
+			(
+				OtherState == optional_state::no_value ||
+				OtherState == optional_state::uninitialized ||
+				(
+					(
+						State == optional_state::no_value ||
+						State == optional_state::uninitialized
+						) &&
+					std::is_nothrow_move_constructible_v<ValueType>
+					) ||
+				(
+					State == optional_state::has_value &&
+					(
+						std::is_nothrow_move_assignable_v<ValueType> ||
+						std::is_nothrow_move_constructible_v<ValueType>
+						)
+					) ||
+				(
+					State == optional_state::unknown &&
+					std::is_nothrow_move_assignable_v<ValueType> &&
+					std::is_nothrow_move_constructible_v<ValueType>
+				)
+			)
         {
             // ---------------- OTHER: 1 (CEVAL) ----------------
             if constexpr (OtherState == optional_state::has_value)
@@ -2579,7 +3366,15 @@ namespace woj
                 // ----------> *OTHER: 1 (CEVAL), SELF: 1 (CEVAL) <----------------
                 if constexpr (State == optional_state::has_value)
                 {
-                    m_value = std::move(other.m_value);
+					if constexpr (std::is_move_assignable_v<ValueType>)
+					{
+						m_value = std::move(other.m_value);
+					}
+					else
+					{
+						std::destroy_at(&m_value);
+						std::construct_at(&m_value, std::move(other.m_value));
+					}
                     other.m_has_value = false;
                 }
                 // ----------> *OTHER: 1 (CEVAL), SELF: 0 (CEVAL) <----------------
@@ -2592,8 +3387,16 @@ namespace woj
                 // ----------> *OTHER: 1 (CEVAL), SELF: 1 (REVAL) <----------------
                 else if (*this)
                 {
-                    m_value = std::move(other.m_value);
-                    other.m_has_value = false;
+                    if constexpr (std::is_move_assignable_v<ValueType>)
+                    {
+                        m_value = std::move(other.m_value);
+                    }
+					else
+					{
+						std::destroy_at(&m_value);
+						std::construct_at(&m_value, std::move(other.m_value));
+					}
+					other.m_has_value = false;
                 }
                 // ----------> *OTHER: 1 (CEVAL), SELF: 0 (REVAL) <----------------
                 else
@@ -2623,8 +3426,16 @@ namespace woj
                     // ------>> *OTHER: 1 (REVAL), SELF: 1 (CEVAL) <----------------
                     if constexpr (State == optional_state::has_value)
                     {
-                        m_value = std::move(other.m_value);
-                        other.m_has_value = false;
+						if constexpr (std::is_move_assignable_v<ValueType>)
+						{
+							m_value = std::move(other.m_value);
+						}
+						else
+						{
+							std::destroy_at(&m_value);
+							std::construct_at(&m_value, std::move(other.m_value));
+						}
+						other.m_has_value = false;
                     }
                     // ------>> *OTHER: 1 (REVAL), SELF: 0 (CEVAL) <----------------
                     else if constexpr (State == optional_state::no_value || State == optional_state::uninitialized)
@@ -2636,8 +3447,16 @@ namespace woj
                     // ------>> *OTHER: 1 (REVAL), SELF: 1 (REVAL) <----------------
                     else if (*this)
                     {
-                        m_value = std::move(other.m_value);
-                        other.m_has_value = false;
+						if constexpr (std::is_move_assignable_v<ValueType>)
+						{
+							m_value = std::move(other.m_value);
+						}
+						else
+						{
+							std::destroy_at(&m_value);
+							std::construct_at(&m_value, std::move(other.m_value));
+						}
+						other.m_has_value = false;
                     }
                     // ------>> *OTHER: 1 (REVAL), SELF: 0 (REVAL) <----------------
                     else
@@ -2665,11 +3484,16 @@ namespace woj
         /**
          * Moves from another optional to this optional.
          * @param state State of the current optional.
-		 * @param other_state State of the current optional to move from.
+         * @param other_state State of the current optional to move from.
          * @param other The optional to move from.
          * @return The lvalue reference to optional.
          */
-        constexpr optional& move_from(const optional_state state, const optional_state other_state, optional&& other) noexcept(std::is_nothrow_move_constructible_v<ValueType>&& std::is_nothrow_move_assignable_v<ValueType>)
+        constexpr optional& move_from(const optional_state state, const optional_state other_state, optional&& other)
+    		noexcept
+    		(
+                std::is_nothrow_move_constructible_v<ValueType> && 
+                std::is_nothrow_move_assignable_v<ValueType>
+            )
         {
             // ---------------- OTHER: 1 (CEVAL) ----------------
             if (other_state == optional_state::has_value)
@@ -2677,8 +3501,16 @@ namespace woj
                 // ----------> *OTHER: 1 (CEVAL), SELF: 1 (CEVAL) <----------------
                 if (state == optional_state::has_value)
                 {
-                    m_value = std::move(other.m_value);
-                    other.m_has_value = false;
+					if constexpr (std::is_move_assignable_v<ValueType>)
+					{
+						m_value = std::move(other.m_value);
+					}
+					else
+					{
+						std::destroy_at(&m_value);
+						std::construct_at(&m_value, std::move(other.m_value));
+					}
+					other.m_has_value = false;
                 }
                 // ----------> *OTHER: 1 (CEVAL), SELF: 0 (CEVAL) <----------------
                 else if (state == optional_state::no_value || state == optional_state::uninitialized)
@@ -2690,8 +3522,16 @@ namespace woj
                 // ----------> *OTHER: 1 (CEVAL), SELF: 1 (REVAL) <----------------
                 else if (*this)
                 {
-                    m_value = std::move(other.m_value);
-                    other.m_has_value = false;
+					if constexpr (std::is_move_assignable_v<ValueType>)
+					{
+						m_value = std::move(other.m_value);
+					}
+					else
+					{
+						std::destroy_at(&m_value);
+						std::construct_at(&m_value, std::move(other.m_value));
+					}
+					other.m_has_value = false;
                 }
                 // ----------> *OTHER: 1 (CEVAL), SELF: 0 (REVAL) <----------------
                 else
@@ -2721,8 +3561,16 @@ namespace woj
                     // ------>> *OTHER: 1 (REVAL), SELF: 1 (CEVAL) <----------------
                     if (state == optional_state::has_value)
                     {
-                        m_value = std::move(other.m_value);
-                        other.m_has_value = false;
+						if constexpr (std::is_move_assignable_v<ValueType>)
+						{
+							m_value = std::move(other.m_value);
+						}
+						else
+						{
+							std::destroy_at(&m_value);
+							std::construct_at(&m_value, std::move(other.m_value));
+						}
+						other.m_has_value = false;
                     }
                     // ------>> *OTHER: 1 (REVAL), SELF: 0 (CEVAL) <----------------
                     else if (state == optional_state::no_value || state == optional_state::uninitialized)
@@ -2734,8 +3582,16 @@ namespace woj
                     // ------>> *OTHER: 1 (REVAL), SELF: 1 (REVAL) <----------------
                     else if (*this)
                     {
-                        m_value = std::move(other.m_value);
-                        other.m_has_value = false;
+						if constexpr (std::is_move_assignable_v<ValueType>)
+						{
+							m_value = std::move(other.m_value);
+						}
+						else
+						{
+							std::destroy_at(&m_value);
+							std::construct_at(&m_value, std::move(other.m_value));
+						}
+						other.m_has_value = false;
                     }
                     // ------>> *OTHER: 1 (REVAL), SELF: 0 (REVAL) <----------------
                     else
@@ -2762,12 +3618,16 @@ namespace woj
 
         /**
          * Moves from another value to new optional.
-		 * @tparam OtherState UNUSED. State of the current optional to move from.
+         * @tparam OtherState UNUSED. State of the current optional to move from.
          * @param other The value to move from.
          * @return The new optional.
          */
         template <optional_state OtherState = optional_state::unknown>
-        constexpr optional moved_from(ValueType&& other) noexcept(std::is_nothrow_move_constructible_v<ValueType>)
+        constexpr optional moved_from(ValueType&& other)
+    		noexcept
+    		(
+                std::is_nothrow_move_constructible_v<ValueType>
+            )
         {
             optional temp{ noinit };
             temp.move_from<optional_state::uninitialized, OtherState>(std::move(other));
@@ -2776,11 +3636,15 @@ namespace woj
 
         /**
          * Moves from another value to new optional.
-		 * @param other_state UNUSED. State of the current optional to move from.
+         * @param other_state UNUSED. State of the current optional to move from.
          * @param other The value to move from.
          * @return The new optional.
          */
-        static constexpr optional& moved_from(const optional_state other_state, ValueType&& other) noexcept(std::is_nothrow_move_constructible_v<ValueType>)
+        static constexpr optional& moved_from(const optional_state other_state, ValueType&& other)
+    		noexcept
+    		(
+                std::is_nothrow_move_constructible_v<ValueType>
+            )
         {
             optional temp{ noinit };
             temp.move_from(optional_state::uninitialized, other_state, std::move(other));
@@ -2789,7 +3653,7 @@ namespace woj
 
         /**
          * Moves from another optional to new optional.
-		 * @tparam OtherState State of the current optional to move from.
+         * @tparam OtherState State of the current optional to move from.
          * @param other The optional to move from.
          * @return The new optional.
          */
@@ -2804,7 +3668,7 @@ namespace woj
         /**
          * Moves from another optional to new optional.
          * @tparam DynamicStates Uses dynamic states when provided.
-		 * @param other_state State of the current optional to move from.
+         * @param other_state State of the current optional to move from.
          * @param other The optional to move from.
          * @return The new optional.
          */
@@ -2819,8 +3683,8 @@ namespace woj
         /**
          * Moves from optional to another value.
          * @tparam State State of the current optional.
-		 * @tparam OtherState UNUSED. State of the current optional to move to.
-		 * @param other The value to move to.
+         * @tparam OtherState UNUSED. State of the current optional to move to.
+         * @param other The value to move to.
          * @return The lvalue reference to optional.
          */
         template <optional_state State = optional_state::unknown, optional_state OtherState = optional_state::unknown, typename OtherValueType> requires (!std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>>)
@@ -2871,8 +3735,8 @@ namespace woj
          * Moves from optional to another value.
          * @tparam DynamicStates Uses dynamic states when provided.
          * @param state State of the current optional.
-		 * @param other_state UNUSED. State of the current optional to move to.
-		 * @param other The value to move to.
+         * @param other_state UNUSED. State of the current optional to move to.
+         * @param other The value to move to.
          * @return The lvalue reference to optional.
          */
         template <dynamic_states_t DynamicStates = dynamic_states, typename OtherValueType> requires (!std::is_same_v<std::remove_cvref_t<OtherValueType>, std::remove_cvref_t<this_type>>)
@@ -2924,8 +3788,8 @@ namespace woj
         /**
          * Moves from optional to another optional.
          * @tparam State State of the current optional.
-		 * @tparam OtherState State of the current optional to move to.
-		 * @param other The optional to move to.
+         * @tparam OtherState State of the current optional to move to.
+         * @param other The optional to move to.
          */
         template <optional_state State = optional_state::unknown, optional_state OtherState = optional_state::unknown, typename OtherOptionalType> requires(is_optional_v<std::remove_cvref_t<OtherOptionalType>>)
             constexpr optional& move_to(OtherOptionalType&& other) noexcept
@@ -3028,7 +3892,7 @@ namespace woj
          * Moves from optional to another optional.
          * @tparam DynamicStates Uses dynamic states when provided.
          * @param state State of the current optional.
-		 * @param other_state State of the current optional to move to.
+         * @param other_state State of the current optional to move to.
          * @param other The optional to copy to.
          */
         template <dynamic_states_t DynamicStates = dynamic_states, typename OtherOptionalType> requires(is_optional_v<std::remove_cvref_t<OtherOptionalType>>)
@@ -3129,16 +3993,16 @@ namespace woj
         template <optional_state State = optional_state::unknown>
         constexpr optional& reset() noexcept((State == optional_state::has_value && std::is_nothrow_destructible_v<ValueType>) || State == optional_state::no_value)
         {
-            if constexpr (State == optional_state::has_value && std::is_destructible_v<ValueType>)
+            if constexpr (State == optional_state::has_value)
             {
-                m_value.~ValueType();
+				std::destroy_at(&m_value);
             }
 
-            if constexpr (State == optional_state::unknown && std::is_destructible_v<ValueType>)
+            if constexpr (State == optional_state::unknown)
             {
                 if (*this)
                 {
-                    m_value.~ValueType();
+					std::destroy_at(&m_value);
                 }
             }
 

@@ -139,15 +139,6 @@ namespace woj::meta
 			type_sequence_at() noexcept = default;
 	};
 
-	template <size_t Index, auto TypeSequence>
-	using type_sequence_at_t = typename type_sequence_at<Index, TypeSequence>::type;
-
-	template <size_t Index, auto TypeSequence>
-	using type_sequence_get = typename type_sequence_at<Index, TypeSequence>::type;
-
-	template <size_t Index, auto TypeSequence>
-	using type_sequence_get_t = typename type_sequence_at<Index, TypeSequence>::type;
-
 	template <auto... Values>
 	class value_sequence
 	{
