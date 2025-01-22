@@ -20,13 +20,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\woj\base.hpp" />
-    <ClInclude Include="include\woj\defs.hpp" />
+    <ClInclude Include="include\woj\meta\base.hpp" />
+    <ClInclude Include="include\woj\meta\meta.hpp" />
+    <ClInclude Include="include\woj\meta\sequence.hpp" />
     <ClInclude Include="include\woj\optional.hpp" />
     <ClInclude Include="include\woj\string.hpp" />
     <ClInclude Include="include\woj\utils.hpp" />
     <ClInclude Include="include\woj\vector.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\woj\optional.cpp" />
+    <ClCompile Include="include\woj\optional.h" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -121,8 +125,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,8 +141,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
