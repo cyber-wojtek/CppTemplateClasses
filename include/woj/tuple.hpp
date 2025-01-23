@@ -18,16 +18,24 @@ namespace woj
             : exception{ line, message, file, function } {}
     };
 
+	enum class tuple_state
+	{
+		initialized,
+		unintialized,
+		unknown
+	};
+
     class nulluple
     {
         constexpr nulluple() 
             noexcept = default;
 
-        constexpr nulluple(const nulluple &) 
+        constexpr nulluple(const nulluple other) 
             noexcept = default;
 
-        constexpr nulluple(nulluple &&) 
-            noexcept = default;
+		constexpr nulluple(const tuple_state other_state, const nulluple other)
+			noexcept = default;
+
 
         constexpr nulluple(const noinit_t) 
             noexcept {}
@@ -41,13 +49,13 @@ namespace woj
         constexpr ~nulluple()
             noexcept = default;
 
-        constexpr bool operator==(const nulluple &) const
+        constexpr bool operator==(const nulluple other) const
             noexcept
         {
             return true;
         }
 
-        constexpr std::strong_ordering operator<=>(const nulluple &) const
+        constexpr std::strong_ordering operator<=>(const nulluple other) const
             noexcept
         {
             return std::strong_ordering::equal;
@@ -67,19 +75,33 @@ namespace woj
             return none;
         }
 
-		constexpr const nulluple& copy_from(const nulluple&) const
+		template <tuple_state OtherState = tuple_state::unknown>
+		constexpr const nulluple &copy_from(const nulluple other) const
 			noexcept
 		{
 			return *this;
 		}
 
-        constexpr nulluple &copy_from(const nulluple &) 
+		constexpr const nulluple &copy_from(const tuple_state other_state, const nulluple other) const
+			noexcept
+		{
+			return *this;
+		}
+
+		template <tuple_state OtherState = tuple_state::unknown>
+        constexpr nulluple &copy_from(const nulluple other) 
             noexcept
         {
             return *this;
         }
 
-        template <typename OtherNullupleType>
+		constexpr nulluple &copy_from(const tuple_state other_state, const nulluple other)
+			noexcept
+		{
+			return *this;
+		}
+
+        template <tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
             requires
             (
                 std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
@@ -90,51 +112,107 @@ namespace woj
             return *this;
         }
 
-        template <typename OtherNullupleType>
+		template <typename OtherNullupleType = void>
+			requires
+		(
+			std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
+			)
+		constexpr const nulluple &copy_to(const tuple_state other_state, OtherNullupleType &&other) const
+			noexcept
+		{
+			return *this;
+		}
+
+        template <tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
             requires
             (
                 std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
             )
-        constexpr nulluple &copy_to(OtherNullupleType&&)
+        constexpr nulluple &copy_to(OtherNullupleType &&other)
         {
             return *this;
         }
 
-		constexpr const nulluple& move_from(nulluple&&) const
-			noexcept
-		{
-			return *this;
-		}
-
-		constexpr nulluple& move_from(nulluple&&)
-			noexcept
-		{
-			return *this;
-		}
-
-
-		template <typename OtherNullupleType>
+		template <typename OtherNullupleType = void>
 			requires
-		(
-			std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
+			(
+				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
 			)
-		constexpr const nulluple& move_to(OtherNullupleType&&) const
+		constexpr nulluple &copy_to(const tuple_state other_state, OtherNullupleType &&other)
+		{
+			return *this;
+		}
+
+		template <tuple_state OtherState = tuple_state::unknown>
+		constexpr const nulluple &move_from(nulluple &&other) const
 			noexcept
 		{
 			return *this;
 		}
 
-		template <typename OtherNullupleType>
+		template <tuple_state OtherState = tuple_state::unknown>
+		constexpr nulluple &move_from(nulluple &&other)
+			noexcept
+		{
+			return *this;
+		}
+
+		constexpr const nulluple &move_from(const tuple_state other_state, nulluple &&other) const
+			noexcept
+		{
+			return *this;
+		}
+
+		constexpr nulluple &move_from(const tuple_state other_state, nulluple &&other)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
 			requires
-		(
-			std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
+			(
+				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
 			)
-			constexpr nulluple& move_to(OtherNullupleType&&)
+		constexpr const nulluple &move_to(OtherNullupleType &&other) const
 			noexcept
 		{
 			return *this;
 		}
 
+		template <tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
+			requires
+			(
+				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
+			)
+		constexpr nulluple &move_to(OtherNullupleType &&other)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <typename OtherNullupleType = void>
+			requires
+			(
+				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
+			)
+		constexpr const nulluple &move_to(const tuple_state other_state, OtherNullupleType&& other) const
+			noexcept
+		{
+			return *this;
+		}
+
+
+		template <typename OtherNullupleType = void>
+			requires
+			(
+				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
+			)
+		constexpr nulluple& move_to(const tuple_state other_state, OtherNullupleType&& other)
+			noexcept
+		{
+			return *this;
+		}
 
         template <size_t Index>
         static constexpr none_t get()
@@ -205,6 +283,9 @@ namespace woj
                 std::is_nothrow_default_constructible_v<FirstType>
             )
             : first{} {}
+
+		explicit constexpr single(const noinit_t)
+			noexcept {}
 
 		template <typename OtherFirstType>
 			requires
@@ -409,34 +490,10 @@ namespace woj
 #endif
 		}
 
-		constexpr const single &copy_from(const single& other) const
-			noexcept
-			(
-				std::is_nothrow_copy_constructible_v<FirstType> ||
-				(
-					!std::is_copy_constructible_v<FirstType> &&
-					std::is_nothrow_copy_assignable_v<FirstType>
-				)
-			)
-		{
-			if constexpr (std::is_copy_assignable_v<FirstType>)
-			{
-				first = other.first;
-			}
-			else
-			{
-				std::destroy_at(std::addressof(first));
-				std::construct_at(std::addressof(first), other.first);
-			}
-
-			return *this;
-		}
-
-
 		constexpr single &copy_from(const single& other)
 			noexcept
 			(
-				std::is_nothrow_copy_constructible_v<FirstType> ||
+				std::is_nothrow_copy_assignable_v<FirstType> ||
 				(
 					!std::is_copy_constructible_v<FirstType> &&
 					std::is_nothrow_copy_assignable_v<FirstType>
@@ -455,13 +512,38 @@ namespace woj
 
 			return *this;
 		}
+
+		constexpr single& copy_from(const FirstType& other)
+			noexcept
+			(
+				std::is_nothrow_copy_constructible_v<FirstType> ||
+				(
+					!std::is_copy_constructible_v<FirstType> &&
+					std::is_nothrow_copy_assignable_v<FirstType>
+					)
+				)
+		{
+			if constexpr (std::is_copy_assignable_v<FirstType>)
+			{
+				first = other;
+			}
+			else
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), other);
+			}
+
+			return *this;
+		}
+
+
 
 		template <typename OtherSingleType>
 			requires
 			(
 				std::is_same_v<std::remove_cvref_t<OtherSingleType>, single>
 			)
-		constexpr const single& copy_to(OtherSingleType&& other) const
+		constexpr const single &copy_to(OtherSingleType&& other) const
 			noexcept
 			(
 				std::is_nothrow_copy_constructible_v<FirstType> ||
@@ -488,28 +570,82 @@ namespace woj
 			(
 				std::is_same_v<std::remove_cvref_t<OtherSingleType>, single>
 			)
-			constexpr single& copy_to(OtherSingleType&& other)
-				noexcept
+		constexpr single &copy_to(OtherSingleType&& other)
+			noexcept
+			(
+				std::is_nothrow_copy_constructible_v<FirstType> ||
 				(
-					std::is_nothrow_copy_constructible_v<FirstType> ||
-					(
-						!std::is_copy_constructible_v<FirstType> &&
-						std::is_nothrow_copy_constructible_v<FirstType>
-					)
+					!std::is_copy_constructible_v<FirstType> &&
+					std::is_nothrow_copy_constructible_v<FirstType>
 				)
+			)
+		{
+			if constexpr (std::is_copy_constructible_v<FirstType>)
 			{
-				if constexpr (std::is_copy_constructible_v<FirstType>)
-				{
-					other.first = first;
-				}
-				else
-				{
-					std::destroy_at(std::addressof(other.first));
-					std::construct_at(std::addressof(other.first), first);
-				}
-				return *this;
+				other.first = first;
+			}
+			else
+			{
+				std::destroy_at(std::addressof(other.first));
+				std::construct_at(std::addressof(other.first), first);
+			}
+			return *this;
+		}
+
+		template <typename OtherValueType>
+		constexpr single &copy_to(OtherValueType &&other)
+			noexcept
+			(
+				std::is_nothrow_assignable_v<OtherValueType &&, FirstType> ||
+				(
+					!std::is_assignable_v<OtherValueType &&, FirstType> &&
+					std::is_nothrow_constructible_v<OtherValueType, FirstType>
+				)	
+			)
+		{
+			if constexpr (std::is_assignable_v<OtherValueType &&, FirstType>)
+			{
+				other = first;
+			}
+			else
+			{
+				std::destroy_at(std::addressof(other));
+				std::construct_at(std::addressof(other), first);
 			}
 
+        	return *this;
+		}
+
+		template <typename OtherValueType>
+		constexpr const single &copy_to(OtherValueType&& other) const
+			noexcept
+			(
+				std::is_nothrow_assignable_v<OtherValueType&&, FirstType> ||
+				(
+					!std::is_assignable_v<OtherValueType&&, FirstType> &&
+					std::is_nothrow_constructible_v<OtherValueType, FirstType>
+				)
+			)
+		{
+			if constexpr (std::is_assignable_v<OtherValueType&&, FirstType>)
+			{
+				other = first;
+			}
+			else
+			{
+				std::destroy_at(std::addressof(other));
+				std::construct_at(std::addressof(other), first);
+			}
+
+			return *this;
+		}
+
+		constexpr single& move_from(single&& other)
+			noexcept
+			(
+				std::is_nothrow_move_constructible_v<FirstType> ||
+				(
+					!std::is_move_constructible_v<FirstType> &&
 
         template <size_t Index>
 		constexpr FirstType &get() const
