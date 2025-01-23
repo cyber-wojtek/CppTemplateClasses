@@ -94,6 +94,23 @@ namespace woj
             return *this;
         }
 
+		constexpr nulluple& move_from(nulluple &&) const
+			noexcept
+		{
+			return *this;
+		}
+
+		template <typename OtherNullupleType>
+			requires
+		(
+			std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
+			)
+		constexpr nulluple& move_to(OtherNullupleType&&) const
+			noexcept
+		{
+			return *this;
+		}
+
 
         template <size_t Index>
         static constexpr none_t get()
