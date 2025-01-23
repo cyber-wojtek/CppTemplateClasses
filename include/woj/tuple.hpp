@@ -66,6 +66,12 @@ namespace woj
             return none;
         }
 
+		constexpr const nulluple& copy_from(const nulluple&) const
+			noexcept
+		{
+			return *this;
+		}
+
         constexpr nulluple &copy_from(const nulluple &) 
             noexcept
         {
@@ -77,7 +83,7 @@ namespace woj
             (
                 std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
             )
-        constexpr nulluple &copy_to(OtherNullupleType&&) const
+        constexpr const nulluple &copy_to(OtherNullupleType&&) const
             noexcept
         {
             return *this;
@@ -89,12 +95,29 @@ namespace woj
                 std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
             )
         constexpr nulluple &copy_to(OtherNullupleType&&)
-            noexcept
         {
             return *this;
         }
 
-		constexpr nulluple& move_from(nulluple &&) const
+		constexpr const nulluple& move_from(nulluple&&) const
+			noexcept
+		{
+			return *this;
+		}
+
+		constexpr nulluple& move_from(nulluple&&)
+			noexcept
+		{
+			return *this;
+		}
+
+
+		template <typename OtherNullupleType>
+			requires
+		(
+			std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
+			)
+		constexpr const nulluple& move_to(OtherNullupleType&&) const
 			noexcept
 		{
 			return *this;
@@ -105,7 +128,7 @@ namespace woj
 		(
 			std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
 			)
-		constexpr nulluple& move_to(OtherNullupleType&&) const
+			constexpr nulluple& move_to(OtherNullupleType&&)
 			noexcept
 		{
 			return *this;
