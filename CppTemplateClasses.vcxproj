@@ -25,6 +25,7 @@
     <ClInclude Include="include\woj\meta\sequence.hpp" />
     <ClInclude Include="include\woj\optional.hpp" />
     <ClInclude Include="include\woj\string.hpp" />
+    <ClInclude Include="include\woj\tuple.hpp" />
     <ClInclude Include="include\woj\utils.hpp" />
     <ClInclude Include="include\woj\vector.hpp" />
   </ItemGroup>

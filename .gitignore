@@ -364,3 +364,4 @@ FodyWeavers.xsd
 /src/string.cpp
 /CMakeLists.txt
 /main.cpp
+/include/woj/optional.cpp
