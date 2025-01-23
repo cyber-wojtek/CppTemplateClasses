@@ -7,9 +7,9 @@
 #include <optional>
 #include <iostream>
 
-#include "base.hpp"
+#include "woj/base.hpp"
 
-#include "vector.hpp"
+#include "woj/vector.hpp"
 #include "meta/sequence.hpp"
 
 namespace woj
@@ -17,9 +17,12 @@ namespace woj
     class bad_optional_access final : exception
     {
     public:
-        constexpr bad_optional_access() : exception{ static_cast<uint64_t>(-1), "Bad optional access.", nullptr, nullptr } {}
+        constexpr bad_optional_access() 
+            noexcept 
+            : exception{ static_cast<uint64_t>(-1), "Bad optional access.", nullptr, nullptr } {}
 
-        constexpr bad_optional_access(const size_t line, const char* const file, const char* const function) noexcept
+        constexpr bad_optional_access(const size_t line, const char* const file, const char* const function) 
+            noexcept
             : exception{ line, "Bad optional access", file, function } {}
     };
 

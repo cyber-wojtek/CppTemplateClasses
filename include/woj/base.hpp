@@ -136,7 +136,6 @@
 #include <cstring>
 #include <string>
 #include <type_traits>
-#include <boost/exception/exception.hpp>
 #include <cstdio>
 
 namespace woj
@@ -159,7 +158,41 @@ namespace woj
 	 */
 	struct none_t
 	{
-		explicit constexpr none_t() noexcept = default;
+		explicit constexpr none_t() 
+			noexcept = default;
+
+		constexpr none_t(const none_t&) 
+			noexcept = default;
+
+		constexpr none_t(none_t&&) 
+			noexcept = default;
+
+		constexpr none_t& operator=(const none_t&) 
+			noexcept = default;
+
+		constexpr none_t& operator=(none_t&&) 
+			noexcept = default;
+
+		constexpr ~none_t() 
+			noexcept = default;
+
+		constexpr bool operator==(const none_t&) const 
+			noexcept 
+		{ 
+			return true; 
+		}
+
+		constexpr std::strong_ordering operator<=>(const none_t&) const 
+			noexcept 
+		{ 
+			return std::strong_ordering::equal; 
+		}
+
+		constexpr operator bool() const 
+			noexcept 
+		{ 
+			return false; 
+		}
 	};
 
 	/**
@@ -172,7 +205,41 @@ namespace woj
 	 */
 	struct empty_t
 	{
-		constexpr empty_t() noexcept = default;
+		constexpr empty_t() 
+			noexcept = default;
+
+		constexpr empty_t(const empty_t&)
+			noexcept = default;
+
+		constexpr empty_t(empty_t&&)
+			noexcept = default;
+
+		constexpr empty_t& operator=(const empty_t&)
+			noexcept = default;
+
+		constexpr empty_t& operator=(empty_t&&)
+			noexcept = default;
+
+		constexpr ~empty_t()
+			noexcept = default;
+
+		constexpr bool operator==(const empty_t&) const
+			noexcept
+		{
+			return true;
+		}
+
+		constexpr std::strong_ordering operator<=>(const empty_t&) const
+			noexcept
+		{
+			return std::strong_ordering::equal;
+		}
+
+		constexpr operator bool() const
+			noexcept
+		{
+			return false;
+		}
 	};
 
 	struct in_place_t
@@ -185,7 +252,23 @@ namespace woj
 	class dynamic_states_t
 	{
 	public:
-		explicit constexpr dynamic_states_t() noexcept = default;
+		explicit constexpr dynamic_states_t() 
+			noexcept = default;
+
+		constexpr dynamic_states_t(const dynamic_states_t&) 
+			noexcept = default;
+
+		constexpr dynamic_states_t(dynamic_states_t&&) 
+			noexcept = default;
+
+		constexpr dynamic_states_t& operator=(const dynamic_states_t&) 
+			noexcept = default;
+	
+		constexpr dynamic_states_t& operator=(dynamic_states_t&&)
+			noexcept = default;
+
+		constexpr ~dynamic_states_t()
+			noexcept = default;
 	};
 
 	inline constexpr dynamic_states_t dynamic_states{};
