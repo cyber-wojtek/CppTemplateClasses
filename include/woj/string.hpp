@@ -8,7 +8,7 @@
 #endif
 
 #ifndef WOJ_DEFS_HPP
-#include "base.hpp"
+#include "woj/base.hpp"
 #endif
 
 #include <type_traits>
