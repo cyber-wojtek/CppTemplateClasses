@@ -27,6 +27,7 @@ namespace woj
 
     class nulluple
     {
+    public:
         constexpr nulluple() 
             noexcept = default;
 
@@ -75,33 +76,33 @@ namespace woj
             return none;
         }
 
-		template <tuple_state OtherState = tuple_state::unknown>
+		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
 		constexpr const nulluple &copy_from(const nulluple other) const
 			noexcept
 		{
 			return *this;
 		}
 
-		constexpr const nulluple &copy_from(const tuple_state other_state, const nulluple other) const
+		constexpr const nulluple &copy_from(const tuple_state state, const tuple_state other_state, const nulluple other) const
 			noexcept
 		{
 			return *this;
 		}
 
-		template <tuple_state OtherState = tuple_state::unknown>
+		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
         constexpr nulluple &copy_from(const nulluple other) 
             noexcept
         {
             return *this;
         }
 
-		constexpr nulluple &copy_from(const tuple_state other_state, const nulluple other)
+		constexpr nulluple &copy_from(const tuple_state state, const tuple_state other_state, const nulluple other)
 			noexcept
 		{
 			return *this;
 		}
 
-        template <tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
+        template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
             requires
             (
                 std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
@@ -117,13 +118,13 @@ namespace woj
 		(
 			std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
 			)
-		constexpr const nulluple &copy_to(const tuple_state other_state, OtherNullupleType &&other) const
+		constexpr const nulluple &copy_to(const tuple_state state, const tuple_state other_state, OtherNullupleType &&other) const
 			noexcept
 		{
 			return *this;
 		}
 
-        template <tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
+        template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
             requires
             (
                 std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
@@ -138,38 +139,38 @@ namespace woj
 			(
 				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
 			)
-		constexpr nulluple &copy_to(const tuple_state other_state, OtherNullupleType &&other)
+		constexpr nulluple &copy_to(const tuple_state state, const tuple_state other_state, OtherNullupleType &&other)
 		{
 			return *this;
 		}
 
-		template <tuple_state OtherState = tuple_state::unknown>
+		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
 		constexpr const nulluple &move_from(nulluple &&other) const
 			noexcept
 		{
 			return *this;
 		}
 
-		template <tuple_state OtherState = tuple_state::unknown>
+		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
 		constexpr nulluple &move_from(nulluple &&other)
 			noexcept
 		{
 			return *this;
 		}
 
-		constexpr const nulluple &move_from(const tuple_state other_state, nulluple &&other) const
+		constexpr const nulluple &move_from(const tuple_state state, const tuple_state other_state, nulluple &&other) const
 			noexcept
 		{
 			return *this;
 		}
 
-		constexpr nulluple &move_from(const tuple_state other_state, nulluple &&other)
+		constexpr nulluple &move_from(const tuple_state state, const tuple_state other_state, nulluple &&other)
 			noexcept
 		{
 			return *this;
 		}
 
-		template <tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
+		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
 			requires
 			(
 				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
@@ -180,7 +181,7 @@ namespace woj
 			return *this;
 		}
 
-		template <tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
+		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
 			requires
 			(
 				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
@@ -196,7 +197,7 @@ namespace woj
 			(
 				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
 			)
-		constexpr const nulluple &move_to(const tuple_state other_state, OtherNullupleType&& other) const
+		constexpr const nulluple &move_to(const tuple_state state, const tuple_state other_state, OtherNullupleType&& other) const
 			noexcept
 		{
 			return *this;
@@ -208,7 +209,7 @@ namespace woj
 			(
 				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
 			)
-		constexpr nulluple& move_to(const tuple_state other_state, OtherNullupleType&& other)
+		constexpr nulluple& move_to(const tuple_state state, const tuple_state other_state, OtherNullupleType&& other)
 			noexcept
 		{
 			return *this;
@@ -229,7 +230,7 @@ namespace woj
             return none;
         }
 
-        static constexpr none_t get(const size_t)
+        static constexpr none_t get(const size_t index)
 	        noexcept
 #ifndef NDEBUG
             (
@@ -490,6 +491,7 @@ namespace woj
 #endif
 		}
 
+		template <tuple_state OtherState = tuple_state::unknown>
 		constexpr single &copy_from(const single& other)
 			noexcept
 			(
@@ -500,7 +502,7 @@ namespace woj
 				)
 			)
 		{
-			if constexpr (std::is_copy_assignable_v<FirstType>)
+			if constexpr (std::is_copy_assignable_v<FirstType> && 
 			{
 				first = other.first;
 			}
