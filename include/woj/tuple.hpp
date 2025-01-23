@@ -5,7 +5,7 @@
 
 namespace woj
 {
-    class bad_tuple_access : public exception
+    class bad_tuple_access final : public exception
     {
     public:
         constexpr bad_tuple_access() 
@@ -96,8 +96,8 @@ namespace woj
 
 
         template <size_t Index>
-        constexpr none_t get() const
-            noexcept
+        static constexpr none_t get()
+	        noexcept
 #ifndef NDEBUG
             (
                 false
@@ -110,8 +110,8 @@ namespace woj
             return none;
         }
 
-        constexpr none_t get(const size_t) const
-            noexcept
+        static constexpr none_t get(const size_t)
+	        noexcept
 #ifndef NDEBUG
             (
                 false
@@ -124,8 +124,8 @@ namespace woj
             return none;
         }
 
-        constexpr size_t size() const
-            noexcept
+        static constexpr size_t size()
+	        noexcept
         {
             return 0;
         }
@@ -155,7 +155,7 @@ namespace woj
     public:
         union 
         {
-            FirstType m_data[1];
+            FirstType first;
         };
 
         constexpr single() 
@@ -163,61 +163,148 @@ namespace woj
             (
                 std::is_nothrow_default_constructible_v<FirstType>
             )
-            : m_data{} {}
+            : first{} {}
 
-        constexpr single(const FirstType &first)
+		template <typename OtherFirstType>
+			requires
+			(
+				std::is_constructible_v<FirstType, const OtherFirstType &>   
+            )
+		explicit constexpr single(const OtherFirstType &first)
             noexcept 
             (
                 std::is_nothrow_copy_constructible_v<FirstType>
             )
-            : m_data{ first } {}
+            : first{ first } {}
 
-        constexpr single(FirstType &&first)
-            noexcept 
-            (
-                std::is_nothrow_move_constructible_v<FirstType>
+		template <typename OtherFirstType>
+			requires
+			(
+				std::is_constructible_v<FirstType, OtherFirstType&&> &&
+				std::is_rvalue_reference_v<OtherFirstType>
             )
-            : m_data{ std::move(first) } {}
+		explicit constexpr single(OtherFirstType&& first)
+			noexcept
+			(
+				std::is_nothrow_constructible_v<FirstType, OtherFirstType &&>
+			)
+            : first{ std::forward<OtherFirstType>(first) } {}
 
         constexpr single(const single &other)
             noexcept 
             (
                 std::is_nothrow_copy_constructible_v<FirstType>
             )
-            : m_data{ other.m_data } {}
+            : first{ other.first } {}
 
         constexpr single(single &&other)
             noexcept 
             (
                 std::is_nothrow_move_constructible_v<FirstType>
             )
-            : m_data{ std::move(other.m_data) } {}
+            : first{ std::move(other.first) } {}
 
-        template <typename... Args>
-        constexpr single(in_place_t, Args &&...args)
+        template <typename ...ArgsTypes>
+        explicit constexpr single(in_place_t, ArgsTypes &&...args)
             noexcept 
             (
                 std::is_nothrow_copy_constructible_v<FirstType>
             )
-            : m_data{ std::forward<Args>(args)... } {}
+            : first{ std::forward<ArgsTypes>(args)... } {}
+
+		constexpr single& operator=(const FirstType& other)
+			noexcept
+			(
+				std::is_nothrow_copy_assignable_v<FirstType> ||
+				(
+					!std::is_copy_assignable_v<FirstType> &&
+					std::is_nothrow_copy_constructible_v<FirstType> &&
+					std::is_nothrow_destructible_v<FirstType>
+				)
+			)
+		{
+			if constexpr (std::is_copy_assignable_v<FirstType>)
+			{
+				first = other;
+			}
+			else
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), other);
+			}
+
+			return *this;
+		}
+
+		constexpr single& operator=(FirstType&& other)
+			noexcept
+			(
+				std::is_nothrow_move_assignable_v<FirstType> ||
+				(
+					!std::is_move_assignable_v<FirstType> &&
+					std::is_nothrow_move_constructible_v<FirstType> &&
+					std::is_nothrow_destructible_v<FirstType>
+				)
+			)
+		{
+			if constexpr (std::is_move_assignable_v<FirstType>)
+			{
+				first = std::move(other);
+			}
+			else
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), std::move(other));
+			}
+
+			return *this;
+		}
+        
 
         constexpr single &operator=(const single &other)
             noexcept
             (
-                std::is_nothrow_copy_assignable_v<FirstType>
+                std::is_nothrow_copy_assignable_v<FirstType> ||
+                (
+                    !std::is_copy_assignable_v<FirstType> &&
+					std::is_nothrow_copy_constructible_v<FirstType> &&
+                    std::is_nothrow_destructible_v<FirstType>
+                )
             )
         {
-            m_data = other.m_data;
+            if constexpr (std::is_copy_assignable_v<FirstType>)
+            {
+                first = other.first;
+            }
+			else
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), other.first);
+			}
             return *this;
         }
 
         constexpr single &operator=(single &&other)
             noexcept
             (
-                std::is_nothrow_move_assignable_v<FirstType>
+                std::is_nothrow_move_assignable_v<FirstType> ||
+				(
+					!std::is_move_assignable_v<FirstType> &&
+					std::is_move_constructible_v<FirstType> &&
+					std::is_nothrow_destructible_v<FirstType>
+                )
             )
         {
-            m_data = std::move(other.m_data);
+			if constexpr (std::is_move_assignable_v<FirstType>)
+			{
+				first = std::move(other.first);
+			}
+			else
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), std::move(other.first));
+			}
+            first = std::move(other.first);
             return *this;
         }
 
@@ -228,19 +315,26 @@ namespace woj
             ) = default;
 
         constexpr bool operator==(const single &other) const
-
             noexcept
+			(
+				std::is_arithmetic_v<FirstType> ||
+				std::is_pointer_v<FirstType>
+            )
         {
-            return m_data == other.m_data;
+            return first == other.first;
         }
 
         constexpr std::strong_ordering operator<=>(const single &other) const
             noexcept
+			(
+				std::is_arithmetic_v<FirstType> ||
+				std::is_pointer_v<FirstType>
+            )
         {
-            return m_data <=> other.m_data;
+			return first == other.first;
         }
 
-        constexpr FirstType operator[](const size_t index) const
+        constexpr FirstType &operator[](const size_t index)
             noexcept
 #ifndef NDEBUG
             (
@@ -250,14 +344,50 @@ namespace woj
         {
 #ifndef NDEBUG
             if (!index)
-                return m_data[index];
+                return first;
             throw bad_tuple_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
 #else
-            return m_data[index];
+            return first;
 #endif
         }
 
-        constexpr FirstType get(const size_t index) const
+		constexpr  const FirstType& operator[](const size_t index) const
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#endif
+		{
+#ifndef NDEBUG
+			if (!index)
+				return first;
+			throw bad_tuple_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
+#else
+			return first;
+#endif
+		}
+
+        template <size_t Index>
+		constexpr FirstType &get() const
+			noexcept
+#ifndef NDEBUG
+			(
+				!Index
+			)
+#endif
+		{
+#ifndef NDEBUG
+			if constexpr (!Index)
+				return first;
+
+			throw bad_tuple_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
+#else
+			return first;
+#endif
+		}
+
+        constexpr FirstType &get(const size_t index) const
             noexcept
 #ifndef NDEBUG
             (
@@ -265,11 +395,18 @@ namespace woj
             )
 #endif
         {
-            return operator[](index);
+#ifndef NDEBUG
+			if (!index)
+				return first;
+
+        	throw bad_tuple_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
+#else
+			return first;
+#endif
         }
 
-        constexpr size_t size() const
-            noexcept
+        static constexpr size_t size()
+	        noexcept
         {
             return 1;
         }
@@ -279,139 +416,371 @@ namespace woj
         {
             return true;
         }
+
+		constexpr single &swap(single &other)
+			noexcept
+			(
+				std::is_nothrow_swappable_v<FirstType>
+			)
+		{
+			std::swap(first, other.first);
+			return *this;
+		}
+
+		constexpr single &swap(single &&other)
+			noexcept
+			(
+				std::is_nothrow_swappable_v<FirstType>
+			)
+		{
+			std::swap(first, other.first);
+			return *this;
+		}
     };
 
-    template <typename FirstType, typename SecondType>
-    class pair
-    {
-    public:
-        union
-        {
-            FirstType m_data[2];
-        };
+	template <typename FirstType, typename SecondType>
+	class pair
+	{
+	public:
+		union
+		{
+			FirstType first;
+			SecondType second;
+		};
+		constexpr pair()
+			noexcept
+			(
+				std::is_nothrow_default_constructible_v<FirstType>&&
+				std::is_nothrow_default_constructible_v<SecondType>
+			)
+			: first{}, second{} {
+		}
 
-        constexpr pair() 
-            noexcept 
-            (
-                std::is_nothrow_default_constructible_v<FirstType> &&
-                std::is_nothrow_default_constructible_v<SecondType>
-            )
-            : m_data{} {}
+		template <typename OtherFirstType, typename OtherSecondType>
+			requires
+			(
+				std::is_constructible_v<FirstType, OtherFirstType &&> &&
+				std::is_constructible_v<SecondType, OtherSecondType &&>
+			)
+		explicit constexpr pair(OtherFirstType &&first, OtherSecondType &&second)
+			noexcept
+			(
+				std::is_nothrow_constructible_v<FirstType, OtherFirstType &&> &&
+				std::is_nothrow_constructible_v<SecondType, OtherSecondType &&>
+			)
+			: first{ std::forward<OtherFirstType>(first) }, second{ std::forward<OtherSecondType>(second) } {}
 
-        constexpr pair(const FirstType &first, const SecondType &second)
-            noexcept 
-            (
-                std::is_nothrow_copy_constructible_v<FirstType> &&
-                std::is_nothrow_copy_constructible_v<SecondType>
-            )
-            : m_data{ first, second } {}
-
-        constexpr pair(FirstType &&first, SecondType &&second)
-            noexcept 
-            (
-                std::is_nothrow_move_constructible_v<FirstType> &&
-                std::is_nothrow_move_constructible_v<SecondType>
-            )
-            : m_data{ std::move(first), std::move(second) } {}
-
-        constexpr pair(const pair &other)
-            noexcept 
-            (
-                std::is_nothrow_copy_constructible_v<FirstType> &&
-                std::is_nothrow_copy_constructible_v<SecondType>
-            )
-            : m_data{ other.m_data } {}
+		constexpr pair(const pair &other)
+			noexcept
+			(
+				std::is_nothrow_copy_constructible_v<FirstType> &&
+				std::is_nothrow_copy_constructible_v<SecondType>
+			)
+			: first{ other.first }, second{ other.second } {}
 
         constexpr pair(pair &&other)
-            noexcept 
+            noexcept
             (
-                std::is_nothrow_move_constructible_v<FirstType> &&
+                std::is_nothrow_move_constructible_v<FirstType>&&
                 std::is_nothrow_move_constructible_v<SecondType>
             )
-            : m_data{ std::move(other.m_data) } {}
+            : first{ std::move(other.first) }, second{ std::move(other.second) } {}
 
-        constexpr pair &operator=(const pair &other)
+		template <typename ...ArgsTypes>
+		explicit constexpr pair(in_place_t, ArgsTypes &&...args)
+			noexcept
+			(
+				std::is_nothrow_constructible_v<FirstType, ArgsTypes &&...>&&
+				std::is_nothrow_constructible_v<SecondType, ArgsTypes &&...>
+			)
+			: first{ std::forward<ArgsTypes>(args)... }, second{ std::forward<ArgsTypes>(args)... } {
+		}
+
+		constexpr pair& operator=(const pair &other)
+			noexcept
+			(
+				(
+                    std::is_nothrow_copy_assignable_v<FirstType> ||
+					(
+						!std::is_copy_assignable_v<FirstType> &&
+						std::is_nothrow_copy_constructible_v<FirstType> &&
+						std::is_nothrow_destructible_v<FirstType>
+                    )
+                ) &&
+				(
+                    std::is_nothrow_copy_assignable_v<SecondType> ||
+					(
+						!std::is_copy_assignable_v<SecondType>&&
+						std::is_nothrow_copy_constructible_v<SecondType>&&
+						std::is_nothrow_destructible_v<SecondType>
+                    )
+                )
+			)
+		{
+			if constexpr (std::is_copy_assignable_v<FirstType>)
+			{
+				first = other.first;
+			}
+			else
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), other.first);
+			}
+			if constexpr (std::is_copy_assignable_v<SecondType>)
+			{
+				second = other.second;
+			}
+			else
+			{
+				std::destroy_at(std::addressof(second));
+				std::construct_at(std::addressof(second), other.second);
+			}
+			return *this;
+		}
+         
+		constexpr pair &operator=(pair &&other)
+			noexcept
+			(
+				(
+                    std::is_nothrow_move_assignable_v<FirstType> ||
+					(
+						!std::is_move_assignable_v<FirstType> &&
+						std::is_nothrow_move_constructible_v<FirstType> &&
+						std::is_nothrow_destructible_v<FirstType>
+					)
+				) &&
+				(
+					std::is_nothrow_move_assignable_v<SecondType> ||
+					(
+						!std::is_move_assignable_v<SecondType> &&
+						std::is_nothrow_move_constructible_v<SecondType> &&
+						std::is_nothrow_destructible_v<SecondType>
+					)
+				)
+			)
+		{
+			if constexpr (std::is_move_assignable_v<FirstType>)
+			{
+				first = std::move(other.first);
+			}
+			else
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), std::move(other.first));
+			}
+			if constexpr (std::is_move_assignable_v<SecondType>)
+			{
+				second = std::move(other.second);
+			}
+			else
+			{
+				std::destroy_at(std::addressof(second));
+				std::construct_at(std::addressof(second), std::move(other.second));
+			}
+			return *this;
+		}
+
+		constexpr ~pair()
+			noexcept
+			(
+				std::is_nothrow_destructible_v<FirstType>&&
+				std::is_nothrow_destructible_v<SecondType>
+			) = default;
+
+		constexpr bool operator==(const pair& other) const
+			noexcept
+			(
+				(
+                    std::is_arithmetic_v<FirstType> ||
+					std::is_pointer_v<FirstType>
+                ) &&
+				(
+					std::is_arithmetic_v<SecondType> ||
+					std::is_pointer_v<SecondType>
+                )
+			)
+		{
+			return first == other.first && second == other.second;
+		}
+
+        constexpr std::strong_ordering operator<=>(const pair& other) const
             noexcept
             (
-                std::is_nothrow_copy_assignable_v<FirstType> &&
-                std::is_nothrow_copy_assignable_v<SecondType>
-            )
+                (
+                    std::is_arithmetic_v<FirstType> ||
+                    std::is_pointer_v<FirstType>
+                    ) &&
+                (
+                    std::is_arithmetic_v<SecondType> ||
+                    std::is_pointer_v<SecondType>
+                    )
+                )
         {
-            m_data = other.m_data;
-            return *this;
+            if (first == other.first)
+            {
+                if (second == other.second)
+                {
+                    return std::strong_ordering::equal;
+                }
+                if (second < other.second)
+                {
+	                return std::strong_ordering::less;
+                }
+                return std::strong_ordering::greater;
+            }
+            if (first < other.first)
+            {
+	            return std::strong_ordering::less;
+            }
+            return std::strong_ordering::greater;
         }
 
-        constexpr pair &operator=(pair &&other)
-            noexcept
-            (
-                std::is_nothrow_move_assignable_v<FirstType> &&
-                std::is_nothrow_move_assignable_v<SecondType>
-            )
-        {
-            m_data = std::move(other.m_data);
-            return *this;
-        }
-
-        constexpr ~pair()
-            noexcept
-            (
-                std::is_nothrow_destructible_v<FirstType> &&
-                std::is_nothrow_destructible_v<SecondType>
-            ) = default;
-
-        constexpr bool operator==(const pair &other) const
-            noexcept
-        {
-            return m_data[0] == other.m_data[0] && m_data[1] == other.m_data[1];
-        }
-
-        constexpr std::strong_ordering operator<=>(const pair &other) const
-            noexcept
-        {
-            if (m_data[0] != other.m_data[0])
-                return m_data[0] <=> other.m_data[0];
-            return m_data[1] <=> other.m_data[1];
-        }
-
-        constexpr FirstType operator[](const size_t index) const
-            noexcept
+		constexpr auto &operator[](const size_t index)
+			noexcept
 #ifndef NDEBUG
-            (
-                false
-            )
+			(
+				false
+			)
 #endif
-        {
+		{
 #ifndef NDEBUG
-            if (index < 2)
-                return m_data[index];
-            throw bad_tuple_access{ __LINE__, "Pair access out of bounds.", __FILE__, __func__ };
+            if (!index)
+            {
+                return first;
+            }
+            if (index == 1)
+            {
+                return second;
+            }
+
+			throw bad_tuple_access{ __LINE__, "Pair access out of bounds.", __FILE__, __func__ };
 #else
-            return m_data[index];
+			if (!index)
+			{
+				return first;
+			}
+			return second;
 #endif
-        }
+		}
 
-        constexpr FirstType get(const size_t index) const
-            noexcept
+		constexpr const auto &operator[](const size_t index) const
+			noexcept
 #ifndef NDEBUG
-            (
-                false
-            )
+			(
+				false
+			)
 #endif
-        {
-            return operator[](index);
-        }
+		{
+#ifndef NDEBUG
+			if (!index)
+			{
+				return first;
+			}
+			if (index == 1)
+			{
+				return second;
+			}
 
-        constexpr size_t size() const
-            noexcept
-        {
-            return 2;
-        }
+			throw bad_tuple_access{ __LINE__, "Pair access out of bounds.", __FILE__, __func__ };
+#else
+			if (!index)
+			{
+				return first;
+			}
+			return second;
+#endif
+		}
 
-        constexpr explicit operator bool() const
-            noexcept
-        {
-            return true;
-        }
-    };
+		template <size_t Index>
+		constexpr auto get() const
+			noexcept
+#ifndef NDEBUG
+			(
+				Index < 2
+			)
+#endif
+		{
+#ifndef NDEBUG
+			if constexpr (!Index)
+			{
+				return first;
+			}
+			if constexpr (Index == 1)
+			{
+				return second;
+			}
+			throw bad_tuple_access{ __LINE__, "Pair access out of bounds.", __FILE__, __func__ };
+#else
+			if constexpr (!Index)
+			{
+				return first;
+			}
+			return second;
+#endif
+		}
+
+		constexpr auto get(const size_t index) const
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#endif
+		{
+#ifndef NDEBUG
+			if (!index)
+			{
+				return first;
+			}
+			if (index == 1)
+			{
+				return second;
+			}
+			throw bad_tuple_access{ __LINE__, "Pair access out of bounds.", __FILE__, __func__ };
+#else
+			if (!index)
+			{
+				return first;
+			}
+			return second;
+#endif
+		}
+
+		static constexpr size_t size()
+			noexcept
+		{
+			return 2;
+		}
+
+		constexpr explicit operator bool() const
+			noexcept
+		{
+			return true;
+		}
+
+		constexpr pair &swap(pair &other)
+			noexcept
+			(
+				std::is_nothrow_swappable_v<FirstType> &&
+				std::is_nothrow_swappable_v<SecondType>
+			)
+		{
+			std::swap(first, other.first);
+			std::swap(second, other.second);
+			return *this;
+		}
+
+		constexpr pair &swap(pair &&other)
+			noexcept
+			(
+				std::is_nothrow_swappable_v<FirstType>&&
+				std::is_nothrow_swappable_v<SecondType>
+			)
+		{
+			std::swap(first, other.first);
+			std::swap(second, other.second);
+			return *this;
+		}
+	};
 
 } // namespace woj
