@@ -137,6 +137,7 @@
 #include <string>
 #include <type_traits>
 #include <cstdio>
+#include <cstdint>
 
 namespace woj
 {

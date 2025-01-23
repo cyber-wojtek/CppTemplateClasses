@@ -10,7 +10,8 @@ namespace woj
     public:
         constexpr bad_tuple_access() 
             noexcept 
-            : exception{ static_cast<uint64_t>(-1), "Bad optional access.", nullptr, nullptr } {}
+			: exception{ static_cast<uint64_t>(-1), "Nulluple access out of bounds.", nullptr, nullptr } {
+		}
 
         constexpr bad_tuple_access(const size_t line, const char* message, const char* const file, const char* const function) 
             noexcept
@@ -61,7 +62,7 @@ namespace woj
 #endif
         {
 #ifndef NDEBUG
-            throw bad_tuple_access{ __LINE__, "Accessing nulluple.", __FILE__, __func__ };
+			throw bad_tuple_access{ __LINE__, "Nulluple access out of bounds.", __FILE__, __func__ };
 #endif
             return none;
         }
@@ -408,6 +409,108 @@ namespace woj
 #endif
 		}
 
+		constexpr const single &copy_from(const single& other) const
+			noexcept
+			(
+				std::is_nothrow_copy_constructible_v<FirstType> ||
+				(
+					!std::is_copy_constructible_v<FirstType> &&
+					std::is_nothrow_copy_assignable_v<FirstType>
+				)
+			)
+		{
+			if constexpr (std::is_copy_assignable_v<FirstType>)
+			{
+				first = other.first;
+			}
+			else
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), other.first);
+			}
+
+			return *this;
+		}
+
+
+		constexpr single &copy_from(const single& other)
+			noexcept
+			(
+				std::is_nothrow_copy_constructible_v<FirstType> ||
+				(
+					!std::is_copy_constructible_v<FirstType> &&
+					std::is_nothrow_copy_assignable_v<FirstType>
+				)
+			)
+		{
+			if constexpr (std::is_copy_assignable_v<FirstType>)
+			{
+				first = other.first;
+			}
+			else
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), other.first);
+			}
+
+			return *this;
+		}
+
+		template <typename OtherSingleType>
+			requires
+			(
+				std::is_same_v<std::remove_cvref_t<OtherSingleType>, single>
+			)
+		constexpr const single& copy_to(OtherSingleType&& other) const
+			noexcept
+			(
+				std::is_nothrow_copy_constructible_v<FirstType> ||
+				(
+					!std::is_copy_constructible_v<FirstType> &&
+					std::is_nothrow_copy_constructible_v<FirstType>
+				)
+			)
+        {
+			if constexpr (std::is_copy_constructible_v<FirstType>)
+			{
+				other.first = first;
+			}
+			else
+			{
+				std::destroy_at(std::addressof(other.first));
+				std::construct_at(std::addressof(other.first), first);
+			}
+			return *this;
+        }
+
+		template <typename OtherSingleType>
+			requires
+			(
+				std::is_same_v<std::remove_cvref_t<OtherSingleType>, single>
+			)
+			constexpr single& copy_to(OtherSingleType&& other)
+				noexcept
+				(
+					std::is_nothrow_copy_constructible_v<FirstType> ||
+					(
+						!std::is_copy_constructible_v<FirstType> &&
+						std::is_nothrow_copy_constructible_v<FirstType>
+					)
+				)
+			{
+				if constexpr (std::is_copy_constructible_v<FirstType>)
+				{
+					other.first = first;
+				}
+				else
+				{
+					std::destroy_at(std::addressof(other.first));
+					std::construct_at(std::addressof(other.first), first);
+				}
+				return *this;
+			}
+
+
         template <size_t Index>
 		constexpr FirstType &get() const
 			noexcept
@@ -485,8 +588,13 @@ namespace woj
 		union
 		{
 			FirstType first;
+		};
+
+		union
+		{
 			SecondType second;
 		};
+
 		constexpr pair()
 			noexcept
 			(
