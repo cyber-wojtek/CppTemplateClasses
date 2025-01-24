@@ -4874,7 +4874,7 @@ namespace woj
                 {
                     std::swap(m_value, other.m_value);
                 }
-                // -----> SELF: 1 (CSTATE), OTHER: 0 (RSTATE) <---------
+                // -----> SELF: 1 (CSTATE), OTHER: 0 (RSTATE) <--------- 
                 else
                 {
                     std::construct_at(std::addressof(other.m_value), std::move(m_value));
