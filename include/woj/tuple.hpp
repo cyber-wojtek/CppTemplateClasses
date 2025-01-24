@@ -1771,11 +1771,13 @@ namespace woj
 						State == state_t::initialized ||
 						State == state_t::unknown
 					) &&
-					std::is_nothrow_assignable_v<FirstType, OtherValueType&&> ||
 					(
-						!std::is_assignable_v<FirstType, OtherValueType&&> &&
-						std::is_nothrow_constructible_v<FirstType, OtherValueType&&> &&
-						std::is_nothrow_destructible_v<FirstType>
+						std::is_nothrow_assignable_v<FirstType, OtherValueType&&> ||
+						(
+							!std::is_assignable_v<FirstType, OtherValueType&&> &&
+							std::is_nothrow_constructible_v<FirstType, OtherValueType&&> &&
+							std::is_nothrow_destructible_v<FirstType>
+						)
 					)
 				) ||
 				(
@@ -1783,6 +1785,81 @@ namespace woj
 					std::is_nothrow_constructible_v<FirstType, OtherValueType&&>
 				)
 			)
+		{
+			if constexpr (State == state_t::initialized)
+			{
+				if constexpr (std::is_assignable_v<FirstType, OtherValueType &&>)
+				{
+					first = std::forward<OtherValueType>(other);
+				}
+				else
+				{
+					std::destroy_at(std::addressof(first));
+					std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
+				}
+			}
+			else if constexpr (State == state_t::uninitialized)
+			{
+				std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
+			}
+			else
+			{
+				if constexpr (std::is_assignable_v<FirstType, OtherValueType &&>)
+				{
+					first = std::forward<OtherValueType>(other);
+				}
+				else
+				{
+					std::destroy_at(std::addressof(first));
+					std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
+				}
+			}
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states, typename OtherValueType>
+			requires
+			(
+				!std::is_same_v<std::remove_cvref_t<OtherValueType>, single>
+			)
+		constexpr single& copy_from(const state_t state, const state_t other_state, OtherValueType&& other)
+			noexcept
+			(
+				std::is_nothrow_assignable_v<FirstType, OtherValueType&&> &&
+				std::is_nothrow_constructible_v<FirstType, OtherValueType&&> &&
+				std::is_nothrow_destructible_v<FirstType>
+			)
+		{
+			if (state == state_t::initialized)
+			{
+				if constexpr (std::is_assignable_v<FirstType, OtherValueType&&>)
+				{
+					first = std::forward<OtherValueType>(other);
+				}
+				else
+				{
+					std::destroy_at(std::addressof(first));
+					std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
+				}
+			}
+			else if (state == state_t::uninitialized)
+			{
+				std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
+			}
+			else
+			{
+				if constexpr (std::is_assignable_v<FirstType, OtherValueType&&>)
+				{
+					first = std::forward<OtherValueType>(other);
+				}
+				else
+				{
+					std::destroy_at(std::addressof(first));
+					std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
+				}
+			}
+			return *this;
+		}
 
 		template <typename OtherSingleType>
 			requires
