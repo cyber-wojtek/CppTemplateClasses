@@ -7,7 +7,7 @@
 #endif
 
 // Define version detection for MSVC (_MSVC_LANG) and GCC/Clang (__cplusplus)
-#if defined(_MSC_VER) && defined(_MSVC_LANG)
+#if defined(_MSC_VER)  &&defined(_MSVC_LANG)
 #define WOJ_CPP_VERSION _MSVC_LANG
 #define _CRT_SECURE_NO_WARNINGS
 #pragma warning(disable:4996)
@@ -159,37 +159,83 @@ namespace woj
 	 */
 	struct none_t
 	{
-		explicit constexpr none_t() 
+		explicit 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			none_t() 
 			noexcept = default;
 
-		constexpr none_t(const none_t&) 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			none_t(const none_t &other) 
 			noexcept = default;
 
-		constexpr none_t(none_t&&) 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			none_t(none_t &&other) 
 			noexcept = default;
 
-		constexpr none_t& operator=(const none_t&) 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			none_t &operator=(const none_t &other) 
 			noexcept = default;
 
-		constexpr none_t& operator=(none_t&&) 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			none_t &operator=(none_t &&other)
 			noexcept = default;
 
-		constexpr ~none_t() 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			~none_t() 
 			noexcept = default;
 
-		constexpr bool operator==(const none_t&) const 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			bool operator==(const none_t &other) const 
 			noexcept 
 		{ 
 			return true; 
 		}
 
-		constexpr std::strong_ordering operator<=>(const none_t&) const 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			std::strong_ordering operator<=>(const none_t &other) const 
 			noexcept 
-		{ 
+		{
 			return std::strong_ordering::equal; 
 		}
 
-		constexpr operator bool() const 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			operator bool() const 
 			noexcept 
 		{ 
 			return false; 
@@ -206,37 +252,82 @@ namespace woj
 	 */
 	struct empty_t
 	{
-		constexpr empty_t() 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			empty_t() 
 			noexcept = default;
 
-		constexpr empty_t(const empty_t&)
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			empty_t(const empty_t &other)
 			noexcept = default;
 
-		constexpr empty_t(empty_t&&)
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			empty_t(empty_t &&other)
 			noexcept = default;
 
-		constexpr empty_t& operator=(const empty_t&)
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			empty_t &operator=(const empty_t &other)
 			noexcept = default;
 
-		constexpr empty_t& operator=(empty_t&&)
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			empty_t &operator=(empty_t &&other)
 			noexcept = default;
 
-		constexpr ~empty_t()
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			~empty_t()
 			noexcept = default;
 
-		constexpr bool operator==(const empty_t&) const
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			bool operator==(const empty_t &other) const
 			noexcept
 		{
 			return true;
 		}
 
-		constexpr std::strong_ordering operator<=>(const empty_t&) const
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			std::strong_ordering operator<=>(const empty_t &other) const
 			noexcept
 		{
 			return std::strong_ordering::equal;
 		}
 
-		constexpr operator bool() const
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			operator bool() const
 			noexcept
 		{
 			return false;
@@ -245,31 +336,261 @@ namespace woj
 
 	struct in_place_t
 	{
-		explicit constexpr in_place_t() noexcept = default;
+		explicit
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			in_place_t()
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			in_place_t(const in_place_t &other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			in_place_t(in_place_t &&other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			in_place_t &operator=(const in_place_t &other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			in_place_t &operator=(in_place_t &&other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			~in_place_t()
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			bool operator==(const in_place_t &other) const
+			noexcept
+		{
+			return true;
+		}
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			std::strong_ordering operator<=>(const in_place_t &other) const
+			noexcept
+		{
+			return std::strong_ordering::equal;
+		}
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			operator bool() const
+			noexcept
+		{
+			return false;
+		}
 	};
 
 	constexpr in_place_t in_place{};
 
-	class dynamic_states_t
+	struct invalid_t
 	{
-	public:
-		explicit constexpr dynamic_states_t() 
+		explicit
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+			invalid_t()
 			noexcept = default;
 
-		constexpr dynamic_states_t(const dynamic_states_t&) 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			invalid_t(const invalid_t& other)
 			noexcept = default;
 
-		constexpr dynamic_states_t(dynamic_states_t&&) 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			invalid_t(invalid_t&& other)
 			noexcept = default;
 
-		constexpr dynamic_states_t& operator=(const dynamic_states_t&) 
-			noexcept = default;
-	
-		constexpr dynamic_states_t& operator=(dynamic_states_t&&)
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			invalid_t& operator=(const invalid_t& other)
 			noexcept = default;
 
-		constexpr ~dynamic_states_t()
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			invalid_t& operator=(invalid_t&& other)
 			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			~invalid_t()
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			bool operator==(const invalid_t& other) const
+			noexcept
+		{
+			return true;
+		}
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			std::strong_ordering operator<=>(const invalid_t& other) const
+			noexcept
+		{
+			return std::strong_ordering::equal;
+		}
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			operator bool() const
+			noexcept
+		{
+			return false;
+		}
+	};
+
+	constexpr invalid_t invalid{};
+
+	struct dynamic_states_t
+	{
+		explicit
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+			dynamic_states_t()
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			dynamic_states_t(const dynamic_states_t &other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			dynamic_states_t(dynamic_states_t &&other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			dynamic_states_t &operator=(const dynamic_states_t &other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			dynamic_states_t &operator=(dynamic_states_t &&other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			~dynamic_states_t()
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			bool operator==(const dynamic_states_t &other) const
+			noexcept
+		{
+			return true;
+		}
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			std::strong_ordering operator<=>(const dynamic_states_t &other) const
+			noexcept
+		{
+			return std::strong_ordering::equal;
+		}
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			operator bool() const
+			noexcept
+		{
+			return false;
+		}
 	};
 
 	inline constexpr dynamic_states_t dynamic_states{};
@@ -290,7 +611,7 @@ namespace woj
 		return std::is_constant_evaluated();
 #elif defined(_MSC_VER)
 		return std::_Is_constant_evaluated();
-#elif (defined(__clang__) && || __clang_major__ >= 10) || (defined(__GNUC__) && __GNUC__ >= 10) || (defined(__INTEL_COMPILER) && __INTEL_COMPILER >= 2005)
+#elif (defined(__clang__)  &&|| __clang_major__ >= 10) || (defined(__GNUC__)  &&__GNUC__ >= 10) || (defined(__INTEL_COMPILER)  &&__INTEL_COMPILER >= 2005)
 		return __builtin_is_constant_evaluated();
 #else
 		return false;
@@ -312,10 +633,10 @@ namespace woj
 		constexpr exception(const size_t line, const char* const msg, const char* const file, const char* const function) noexcept
 			: m_message(msg ? copy_string(msg) : nullptr), m_file(file ? copy_string(file) : nullptr), m_function(function ? copy_string(function) : nullptr), m_line(line), m_manage(true), m_what_buffer(nullptr) {}
 
-		constexpr exception(const exception& other) noexcept
+		constexpr exception(const exception &other) noexcept
 			: m_message(other.m_message ? copy_string(other.m_message) : nullptr), m_file(other.m_file ? copy_string(other.m_file) : nullptr), m_function(other.m_function ? copy_string(other.m_function) : nullptr), m_line(other.m_line), m_manage(true), m_what_buffer(nullptr) {}
 
-		constexpr exception(exception&& other) noexcept
+		constexpr exception(exception &&other) noexcept
 			: m_message(other.m_message), m_file(other.m_file), m_function(other.m_function), m_line(other.m_line), m_manage(other.m_manage), m_what_buffer(other.m_what_buffer) {
 			other.m_message = other.m_file = other.m_function = nullptr;
 			other.m_manage = false;
@@ -327,7 +648,7 @@ namespace woj
 			delete[] m_what_buffer;
 		}
 
-		constexpr exception& operator=(const exception& other) noexcept {
+		constexpr exception &operator=(const exception &other) noexcept {
 			if (this != &other) {
 				clear();
 				m_message = copy_string(other.m_message);
@@ -339,7 +660,7 @@ namespace woj
 			return *this;
 		}
 
-		constexpr exception& operator=(exception&& other) noexcept {
+		constexpr exception &operator=(exception &&other) noexcept {
 			if (this != &other) {
 				clear();
 				m_message = other.m_message;

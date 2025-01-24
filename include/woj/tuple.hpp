@@ -28,41 +28,101 @@ namespace woj
     class nulluple
     {
     public:
-        constexpr nulluple() 
-            noexcept = default;
-
-        constexpr nulluple(const nulluple other) 
-            noexcept = default;
-
-		constexpr nulluple(const tuple_state other_state, const nulluple other)
+#if WOJ_HAS_CXX20
+		consteval
+#else
+        constexpr
+#endif
+			nulluple()
 			noexcept = default;
 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			nulluple(const nulluple &other)
+			noexcept = default;
 
-        constexpr nulluple(const noinit_t) 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple(const tuple_state other_state, const nulluple &other)
+			noexcept {}
+
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple(const none_t none)
+			noexcept {}
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+			#endif
+    		nulluple(const noinit_t noinit)
             noexcept {}
 
-        constexpr nulluple &operator=(const nulluple &) 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &operator=(const nulluple &) 
             noexcept = default;
 
-        constexpr nulluple &operator=(nulluple &&)
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &operator=(nulluple &&)
             noexcept = default;
 
-        constexpr ~nulluple()
+#if WOJ_HAS_CXX20
+		consteval
+#endif
+    		~nulluple()
             noexcept = default;
 
-        constexpr bool operator==(const nulluple other) const
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		bool operator==(const nulluple other) const
             noexcept
         {
             return true;
         }
 
-        constexpr std::strong_ordering operator<=>(const nulluple other) const
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		std::strong_ordering operator<=>(const nulluple other) const
             noexcept
         {
             return std::strong_ordering::equal;
         }
 
-        constexpr none_t operator[](const size_t) const
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		invalid_t
+#ifndef NDEBUG
+			[[noreturn]]
+#endif
+    		operator[](const size_t) const
             noexcept
 #ifndef NDEBUG
             (
@@ -73,7 +133,7 @@ namespace woj
 #ifndef NDEBUG
 			throw bad_tuple_access{ __LINE__, "Nulluple access out of bounds.", __FILE__, __func__ };
 #endif
-            return none;
+			return invalid;
         }
 
 		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
@@ -103,6 +163,13 @@ namespace woj
 		{
 			return *this;
 		}
+
+		template <tuple_state OtherState = tuple_state::unknown>
+		static constexpr nulluple constructed_from(const noinit_t noinit)
+			noexcept
+        {
+			return nulluple{ noinit };
+        }
 
 		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
 		constexpr const nulluple &assign_from(const nulluple other) const
@@ -775,9 +842,9 @@ namespace woj
 							!std::is_assignable_v<FirstType, OtherValueType &&> &&
 							std::is_nothrow_constructible_v<FirstType, OtherValueType &&> &&
 							std::is_nothrow_destructible_v<FirstType>
-							)
 						)
-					) ||
+					)
+				) ||
 				(
 					State == tuple_state::unintialized &&
 					std::is_nothrow_constructible_v<FirstType, OtherValueType &&>
