@@ -74,7 +74,7 @@ namespace woj
 #else
 		constexpr
 #endif
-    		nulluple &operator=(const nulluple &) 
+    		nulluple &operator=(const nulluple &other) 
             noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -82,7 +82,7 @@ namespace woj
 #else
 		constexpr
 #endif
-    		nulluple &operator=(nulluple &&)
+    		nulluple &operator=(nulluple &&other)
             noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -111,32 +111,9 @@ namespace woj
             noexcept
         {
             return std::strong_ordering::equal;
-        }
+							}
 
-#if WOJ_HAS_CXX20
-		consteval
-#else
-		constexpr
-#endif
-    		invalid_t
-#ifndef NDEBUG
-			[[noreturn]]
-#endif
-    		operator[](const size_t) const
-            noexcept
-#ifndef NDEBUG
-            (
-                false
-            )
-#endif
-        {
-#ifndef NDEBUG
-			throw bad_tuple_access{ __LINE__, "Nulluple access out of bounds.", __FILE__, __func__ };
-#endif
-			return invalid;
-        }
-
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
+		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknow	n>
 		constexpr const nulluple &construct_from(const nulluple other) const
 			noexcept
 		{
