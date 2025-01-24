@@ -141,6 +141,17 @@
 
 namespace woj
 {
+	class noinit_t;
+
+	template <typename Type>
+	class is_noinit_t : std::false_type {};
+
+	template <>
+	class is_noinit_t<noinit_t> : std::true_type {};
+
+	template <typename Type>
+	constexpr bool is_noinit_t_v = is_noinit_t<Type>::value;
+
 	/**
 	 * Represents a type that is used to prevent the initialization of a variable
 	 */
@@ -161,7 +172,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			noinit_t(const noinit_t& other)
+			noinit_t(const noinit_t &other)
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -169,7 +180,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			noinit_t(noinit_t&& other)
+			noinit_t(noinit_t &&other)
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -177,7 +188,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			noinit_t& operator=(const noinit_t& other)
+			noinit_t &operator=(const noinit_t &other)
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -185,7 +196,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			noinit_t& operator=(noinit_t&& other)
+			noinit_t &operator=(noinit_t &&other)
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -199,7 +210,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			bool operator==(const noinit_t& other) const
+			bool operator==(const noinit_t &other) const
 			noexcept
 		{
 			return true;
@@ -210,7 +221,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			std::strong_ordering operator<=>(const noinit_t& other) const
+			std::strong_ordering operator<=>(const noinit_t &other) const
 			noexcept
 		{
 			return std::strong_ordering::equal;
@@ -232,6 +243,17 @@ namespace woj
 	 * Represents a constant that is used to prevent the initialization of a class
 	 */
 	constexpr noinit_t noinit{};
+
+	class none_t;
+
+	template <typename Type>
+	class is_none_t : std::false_type {};
+
+	template <>
+	class is_none_t<none_t> : std::true_type {};
+
+	template <typename Type>
+	constexpr bool is_none_t_v = is_none_t<Type>::value;
 
 	/**
 	 * Represents a type that is used to construct class without any value
@@ -321,9 +343,20 @@ namespace woj
 	};
 
 	/**
-	 * Represents a constant that is used to construct an empty value.
+	 * Represents a constant that is used to construct an empty/unset value.
 	 */
 	constexpr none_t none{};
+
+	class empty_t;
+
+	template <typename Type>
+	class is_empty_t : std::false_type {};
+
+	template <>
+	class is_empty_t<empty_t> : std::true_type {};
+
+	template <typename Type>
+	constexpr bool is_empty_t_v = is_empty_t<Type>::value;
 
 	/**
 	 * Represents a type that is to be used as a placeholder for when empty constructor like '{}' may be desired (e.g. 'std::initializer_list' - like with no elements)
@@ -411,6 +444,17 @@ namespace woj
 		}
 	};
 
+	class in_place_t;
+
+	template <typename Type>
+	class is_in_place : std::false_type {};
+
+	template <>
+	class is_in_place<in_place_t> : std::true_type {};
+
+	template <typename Type>
+	constexpr bool is_in_place_v = is_in_place<Type>::value;
+
 	class in_place_t
 	{
 	public:
@@ -497,6 +541,17 @@ namespace woj
 
 	constexpr in_place_t in_place{};
 
+	class invalid_t;
+
+	template <typename Type>
+	class is_invalid_t : std::false_type {};
+
+	template <>
+	class is_invalid_t<invalid_t> : std::true_type {};
+
+	template <typename Type>
+	constexpr bool is_invalid_t_v = is_invalid_t<Type>::value;
+
 	class invalid_t
 	{
 	public:
@@ -514,7 +569,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			invalid_t(const invalid_t& other)
+			invalid_t(const invalid_t &other)
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -522,7 +577,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			invalid_t(invalid_t&& other)
+			invalid_t(invalid_t &&other)
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -530,7 +585,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			invalid_t& operator=(const invalid_t& other)
+			invalid_t &operator=(const invalid_t &other)
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -538,7 +593,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			invalid_t& operator=(invalid_t&& other)
+			invalid_t &operator=(invalid_t &&other)
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -552,7 +607,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			bool operator==(const invalid_t& other) const
+			bool operator==(const invalid_t &other) const
 			noexcept
 		{
 			return true;
@@ -563,7 +618,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			std::strong_ordering operator<=>(const invalid_t& other) const
+			std::strong_ordering operator<=>(const invalid_t &other) const
 			noexcept
 		{
 			return std::strong_ordering::equal;
@@ -669,10 +724,20 @@ namespace woj
 
 	inline constexpr dynamic_states_t dynamic_states{};
 
+	class delimiter_t;
+
+	template <typename Type>
+	class is_delimiter_t : std::false_type {};
+
+	template <>
+	class is_delimiter_t<delimiter_t> : std::true_type {};
+
+	template <typename Type>
+	constexpr bool is_delimiter_t_v = is_delimiter_t<Type>::value;
+
 	class delimiter_t
 	{
 	public:
-		explicit
 #if WOJ_HAS_CXX20
 			consteval
 #else
@@ -686,7 +751,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			delimiter_t(const delimiter_t& other)
+			delimiter_t(const delimiter_t &other)
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -694,7 +759,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			delimiter_t(delimiter_t&& other)
+			delimiter_t(delimiter_t &&other)
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -702,7 +767,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			delimiter_t& operator=(const delimiter_t& other)
+			delimiter_t &operator=(const delimiter_t &other)
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -710,7 +775,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			delimiter_t& operator=(delimiter_t&& other)
+			delimiter_t &operator=(delimiter_t &&other)
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -724,7 +789,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			bool operator==(const delimiter_t& other) const
+			bool operator==(const delimiter_t &other) const
 			noexcept
 		{
 			return true;
@@ -735,7 +800,7 @@ namespace woj
 #else
 		constexpr
 #endif
-			std::strong_ordering operator<=>(const delimiter_t& other) const
+			std::strong_ordering operator<=>(const delimiter_t &other) const
 			noexcept
 		{
 			return std::strong_ordering::equal;
