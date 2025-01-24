@@ -144,9 +144,88 @@ namespace woj
 	/**
 	 * Represents a type that is used to prevent the initialization of a variable
 	 */
-	struct noinit_t
+	class noinit_t
 	{
-		explicit constexpr noinit_t() noexcept = default;
+	public:
+		explicit
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+			noinit_t()
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			noinit_t(const noinit_t& other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			noinit_t(noinit_t&& other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			noinit_t& operator=(const noinit_t& other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			noinit_t& operator=(noinit_t&& other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		constexpr
+#endif
+			~noinit_t()
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			bool operator==(const noinit_t& other) const
+			noexcept
+		{
+			return true;
+		}
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			std::strong_ordering operator<=>(const noinit_t& other) const
+			noexcept
+		{
+			return std::strong_ordering::equal;
+		}
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			operator bool() const
+			noexcept
+		{
+			return false;
+		}
 	};
 
 	/**
@@ -157,8 +236,9 @@ namespace woj
 	/**
 	 * Represents a type that is used to construct class without any value
 	 */
-	struct none_t
+	class none_t
 	{
+	public:
 		explicit 
 #if WOJ_HAS_CXX20
 		consteval
@@ -201,8 +281,6 @@ namespace woj
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
-		consteval
-#else
 		constexpr
 #endif
 			~none_t() 
@@ -250,8 +328,9 @@ namespace woj
 	/**
 	 * Represents a type that is to be used as a placeholder for when empty constructor like '{}' may be desired (e.g. 'std::initializer_list' - like with no elements)
 	 */
-	struct empty_t
+	class empty_t
 	{
+	public:
 #if WOJ_HAS_CXX20
 		consteval
 #else
@@ -293,8 +372,6 @@ namespace woj
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
-		consteval
-#else
 		constexpr
 #endif
 			~empty_t()
@@ -334,8 +411,9 @@ namespace woj
 		}
 	};
 
-	struct in_place_t
+	class in_place_t
 	{
+	public:
 		explicit
 #if WOJ_HAS_CXX20
 		consteval
@@ -378,8 +456,6 @@ namespace woj
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
-		consteval
-#else
 		constexpr
 #endif
 			~in_place_t()
@@ -421,8 +497,9 @@ namespace woj
 
 	constexpr in_place_t in_place{};
 
-	struct invalid_t
+	class invalid_t
 	{
+	public:
 		explicit
 #if WOJ_HAS_CXX20
 			consteval
@@ -465,8 +542,6 @@ namespace woj
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
-		consteval
-#else
 		constexpr
 #endif
 			~invalid_t()
@@ -508,8 +583,9 @@ namespace woj
 
 	constexpr invalid_t invalid{};
 
-	struct dynamic_states_t
+	class dynamic_states_t
 	{
+	public:
 		explicit
 #if WOJ_HAS_CXX20
 			consteval
@@ -552,8 +628,6 @@ namespace woj
 			noexcept = default;
 
 #if WOJ_HAS_CXX20
-		consteval
-#else
 		constexpr
 #endif
 			~dynamic_states_t()
@@ -594,6 +668,92 @@ namespace woj
 	};
 
 	inline constexpr dynamic_states_t dynamic_states{};
+
+	class delimiter_t
+	{
+	public:
+		explicit
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+			delimiter_t()
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			delimiter_t(const delimiter_t& other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			delimiter_t(delimiter_t&& other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			delimiter_t& operator=(const delimiter_t& other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			delimiter_t& operator=(delimiter_t&& other)
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		constexpr
+#endif
+			~delimiter_t()
+			noexcept = default;
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			bool operator==(const delimiter_t& other) const
+			noexcept
+		{
+			return true;
+		}
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			std::strong_ordering operator<=>(const delimiter_t& other) const
+			noexcept
+		{
+			return std::strong_ordering::equal;
+		}
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			operator bool() const
+			noexcept
+		{
+			return false;
+		}
+	};
+
+	constexpr delimiter_t delimiter{};
 
 	/**
 	 * Function that checks if the m_function is being evaluated at compile-time.

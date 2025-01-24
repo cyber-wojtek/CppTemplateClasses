@@ -18,16 +18,16 @@ namespace woj
             : exception{ line, message, file, function } {}
     };
 
-	enum class tuple_state
-	{
-		initialized,
-		unintialized,
-		unknown
-	};
-
     class nulluple
     {
     public:
+		enum class state_t : uint8_t
+		{
+			intialized,
+			uninitialized,
+			unknown
+		};
+
 #if WOJ_HAS_CXX20
 		consteval
 #else
@@ -49,7 +49,7 @@ namespace woj
 #else
 		constexpr
 #endif
-    		nulluple(const tuple_state other_state, const nulluple &other)
+    		nulluple(const state_t other_state, const nulluple &other)
 			noexcept {}
 
 
@@ -74,6 +74,14 @@ namespace woj
 #else
 		constexpr
 #endif
+			nulluple(const in_place_t in_place)
+			noexcept {}
+
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
     		nulluple &operator=(const nulluple &) 
             noexcept = default;
 
@@ -86,7 +94,7 @@ namespace woj
             noexcept = default;
 
 #if WOJ_HAS_CXX20
-		consteval
+		constexpr
 #endif
     		~nulluple()
             noexcept = default;
@@ -113,237 +121,655 @@ namespace woj
             return std::strong_ordering::equal;
         }
 
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 #if WOJ_HAS_CXX20
 		consteval
 #else
 		constexpr
 #endif
-    		invalid_t
-#ifndef NDEBUG
-			[[noreturn]]
-#endif
-    		operator[](const size_t) const
-            noexcept
-#ifndef NDEBUG
-            (
-                false
-            )
-#endif
-        {
-#ifndef NDEBUG
-			throw bad_tuple_access{ __LINE__, "Nulluple access out of bounds.", __FILE__, __func__ };
-#endif
-			return invalid;
-        }
-
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
-		constexpr const nulluple &construct_from(const nulluple other) const
+    		const nulluple &construct_from(const none_t none) const
 			noexcept
 		{
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
-		constexpr nulluple &construct_from(const nulluple other)
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &construct_from(const none_t none)
 			noexcept
 		{
 			return *this;
 		}
 
 		template <dynamic_states_t DynamicStates = dynamic_states>
-		constexpr const nulluple &construct_from(const nulluple other) const
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple &construct_from(const state_t state, const state_t other_state, const none_t none) const
 			noexcept
 		{
 			return *this;
 		}
 
 		template <dynamic_states_t DynamicStates = dynamic_states>
-		constexpr nulluple &construct_from(const nulluple other)
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &construct_from(const state_t state, const state_t other_state, const none_t none)
 			noexcept
 		{
 			return *this;
 		}
 
-		template <tuple_state OtherState = tuple_state::unknown>
-		static constexpr nulluple constructed_from(const noinit_t noinit)
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+			#endif
+    		const nulluple  &construct_from(const noinit_t noinit) const
 			noexcept
-        {
+		{
+			return *this;
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &construct_from(const noinit_t noinit)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple &construct_from(const state_t state, const state_t other_state, const noinit_t noinit) const
+			noexcept
+		{
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &construct_from(const state_t state, const state_t other_state, const noinit_t noinit)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple &construct_from(const nulluple other) const
+			noexcept
+		{
+			return *this;
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &construct_from(const nulluple other)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple &construct_from(const nulluple other) const
+			noexcept
+		{
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &construct_from(const nulluple other)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <state_t OtherState = state_t::unknown>
+		static 
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+    		nulluple constructed_from(const none_t none)
+			noexcept
+		{
+			return nulluple{};
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+		static
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+    		nulluple constructed_from(const state_t state, const state_t other_state, const none_t none)
+			noexcept
+		{
+			return nulluple{};
+		}
+
+		template <state_t OtherState = state_t::unknown>
+		static
+#if WOJ_HAS_CXX20
+			consteval	
+#else
+			constexpr
+#endif
+    		nulluple constructed_from(const noinit_t noinit)
+			noexcept
+		{
 			return nulluple{ noinit };
-        }
+		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
-		constexpr const nulluple &assign_from(const nulluple other) const
+		template <dynamic_states_t DynamicStates = dynamic_states>
+		static
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+    		nulluple constructed_from(const state_t state, const state_t other_state, const noinit_t noinit)
+			noexcept
+		{
+			return nulluple{ noinit };
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		static
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+    		nulluple constructed_from(const nulluple other)
+			noexcept
+		{
+			return nulluple{ other };
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+		static
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+    		nulluple constructed_from(const nulluple other)
+			noexcept
+		{
+			return nulluple{ other };
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple  &assign_from(const none_t none) const
 			noexcept
 		{
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
-		constexpr nulluple &assign_from(const nulluple other)
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &assign_from(const none_t none)
 			noexcept
 		{
 			return *this;
 		}
 
 		template <dynamic_states_t DynamicStates = dynamic_states>
-		constexpr const nulluple &assign_from(const nulluple other) const
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple &assign_from(const state_t state, const state_t other_state, const none_t none) const
 			noexcept
 		{
 			return *this;
 		}
 
 		template <dynamic_states_t DynamicStates = dynamic_states>
-		constexpr nulluple &assign_from(const nulluple other)
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &assign_from(const state_t state, const state_t other_state, const none_t none)
 			noexcept
 		{
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
-		constexpr const nulluple &copy_from(const nulluple other) const
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple &assign_from(const nulluple other) const
 			noexcept
 		{
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
-		constexpr nulluple &copy_from(const nulluple other)
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &assign_from(const nulluple other)
 			noexcept
 		{
 			return *this;
 		}
 
 		template <dynamic_states_t DynamicStates = dynamic_states>
-		constexpr const nulluple &copy_from(const tuple_state state, const tuple_state other_state, const nulluple other) const
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple &assign_from(const nulluple other) const
 			noexcept
 		{
 			return *this;
 		}
 
 		template <dynamic_states_t DynamicStates = dynamic_states>
-		constexpr nulluple &copy_from(const tuple_state state, const tuple_state other_state, const nulluple other)
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &assign_from(const nulluple other)
 			noexcept
 		{
 			return *this;
 		}
 
-        template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
-            requires
-            (
-                std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
-            )
-        constexpr const nulluple &copy_to(OtherNullupleType &other&) const
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			const nulluple &emplace_from() const
+			noexcept
+		{
+			return *this;
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			nulluple &emplace_from()
+			noexcept
+		{
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			const nulluple &emplace_from(const state_t state, const state_t other_state) const
+			noexcept
+		{
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			nulluple &emplace_from(const state_t state, const state_t other_state)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <state_t OtherState = state_t::unknown>
+		static
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+			const nulluple &emplaced_from()
+			noexcept
+		{
+			return nulluple{ in_place };
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+		static
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+			nulluple emplaced_from(const state_t state, const state_t other_state)
+			noexcept
+		{
+			return nulluple{ in_place };
+		}
+
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple &copy_from(const nulluple other) const
+			noexcept
+		{
+			return *this;
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &copy_from(const nulluple other)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple &copy_from(const state_t state, const state_t other_state, const nulluple other) const
+			noexcept
+		{
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &copy_from(const state_t state, const state_t other_state, const nulluple other)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <state_t OtherState = state_t::unknown>
+		static 
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+    		nulluple copied_from(const nulluple other)
+			noexcept
+		{
+			return nulluple{ other };
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+		static 
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+    		nulluple copied_from(const state_t state, const state_t other_state, const nulluple other)
+			noexcept
+		{
+			return nulluple{ other };
+		}
+
+        template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+    		const nulluple &copy_to(const nulluple other) const
             noexcept
         {
             return *this;
         }
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
-			requires
-			(
-				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
-			)
-			constexpr nulluple &copy_to(OtherNullupleType &&other)
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+    		nulluple &copy_to(const nulluple other)
 		{
 			return *this;
 		}
 
-		template <dynamic_states_t DynamicStates = dynamic_states, typename OtherNullupleType = void>
-			requires
-			(	
-				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
-			)
-		constexpr const nulluple &copy_to(const tuple_state state, const tuple_state other_state, OtherNullupleType &&other) const
-			noexcept
-		{
-			return *this;
-		}
-
-		template <dynamic_states_t DynamicStates = dynamic_states, typename OtherNullupleType = void>
-			requires
-			(
-				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
-			)
-			constexpr nulluple &copy_to(const tuple_state state, const tuple_state other_state, OtherNullupleType &&other)
-		{
-			return *this;
-		}
-
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
-		constexpr const nulluple &move_from(nulluple &&other) const
-			noexcept
-		{
-			return *this;
-		}
-
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
-		constexpr nulluple &move_from(nulluple &&other)
+		template <dynamic_states_t DynamicStates = dynamic_states>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple &copy_to(const state_t state, const state_t other_state, const nulluple other) const
 			noexcept
 		{
 			return *this;
 		}
 
 		template <dynamic_states_t DynamicStates = dynamic_states>
-		constexpr const nulluple &move_from(const tuple_state state, const tuple_state other_state, nulluple &&other) const
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &copy_to(const state_t state, const state_t other_state, const nulluple other)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple &move_from(const nulluple other) const
+			noexcept
+		{
+			return *this;
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &move_from(const nulluple other)
 			noexcept
 		{
 			return *this;
 		}
 
 		template <dynamic_states_t DynamicStates = dynamic_states>
-		constexpr nulluple &move_from(const tuple_state state, const tuple_state other_state, nulluple &&other)
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple &move_from(const state_t state, const state_t other_state, const nulluple other) const
 			noexcept
 		{
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
-			requires
-			(
-				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
-			)
-		constexpr const nulluple &move_to(OtherNullupleType &&other) const
+		template <dynamic_states_t DynamicStates = dynamic_states>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &move_from(const state_t state, const state_t other_state, const nulluple other)
 			noexcept
 		{
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherNullupleType = void>
-			requires
-			(
-				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
-			)
-		constexpr nulluple &move_to(OtherNullupleType &&other)
+		template <state_t OtherState = state_t::unknown>
+		static 
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+    		nulluple moved_from(const nulluple other)
+			noexcept
+		{
+			return nulluple{ other };
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+		static 
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+    		nulluple moved_from(const state_t state, const state_t other_state, const nulluple other)
+			noexcept
+		{
+			return nulluple{ other };
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple &move_to(const nulluple &other) const
 			noexcept
 		{
 			return *this;
 		}
 
-		template <dynamic_states_t DynamicStates = dynamic_states, typename OtherNullupleType = void>
-			requires
-			(
-				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
-			)
-		constexpr const nulluple &move_to(const tuple_state state, const tuple_state other_state, OtherNullupleType &&other) const
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &move_to(const nulluple &other)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		const nulluple &move_to(const state_t state, const state_t other_state, const nulluple &other) const
 			noexcept
 		{
 			return *this;
 		}
 
 
-		template <dynamic_states_t DynamicStates = dynamic_states, typename OtherNullupleType = void>
-			requires
-			(
-				std::is_same_v<std::remove_cvref_t<OtherNullupleType>, nulluple>
-			)
-		constexpr nulluple &move_to(const tuple_state state, const tuple_state other_state, OtherNullupleType &&other)
+		template <dynamic_states_t DynamicStates = dynamic_states>
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &move_to(const state_t state, const state_t other_state, const nulluple &other)
 			noexcept
 		{
 			return *this;
 		}
 
         template <size_t Index>
-        static constexpr none_t get()
+        static 
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+    		none_t
+#ifndef NDEBUG
+			[[noreturn]]
+#endif
+    		get()
 	        noexcept
 #ifndef NDEBUG
             (
@@ -357,19 +783,35 @@ namespace woj
             return none;
         }
 
-        static constexpr size_t size()
+        static 
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+    		size_t size()
 	        noexcept
         {
             return 0;
         }
 
-        constexpr explicit operator bool() const
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		explicit operator bool() const
             noexcept
         {
             return false;
         }
 
-        constexpr nulluple &swap(const nulluple &other) 
+#if WOJ_HAS_CXX20
+		consteval
+#else
+		constexpr
+#endif
+    		nulluple &swap_with(const nulluple other) 
             noexcept 
         {
             return *this;
@@ -380,10 +822,26 @@ namespace woj
     class single
     {
     public:
+		enum class state_t : uint8_t
+		{
+			intialized,
+			uninitialized,
+			unknown
+		};
+
         union 
         {
             FirstType first;
         };
+
+		using first_type = FirstType;
+		using value_type = FirstType;
+		using reference = FirstType &;
+		using const_reference = const FirstType &;
+		using rvalue_reference = FirstType &&;
+		using const_rvalue_reference = const FirstType &&;
+		using pointer = FirstType *;
+		using const_pointer = const FirstType *;
 
         constexpr single() 
             noexcept 
@@ -398,21 +856,8 @@ namespace woj
 		template <typename OtherFirstType>
 			requires
 			(
-				std::is_constructible_v<FirstType, const OtherFirstType &>   
-            )
-		explicit constexpr single(const OtherFirstType &first)
-            noexcept 
-            (
-                std::is_nothrow_copy_constructible_v<FirstType>
-            )
-            : first{ first } {}
-
-		template <typename OtherFirstType>
-			requires
-			(
-				std::is_constructible_v<FirstType, OtherFirstType &&> &&
-				std::is_rvalue_reference_v<OtherFirstType>
-            )
+				!std::is_same_v<std::remove_cvref_t<OtherFirstType>, single>
+			)
 		explicit constexpr single(OtherFirstType &&first)
 			noexcept
 			(
@@ -427,12 +872,28 @@ namespace woj
             )
             : first{ other.first } {}
 
+		constexpr single(const state_t other_state, const single &other)
+			noexcept
+			(
+				std::is_nothrow_copy_constructible_v<FirstType>
+				)
+			: first{ other.first } {
+		}
+
         constexpr single(single &&other)
             noexcept 
             (
                 std::is_nothrow_move_constructible_v<FirstType>
             )
             : first{ std::move(other.first) } {}
+
+		constexpr single(const state_t other_state, single &&other)
+			noexcept
+			(
+				std::is_nothrow_move_constructible_v<FirstType>
+				)
+			: first{ std::move(other.first) } {
+		}
 
         template <typename ...ArgsTypes>
         explicit constexpr single(in_place_t, ArgsTypes &&...args)
@@ -442,10 +903,15 @@ namespace woj
             )
             : first{ std::forward<ArgsTypes>(args)... } {}
 
-		constexpr single &operator=(const FirstType &other)
+		template <typename OtherFirstType>
+			requires
+			(
+				!std::is_same_v<std::remove_cvref_t<OtherFirstType>, single>
+			)
+			constexpr single &operator=(OtherFirstType &&other)
 			noexcept
 			(
-				std::is_nothrow_copy_assignable_v<FirstType> ||
+				std::is_nothrow_constructible_v<FirstType, OtherFirstType &&> ||
 				(
 					!std::is_copy_assignable_v<FirstType> &&
 					std::is_nothrow_copy_constructible_v<FirstType> &&
@@ -455,43 +921,22 @@ namespace woj
 		{
 			if constexpr (std::is_copy_assignable_v<FirstType>)
 			{
-				first = other;
+				first = std::forward<OtherFirstType>(other);
 			}
 			else
 			{
 				std::destroy_at(std::addressof(first));
-				std::construct_at(std::addressof(first), other);
+				std::construct_at(std::addressof(first), std::forward<OtherFirstType>(other));
 			}
-
 			return *this;
 		}
 
-		constexpr single &operator=(FirstType &&other)
-			noexcept
+		template <typename OtherSingleType>
+			requires
 			(
-				std::is_nothrow_move_assignable_v<FirstType> ||
-				(
-					!std::is_move_assignable_v<FirstType> &&
-					std::is_nothrow_move_constructible_v<FirstType> &&
-					std::is_nothrow_destructible_v<FirstType>
-				)
+				std::is_same_v<std::remove_cvref_t<OtherSingleType>, single>
 			)
-		{
-			if constexpr (std::is_move_assignable_v<FirstType>)
-			{
-				first = std::move(other);
-			}
-			else
-			{
-				std::destroy_at(std::addressof(first));
-				std::construct_at(std::addressof(first), std::move(other));
-			}
-
-			return *this;
-		}
-        
-
-        constexpr single &operator=(const single &other)
+		constexpr single &operator=(OtherSingleType &&other)
             noexcept
             (
                 std::is_nothrow_copy_assignable_v<FirstType> ||
@@ -511,30 +956,6 @@ namespace woj
 				std::destroy_at(std::addressof(first));
 				std::construct_at(std::addressof(first), other.first);
 			}
-            return *this;
-        }
-
-        constexpr single &operator=(single &&other)
-            noexcept
-            (
-                std::is_nothrow_move_assignable_v<FirstType> ||
-				(
-					!std::is_move_assignable_v<FirstType> &&
-					std::is_move_constructible_v<FirstType> &&
-					std::is_nothrow_destructible_v<FirstType>
-                )
-            )
-        {
-			if constexpr (std::is_move_assignable_v<FirstType>)
-			{
-				first = std::move(other.first);
-			}
-			else
-			{
-				std::destroy_at(std::addressof(first));
-				std::construct_at(std::addressof(first), std::move(other.first));
-			}
-            first = std::move(other.first);
             return *this;
         }
 
@@ -598,7 +1019,65 @@ namespace woj
 #endif
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherSingleType = void>
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		constexpr const single &construct_from(const none_t none) const
+			noexcept
+		{
+			return *this;
+		}
+
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		constexpr single &construct_from(const none_t none)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+		constexpr const single &construct_from(const state_t state, const state_t other_state, const none_t none) const
+			noexcept
+		{
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+		constexpr single &construct_from(const state_t state, const state_t other_state, const none_t none)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		constexpr const single &construct_from(const noinit_t noinit) const
+			noexcept
+		{
+			return *this;
+		}
+
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		constexpr single &construct_from(const noinit_t noinit)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+		constexpr const single &construct_from(const state_t state, const state_t other_state, const noinit_t noinit) const
+			noexcept
+		{
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+		constexpr single &construct_from(const state_t state, const state_t other_state, const noinit_t noinit)
+			noexcept
+		{
+			return *this;
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherSingleType = void>
 			requires
 			(
 				std::is_same_v<std::remove_cvref_t<OtherSingleType>, single>
@@ -609,24 +1088,24 @@ namespace woj
 			(
 				(
 					(
-						State == tuple_state::initialized ||
-						State == tuple_state::unknown
+						State == state_t::initialized ||
+						State == state_t::unknown
 					) &&
 					std::is_nothrow_constructible_v<FirstType, OtherSingleType &&> &&
 					std::is_nothrow_destructible_v<FirstType>
 				) |
 				(
-					State == tuple_state::unintialized &&
+					State == state_t::unintialized &&
 					std::is_nothrow_constructible_v<FirstType, OtherSingleType &&>
 				)
 			)
 		{
-			if constexpr (State == tuple_state::initialized)
+			if constexpr (State == state_t::initialized)
 			{
 				std::destroy_at(std::addressof(first));
 				std::construct_at(std::addressof(first), std::forward<OtherSingleType>(other));
 			}
-			else if constexpr (State == tuple_state::unintialized)
+			else if constexpr (State == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::forward<OtherSingleType>(other));
 			}
@@ -643,19 +1122,19 @@ namespace woj
 			(
 				std::is_same_v<std::remove_cvref_t<OtherSingleType>, single>
 			)
-		constexpr single &construct_from(const tuple_state state, const tuple_state other_state, OtherSingleType &&other)
+		constexpr single &construct_from(const state_t state, const state_t other_state, OtherSingleType &&other)
 			noexcept
 			(
 				std::is_nothrow_constructible_v<FirstType, OtherSingleType &&>&&
 				std::is_nothrow_destructible_v<FirstType>
 			)
 		{
-			if (state == tuple_state::initialized)
+			if (state == state_t::initialized)
 			{
 				std::destroy_at(std::addressof(first));
 				std::construct_at(std::addressof(first), std::forward<OtherSingleType>(other));
 			}
-			else if (state == tuple_state::unintialized)
+			else if (state == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::forward<OtherSingleType>(other));
 			}
@@ -667,7 +1146,7 @@ namespace woj
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherValueType>
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherValueType>
 			requires
 			(
 				!std::is_same_v<std::remove_cvref_t<OtherValueType>, single>
@@ -677,24 +1156,24 @@ namespace woj
 			(
 				(
 					(
-						State == tuple_state::initialized ||
-						State == tuple_state::unknown
+						State == state_t::initialized ||
+						State == state_t::unknown
 					) &&
 					std::is_nothrow_constructible_v<FirstType, OtherValueType &&> &&
 					std::is_nothrow_destructible_v<FirstType>
 				) ||
 				(
-					State == tuple_state::unintialized &&
+					State == state_t::unintialized &&
 					std::is_nothrow_constructible_v<FirstType, OtherValueType &&>
 				)
 			)
         {
-			if constexpr (State == tuple_state::initialized)
+			if constexpr (State == state_t::initialized)
 			{
 				std::destroy_at(std::addressof(first));
 				std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
 			}
-			else if constexpr (State == tuple_state::unintialized)
+			else if constexpr (State == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
 			}
@@ -710,19 +1189,19 @@ namespace woj
 			(
 				!std::is_same_v<std::remove_cvref_t<OtherValueType>, single>
 			)
-		constexpr single &construct_from(const tuple_state state, const tuple_state other_state, OtherValueType &&other)
+		constexpr single &construct_from(const state_t state, const state_t other_state, OtherValueType &&other)
 			noexcept
 			(
 				std::is_nothrow_constructible_v<FirstType, OtherValueType &&>&&
 				std::is_nothrow_destructible_v<FirstType>
 			)
 		{
-			if (state == tuple_state::initialized)
+			if (state == state_t::initialized)
 			{
 				std::destroy_at(std::addressof(first));
 				std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
 			}
-			else if (state == tuple_state::unintialized)
+			else if (state == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
 			}
@@ -734,7 +1213,93 @@ namespace woj
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherSingleType = void>
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		static constexpr single constructed_from(const none_t none)
+			noexcept
+			(
+				std::is_nothrow_default_constructible_v<FirstType>
+			)
+		{
+			return single{ none };
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+		static constexpr single constructed_from(const state_t state, const state_t other_state, const none_t none)
+			noexcept
+			(
+				std::is_nothrow_default_constructible_v<FirstType>
+			)
+		{
+			return single{ none };
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		static constexpr single constructed_from(const noinit_t noinit)
+			noexcept
+		{
+			return single{ noinit };
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states>
+		static constexpr single constructed_from(const state_t state, const state_t other_state, const noinit_t noinit)
+			noexcept
+		{
+			return single{ noinit };
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherSingleType = void>
+			requires
+			(
+				std::is_same_v<std::remove_cvref_t<OtherSingleType>, single>
+			)
+		static constexpr single constructed_from(OtherSingleType &&other)
+			noexcept
+			(
+				std::is_nothrow_constructible_v<FirstType, OtherSingleType &&>
+			)
+		{
+			return single{ std::forward<OtherSingleType>(other) };
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states, typename OtherSingleType = void>
+			requires
+			(
+				std::is_same_v<std::remove_cvref_t<OtherSingleType>, single>
+			)
+		static constexpr single constructed_from(const state_t state, const state_t other_state, OtherSingleType &&other)
+        {
+			return single{ std::forward<OtherSingleType>(other) };
+        }
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherValueType = void>
+			requires
+			(
+				!std::is_same_v<std::remove_cvref_t<OtherValueType>, single>
+			)
+		static constexpr single constructed_from(OtherValueType &&other)
+			noexcept
+			(
+				std::is_nothrow_constructible_v<FirstType, OtherValueType &&>
+			)
+		{
+			return single{ std::forward<OtherValueType>(other) };
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states, typename OtherValueType = void>
+			requires
+			(
+				!std::is_same_v<std::remove_cvref_t<OtherValueType>, single>
+			)
+			static constexpr single constructed_from(const state_t state, const state_t other_state, OtherValueType &&other)
+			noexcept
+			(
+				std::is_nothrow_constructible_v<FirstType, OtherValueType&&>
+			)
+		{
+			return single{ std::forward<OtherValueType>(other) };
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherSingleType = void>
 			requires
 			(
 				std::is_same_v<std::remove_cvref_t<OtherSingleType>, single>
@@ -744,8 +1309,8 @@ namespace woj
 			(
 				(
 					(
-						State == tuple_state::initialized ||
-						State == tuple_state::unknown
+						State == state_t::initialized ||
+						State == state_t::unknown
 					) &&
 					(
 						std::is_nothrow_assignable_v<FirstType, OtherSingleType &&> ||
@@ -757,12 +1322,12 @@ namespace woj
 					)
 				) ||
 				(
-					State == tuple_state::unintialized &&
+					State == state_t::unintialized &&
 					std::is_nothrow_constructible_v<FirstType, OtherSingleType &&>
 				)
 			)
 		{
-			if constexpr (State == tuple_state::initialized)
+			if constexpr (State == state_t::initialized)
 			{
 				if constexpr (std::is_assignable_v<FirstType, OtherSingleType &&>)
 				{
@@ -774,14 +1339,21 @@ namespace woj
 					std::construct_at(std::addressof(first), std::forward<OtherSingleType>(other));
 				}
 			}
-			else if constexpr (State == tuple_state::unintialized)
+			else if constexpr (State == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::forward<OtherSingleType>(other));
 			}
 			else
 			{
-				std::destroy_at(std::addressof(first));
-				std::construct_at(std::addressof(first), std::forward<OtherSingleType>(other));
+				if constexpr (std::is_assignable_v<FirstType, OtherSingleType&&>)
+				{
+					first = std::forward<OtherSingleType>(other);
+				}
+				else
+				{
+					std::destroy_at(std::addressof(first));
+					std::construct_at(std::addressof(first), std::forward<OtherSingleType>(other));
+				}
 			}
 			return *this;
 		}
@@ -791,7 +1363,7 @@ namespace woj
 			(
 				std::is_same_v<std::remove_cvref_t<OtherSingleType>, single>
 			)
-		constexpr single& assign_from(const tuple_state state, const tuple_state other_state, OtherSingleType &&other)
+		constexpr single &assign_from(const state_t state, const state_t other_state, OtherSingleType &&other)
 			noexcept
 			(
 				std::is_nothrow_assignable_v<FirstType, OtherSingleType &&> &&
@@ -799,7 +1371,7 @@ namespace woj
 				std::is_nothrow_destructible_v<FirstType>
 			)
 		{
-			if (state == tuple_state::initialized)
+			if (state == state_t::initialized)
 			{
 				if constexpr (std::is_assignable_v<FirstType, OtherSingleType &&>)
 				{
@@ -811,30 +1383,37 @@ namespace woj
 					std::construct_at(std::addressof(first), std::forward<OtherSingleType>(other));
 				}
 			}
-			else if (state == tuple_state::unintialized)
+			else if (state == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::forward<OtherSingleType>(other));
 			}
 			else
 			{
-				std::destroy_at(std::addressof(first));
-				std::construct_at(std::addressof(first), std::forward<OtherSingleType>(other));
+				if constexpr (std::is_assignable_v<FirstType, OtherSingleType&&>)
+				{
+					first = std::forward<OtherSingleType>(other);
+				}
+				else
+				{
+					std::destroy_at(std::addressof(first));
+					std::construct_at(std::addressof(first), std::forward<OtherSingleType>(other));
+				}
 			}
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherValueType>
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherValueType>
 			requires
 			(
 				!std::is_same_v<std::remove_cvref_t<OtherValueType>, single>
 			)
-		constexpr single& assign_from(OtherValueType &&other)
+		constexpr single &assign_from(OtherValueType &&other)
 			noexcept
 			(
 				(
 					(
-						State == tuple_state::initialized ||
-						State == tuple_state::unknown
+						State == state_t::initialized ||
+						State == state_t::unknown
 						) &&
 					(
 						std::is_nothrow_assignable_v<FirstType, OtherValueType &&> ||
@@ -846,12 +1425,12 @@ namespace woj
 					)
 				) ||
 				(
-					State == tuple_state::unintialized &&
+					State == state_t::unintialized &&
 					std::is_nothrow_constructible_v<FirstType, OtherValueType &&>
 				)
 			)
 		{
-			if constexpr (State == tuple_state::initialized)
+			if constexpr (State == state_t::initialized)
 			{
 				if constexpr (std::is_assignable_v<FirstType, OtherValueType &&>)
 				{
@@ -863,14 +1442,21 @@ namespace woj
 					std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
 				}
 			}
-			else if constexpr (State == tuple_state::unintialized)
+			else if constexpr (State == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
 			}
 			else
 			{
-				std::destroy_at(std::addressof(first));
-				std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
+				if constexpr (std::is_assignable_v<FirstType, OtherValueType&&>)
+				{
+					first = std::forward<OtherValueType>(other);
+				}
+				else
+				{
+					std::destroy_at(std::addressof(first));
+					std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
+				}
 			}
 			return *this;
 		}
@@ -880,7 +1466,7 @@ namespace woj
 			(
 				!std::is_same_v<std::remove_cvref_t<OtherValueType>, single>
 			)
-		constexpr single& assign_from(const tuple_state state, const tuple_state other_state, OtherValueType && other)
+		constexpr single &assign_from(const state_t state, const state_t other_state, OtherValueType &&other)
 				noexcept
 				(
 					std::is_nothrow_assignable_v<FirstType, OtherValueType &&> &&
@@ -888,7 +1474,7 @@ namespace woj
 					std::is_nothrow_destructible_v<FirstType>
 				)
 			{
-				if (state == tuple_state::initialized)
+				if (state == state_t::initialized)
 				{
 					if constexpr (std::is_assignable_v<FirstType, OtherValueType &&>)
 					{
@@ -900,30 +1486,133 @@ namespace woj
 						std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
 					}
 				}
-				else if (state == tuple_state::unintialized)
+				else if (state == state_t::unintialized)
 				{
 					std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
 				}
 				else
 				{
-					std::destroy_at(std::addressof(first));
-					std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
+					if constexpr (std::is_assignable_v<FirstType, OtherValueType&&>)
+					{
+						first = std::forward<OtherValueType>(other);
+					}
+					else
+					{
+						std::destroy_at(std::addressof(first));
+						std::construct_at(std::addressof(first), std::forward<OtherValueType>(other));
+					}
 				}
 				return *this;
 			}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
-		constexpr single &copy_from(const single &other)
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename ...ArgsTypes>
+		constexpr single &emplace_from(const ArgsTypes &&...args)
 			noexcept
 			(
-				std::is_nothrow_copy_assignable_v<FirstType> ||
 				(
-					!std::is_copy_constructible_v<FirstType> &&
-					std::is_nothrow_copy_assignable_v<FirstType>
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+					) &&
+					std::is_nothrow_constructible_v<FirstType, ArgsTypes &&...> &&
+					std::is_nothrow_destructible_v<FirstType>
+				) ||
+				(
+					State == state_t::unintialized &&
+					std::is_nothrow_constructible_v<FirstType, ArgsTypes &&...>
 				)
 			)
 		{
-			if constexpr (State == tuple_state::initialized)
+			if constexpr (State == state_t::initialized)
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), std::forward<ArgsTypes>(args)...);
+			}
+			else if constexpr (State == state_t::unintialized)
+			{
+				std::construct_at(std::addressof(first), std::forward<ArgsTypes>(args)...);
+			}
+			else
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), std::forward<ArgsTypes>(args)...);
+			}
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states, typename ...ArgsTypes>
+		constexpr single &emplace_from(const state_t state, const state_t other_state, const ArgsTypes &&...args)
+			noexcept
+			(
+				std::is_nothrow_constructible_v<FirstType, ArgsTypes &&...> &&
+				std::is_nothrow_destructible_v<FirstType>
+			)
+		{
+			if (state == state_t::initialized)
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), std::forward<ArgsTypes>(args)...);
+			}
+			else if (state == state_t::unintialized)
+			{
+				std::construct_at(std::addressof(first), std::forward<ArgsTypes>(args)...);
+			}
+			else
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), std::forward<ArgsTypes>(args)...);
+			}
+			return *this;
+		}
+
+		template <state_t OtherState = state_t::unknown, typename ...ArgsTypes>
+		static constexpr single emplaced_from(const ArgsTypes &&...args)
+			noexcept
+			(
+				std::is_nothrow_constructible_v<FirstType, ArgsTypes &&...>
+			)
+		{
+			return single{ in_place, std::forward<ArgsTypes>(args)... };
+		}
+
+		template <dynamic_states_t DynamicStates = dynamic_states, typename ...ArgsTypes>
+		static constexpr single emplaced_from(const state_t state, const state_t other_state, const ArgsTypes &&...args)
+			noexcept
+			(
+				std::is_nothrow_constructible_v<FirstType, ArgsTypes &&...>
+			)
+		{
+			return single{ in_place, std::forward<ArgsTypes>(args)... };
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherSingleType>
+			requires
+			(
+				std::is_same_v<std::remove_cvref_t<OtherSingleType>, single>
+			)
+		constexpr single &copy_from(OtherSingleType &&other)
+			noexcept
+			(
+				(
+					State == state_t::initialized &&
+					std::is_nothrow_copy_assignable_v<FirstType> &&
+					(
+						!std::is_copy_constructible_v<FirstType> &&
+						std::is_nothrow_copy_constructible_v<FirstType>
+					)
+					
+				) ||
+				(
+					State == state_t::unintialized &&
+					std::is_nothrow_copy_constructible_v<FirstType>
+				) ||
+				(
+					std::is_nothrow_copy_constructible_v<FirstType> &&
+					std::is_nothrow_destructible_v<FirstType>
+				)
+			)
+		{
+			if constexpr (State == state_t::initialized)
 			{
 				if constexpr (std::is_copy_assignable_v<FirstType>)
 				{
@@ -935,41 +1624,22 @@ namespace woj
 					std::construct_at(std::addressof(first), other.first);
 				}
 			}
-			else if constexpr (State == tuple_state::unintialized)
+			else if constexpr (State == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), other.first);
 			}
-			else
+			else // ... And what to do here? I guess user would pass unitialized state if he didn't initialize it, would he?
 			{
-				std::destroy_at(std::addressof(first));
-				std::construct_at(std::addressof(first), other.first);
+				if constexpr (std::is_copy_constructible_v<FirstType>)
+				{
+					first = other.first;
+				}
+				else
+				{
+					std::destroy_at(std::addressof(first));
+					std::construct_at(std::addressof(first), other.first);
+				}
 			}
-
-			return *this;
-		}
-
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
-		constexpr single &copy_from(const FirstType &other)
-			noexcept
-			(
-				std::is_nothrow_copy_constructible_v<FirstType> ||
-				(
-					!std::is_copy_constructible_v<FirstType> &&
-					std::is_nothrow_copy_assignable_v<FirstType>
-				)
-			)
-		{
-			if constexpr (std::is_copy_assignable_v<FirstType>)
-			{
-				first = other;
-			}
-			else
-			{
-				std::destroy_at(std::addressof(first));
-				std::construct_at(std::addressof(first), other);
-			}
-
-			return *this;
 		}
 
 
@@ -1076,8 +1746,6 @@ namespace woj
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
-
         template <size_t Index>
 		constexpr FirstType &get() const
 			noexcept
@@ -1097,24 +1765,6 @@ namespace woj
 #endif
 		}
 
-        constexpr FirstType &get(const size_t index) const
-            noexcept
-#ifndef NDEBUG
-            (
-                false
-            )
-#endif
-        {
-#ifndef NDEBUG
-			if (!index)
-				return first;
-
-        	throw bad_tuple_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
-#else
-			return first;
-#endif
-        }
-
         static constexpr size_t size()
 	        noexcept
         {
@@ -1127,17 +1777,48 @@ namespace woj
             return true;
         }
 
-		constexpr single &swap(single &other)
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherSingleType = void>
+			requires
+			(
+				std::is_same_v<std::remove_cvref_t<OtherSingleType>, single>
+			)
+			constexpr single& swap_with(OtherSingleType&& other)
 			noexcept
 			(
 				std::is_nothrow_swappable_v<FirstType>
 			)
 		{
-			std::swap(first, other.first);
+			if constexpr (State == state_t::initialized)
+			{
+				if constexpr (OtherState == state_t::initialized)
+				{
+					std::swap(first, other.first);
+				}
+				else
+				{
+					std::construct_at(std::addressof(other.first), std::move(first));
+				}
+			}
+			else
+			{
+				if constexpr (OtherState == state_t::initialized)
+				{
+					std::construct_at(std::addressof(first), std::move(other.first));
+				}
+				else // Idk & Idc
+				{
+					std::swap(first, other.first);
+				}
+			}
 			return *this;
 		}
 
-		constexpr single &swap(single &&other)
+		template <dynamic_states_t DynamicStates = dynamic_states, typename OtherSingleType = void>
+			requires
+			(
+				std::is_same_v<std::remove_cvref_t<OtherSingleType>, single>
+			)
+		constexpr single& swap_with(const state_t state, const state_t other_state, OtherSingleType&& other)
 			noexcept
 			(
 				std::is_nothrow_swappable_v<FirstType>
@@ -1152,6 +1833,13 @@ namespace woj
 	class pair
 	{
 	public:
+		enum class state_t : uint8_t
+		{
+			unknown,
+			initialized,
+			unintialized
+		};
+
 		union
 		{
 			FirstType first;
@@ -1162,21 +1850,22 @@ namespace woj
 			SecondType second;
 		};
 
+		using first_type = FirstType;
+		using second_type = SecondType;
+
 		constexpr pair()
 			noexcept
 			(
-				std::is_nothrow_default_constructible_v<FirstType>&&
+				std::is_nothrow_default_constructible_v<FirstType> &&
 				std::is_nothrow_default_constructible_v<SecondType>
 			)
 			: first{}, second{} {
 		}
 
+		explicit constexpr pair(const noinit_t noinit)
+			noexcept {}
+
 		template <typename OtherFirstType, typename OtherSecondType>
-			requires
-			(
-				std::is_constructible_v<FirstType, OtherFirstType &&> &&
-				std::is_constructible_v<SecondType, OtherSecondType &&>
-			)
 		explicit constexpr pair(OtherFirstType &&first, OtherSecondType &&second)
 			noexcept
 			(
@@ -1193,7 +1882,7 @@ namespace woj
 			)
 			: first{ other.first }, second{ other.second } {}
 
-		constexpr pair(const tuple_state other_state, const pair &other)
+		constexpr pair(const state_t other_state, const pair &other)
 			noexcept
 			(
 				std::is_nothrow_copy_constructible_v<FirstType>&&
@@ -1210,14 +1899,13 @@ namespace woj
             )
             : first{ std::move(other.first) }, second{ std::move(other.second) } {}
 
-		constexpr pair(const tuple_state other_state, pair &&other)
+		constexpr pair(const state_t other_state, pair &&other)
 			noexcept
 			(
 				std::is_nothrow_move_constructible_v<FirstType>&&
 				std::is_nothrow_move_constructible_v<SecondType>
 				)
-			: first{ std::move(other.first) }, second{ std::move(other.second) } {
-		}
+			: first{ std::move(other.first) }, second{ std::move(other.second) } {}
 
 		template <typename ...ArgsTypes>
 		explicit constexpr pair(in_place_t, ArgsTypes &&...args)
@@ -1226,27 +1914,27 @@ namespace woj
 				std::is_nothrow_constructible_v<FirstType, ArgsTypes &&...>&&
 				std::is_nothrow_constructible_v<SecondType, ArgsTypes &&...>
 			)
-			: first{ std::forward<ArgsTypes>(args)... }, second{ std::forward<ArgsTypes>(args)... } {
-		}
+			: first{ std::forward<ArgsTypes>(args)... }, second{ std::forward<ArgsTypes>(args)... } {}
 
-		constexpr pair &operator=(const pair &other)
+		template <typename OtherPairType>
+		constexpr pair& operator=(OtherPairType&& other)
 			noexcept
 			(
 				(
-                    std::is_nothrow_copy_assignable_v<FirstType> ||
+					std::is_nothrow_assignable_v<FirstType, typename OtherPairType::first_type &&> ||
 					(
-						!std::is_copy_assignable_v<FirstType> &&
-						std::is_nothrow_copy_constructible_v<FirstType> &&
+						!std::is_assignable_v<FirstType, typename OtherPairType::first_type &&> &&
+						std::is_nothrow_constructible_v<FirstType, typename OtherPairType::first_type &&> &&
 						std::is_nothrow_destructible_v<FirstType>
-                    )
+					)
                 ) &&
 				(
-                    std::is_nothrow_copy_assignable_v<SecondType> ||
+					std::is_nothrow_assignable_v<SecondType, typename OtherPairType::second_type &&> ||
 					(
-						!std::is_copy_assignable_v<SecondType>&&
-						std::is_nothrow_copy_constructible_v<SecondType>&&
+						!std::is_assignable_v<SecondType, typename OtherPairType::second_type &&>&&
+						std::is_nothrow_constructible_v<SecondType, typename OtherPairType::second_type &&>&&
 						std::is_nothrow_destructible_v<SecondType>
-                    )
+					)
                 )
 			)
 		{
@@ -1267,48 +1955,6 @@ namespace woj
 			{
 				std::destroy_at(std::addressof(second));
 				std::construct_at(std::addressof(second), other.second);
-			}
-			return *this;
-		}
-         
-		constexpr pair &operator=(pair &&other)
-			noexcept
-			(
-				(
-                    std::is_nothrow_move_assignable_v<FirstType> ||
-					(
-						!std::is_move_assignable_v<FirstType> &&
-						std::is_nothrow_move_constructible_v<FirstType> &&
-						std::is_nothrow_destructible_v<FirstType>
-					)
-				) &&
-				(
-					std::is_nothrow_move_assignable_v<SecondType> ||
-					(
-						!std::is_move_assignable_v<SecondType> &&
-						std::is_nothrow_move_constructible_v<SecondType> &&
-						std::is_nothrow_destructible_v<SecondType>
-					)
-				)
-			)
-		{
-			if constexpr (std::is_move_assignable_v<FirstType>)
-			{
-				first = std::move(other.first);
-			}
-			else
-			{
-				std::destroy_at(std::addressof(first));
-				std::construct_at(std::addressof(first), std::move(other.first));
-			}
-			if constexpr (std::is_move_assignable_v<SecondType>)
-			{
-				second = std::move(other.second);
-			}
-			else
-			{
-				std::destroy_at(std::addressof(second));
-				std::construct_at(std::addressof(second), std::move(other.second));
 			}
 			return *this;
 		}
@@ -1333,7 +1979,7 @@ namespace woj
                 )
 			)
 		{
-			return first == other.first  &&second == other.second;
+			return first == other.first && second == other.second;
 		}
 
         constexpr std::strong_ordering operator<=>(const pair &other) const
@@ -1424,12 +2070,12 @@ namespace woj
 #endif
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr pair &copy_from(const pair &other)
 			noexcept
 			(
 				(
-					State == tuple_state::initialized &&
+					State == state_t::initialized &&
 					(
 						std::is_nothrow_copy_assignable_v<FirstType> ||
 						(
@@ -1446,18 +2092,18 @@ namespace woj
 					)
 				) ||
 				(
-					State == tuple_state::unintialized &&
+					State == state_t::unintialized &&
 					std::is_nothrow_copy_constructible_v<FirstType> &&
 					std::is_nothrow_copy_constructible_v<SecondType>
 				) ||
 				(
-					State == tuple_state::unknown &&
+					State == state_t::unknown &&
 					std::is_nothrow_copy_constructible_v<FirstType> &&
 					std::is_nothrow_copy_constructible_v<SecondType>
 				)
 			)
 		{
-			if constexpr (State == tuple_state::initialized)
+			if constexpr (State == state_t::initialized)
 			{
 				if constexpr (std::is_copy_assignable_v<FirstType>)
 				{
@@ -1478,7 +2124,7 @@ namespace woj
 					std::construct_at(std::addressof(second), other.second);
 				}
 			}
-			else if constexpr (State == tuple_state::unintialized)
+			else if constexpr (State == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), other.first);
 				std::construct_at(std::addressof(second), other.second);
@@ -1494,7 +2140,7 @@ namespace woj
 		}
 
 		template <dynamic_states_t DynamicStates = dynamic_states>
-		constexpr pair &copy_from(const tuple_state state, const tuple_state other_state, const pair &other)
+		constexpr pair &copy_from(const state_t state, const state_t other_state, const pair &other)
 			noexcept
 			(
 				std::is_nothrow_copy_constructible_v<FirstType>&&
@@ -1505,7 +2151,7 @@ namespace woj
 				std::is_nothrow_destructible_v<SecondType>
 			)
 		{
-			if (state == tuple_state::initialized)
+			if (state == state_t::initialized)
 			{
 				if constexpr (std::is_copy_assignable_v<FirstType>)
 				{
@@ -1526,7 +2172,7 @@ namespace woj
 					std::construct_at(std::addressof(second), other.second);
 				}
 			}
-			else if (state == tuple_state::unintialized)
+			else if (state == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), other.first);
 				std::construct_at(std::addressof(second), other.second);
@@ -1541,12 +2187,12 @@ namespace woj
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherFirstType = void, typename OtherSecondType = void>
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherFirstType = void, typename OtherSecondType = void>
 		constexpr pair &copy_from(OtherFirstType &&other_first, OtherSecondType &&other_second)
 			noexcept
 			(
 				(
-					State == tuple_state::initialized &&
+					State == state_t::initialized &&
 					(
 						std::is_nothrow_copy_assignable_v<FirstType> ||
 						(
@@ -1557,17 +2203,17 @@ namespace woj
 					)
 				) ||
 				(
-					State == tuple_state::unintialized &&
+					State == state_t::unintialized &&
 					std::is_nothrow_copy_constructible_v<FirstType>
 				) ||
 				(
-					State == tuple_state::unknown &&
+					State == state_t::unknown &&
 					std::is_nothrow_copy_constructible_v<FirstType> &&
 					std::is_nothrow_destructible_v<FirstType>
 				)
 			)
 		{
-			if constexpr (State == tuple_state::initialized)
+			if constexpr (State == state_t::initialized)
 			{
 				if constexpr (std::is_copy_assignable_v<FirstType>)
 				{
@@ -1588,7 +2234,7 @@ namespace woj
 					std::construct_at(std::addressof(second), std::forward<OtherSecondType>(other_second));
 				}
 			}
-			else if constexpr (State == tuple_state::unintialized)
+			else if constexpr (State == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::forward<OtherFirstType>(other_first));
 				std::construct_at(std::addressof(second), std::forward<OtherSecondType>(other_second));
@@ -1604,7 +2250,7 @@ namespace woj
 		}
 
 		template <dynamic_states_t DynamicStates = dynamic_states, typename OtherFirstType = void, typename OtherSecondType = void> 
-		constexpr pair &copy_from(const tuple_state state, const tuple_state other_state, OtherFirstType &&other_first, OtherSecondType &&other_second)
+		constexpr pair &copy_from(const state_t state, const state_t other_state, OtherFirstType &&other_first, OtherSecondType &&other_second)
 			noexcept
 			(
 				std::is_nothrow_copy_constructible_v<FirstType> &&
@@ -1615,7 +2261,7 @@ namespace woj
 				std::is_nothrow_destructible_v<SecondType>
 			)
 		{
-			if (state == tuple_state::initialized)
+			if (state == state_t::initialized)
 			{
 				if constexpr (std::is_copy_assignable_v<FirstType>)
 				{
@@ -1636,7 +2282,7 @@ namespace woj
 					std::construct_at(std::addressof(second), std::forward<OtherSecondType>(other_second));
 				}
 			}
-			else if (state == tuple_state::unintialized)
+			else if (state == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::forward<OtherFirstType>(other_first));
 				std::construct_at(std::addressof(second), std::forward<OtherSecondType>(other_second));
@@ -1651,7 +2297,7 @@ namespace woj
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherPairType = void>
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherPairType = void>
 			requires
 			(
 				std::is_same_v<std::remove_cvref_t<OtherPairType>, pair>
@@ -1661,24 +2307,24 @@ namespace woj
 			(
 				(
 					(
-						State == tuple_state::initialized ||
-						State == tuple_state::unknown
+						State == state_t::initialized ||
+						State == state_t::unknown
 					) &&
 					std::is_nothrow_constructible_v<FirstType, OtherPairType &&> &&
 					std::is_nothrow_destructible_v<FirstType>
 				) ||
 				(
-					State == tuple_state::unintialized &&
+					State == state_t::unintialized &&
 					std::is_nothrow_constructible_v<FirstType, OtherPairType &&>
 				)
 			)
 		{
-			if constexpr (State == tuple_state::initialized)
+			if constexpr (State == state_t::initialized)
 			{
 				std::destroy_at(std::addressof(first));
 				std::construct_at(std::addressof(first), std::forward<OtherPairType>(other));
 			}
-			else if constexpr (State == tuple_state::unintialized)
+			else if constexpr (State == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::forward<OtherPairType>(other));
 			}
@@ -1695,19 +2341,19 @@ namespace woj
 			(
 				std::is_same_v<std::remove_cvref_t<OtherPairType>, pair>
 			)
-		constexpr pair &construct_from(const tuple_state state, const tuple_state other_state, OtherPairType& &other)
+		constexpr pair &construct_from(const state_t state, const state_t other_state, OtherPairType &&other)
 			noexcept
 			(
 				std::is_nothrow_constructible_v<FirstType, OtherPairType &&>&&
 				std::is_nothrow_destructible_v<FirstType>
 			)
 		{
-			if (state == tuple_state::initialized)
+			if (state == state_t::initialized)
 			{
 				std::destroy_at(std::addressof(first));
 				std::construct_at(std::addressof(first), std::forward<OtherPairType>(other));
 			}
-			else if (state == tuple_state::unintialized)
+			else if (state == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::forward<OtherPairType>(other));
 			}
@@ -1719,7 +2365,7 @@ namespace woj
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherPairType = void>
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherPairType = void>
 			requires
 			(
 				std::is_same_v<std::remove_cvref_t<OtherPairType>, pair>
@@ -1728,7 +2374,7 @@ namespace woj
 			noexcept
 			(
 				(
-					State == tuple_state::initialized &&
+					State == state_t::initialized &&
 					(
 						std::is_nothrow_copy_assignable_v<FirstType> ||
 						(
@@ -1747,12 +2393,12 @@ namespace woj
 					)
 				) ||
 				(
-					State == tuple_state::unintialized &&
+					State == state_t::unintialized &&
 					std::is_nothrow_copy_constructible_v<FirstType> &&
 					std::is_nothrow_copy_constructible_v<SecondType>
 				) ||
 				(
-					State == tuple_state::unknown &&
+					State == state_t::unknown &&
 					std::is_nothrow_copy_constructible_v<FirstType> &&
 					std::is_nothrow_destructible_v<FirstType> &&
 					std::is_nothrow_copy_constructible_v<SecondType> &&
@@ -1760,7 +2406,7 @@ namespace woj
 				)
 			)
 		{
-			if constexpr (State == tuple_state::initialized)
+			if constexpr (State == state_t::initialized)
 			{
 				if constexpr (std::is_copy_constructible_v<FirstType>)
 				{
@@ -1781,7 +2427,7 @@ namespace woj
 					std::construct_at(std::addressof(other.second), second);
 				}
 			}
-			else if constexpr (State == tuple_state::unintialized)
+			else if constexpr (State == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(other.first), first);
 				std::construct_at(std::addressof(other.second), second);
@@ -1801,7 +2447,7 @@ namespace woj
 			(
 				std::is_same_v<std::remove_cvref_t<OtherPairType>, pair>
 			)
-		constexpr pair &copy_to(const tuple_state state, const tuple_state other_state, OtherPairType &&other)
+		constexpr pair &copy_to(const state_t state, const state_t other_state, OtherPairType &&other)
 			noexcept
 			(
 				std::is_nothrow_copy_constructible_v<FirstType>&&
@@ -1812,7 +2458,7 @@ namespace woj
 				std::is_nothrow_destructible_v<SecondType>
 			)
 		{
-			if (state == tuple_state::initialized)
+			if (state == state_t::initialized)
 			{
 				if constexpr (std::is_copy_constructible_v<FirstType>)
 				{
@@ -1833,7 +2479,7 @@ namespace woj
 					std::construct_at(std::addressof(other.second), second);
 				}
 			}
-			else if (state == tuple_state::unintialized)
+			else if (state == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(other.first), first);
 				std::construct_at(std::addressof(other.second), second);
@@ -1848,12 +2494,12 @@ namespace woj
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherValueType = void>
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherValueType = void>
 		constexpr pair &copy_to(OtherValueType &&other)
 			noexcept
 			(
 				(
-					State == tuple_state::initialized &&
+					State == state_t::initialized &&
 					(
 						std::is_nothrow_assignable_v<OtherValueType &&, FirstType> ||
 						(
@@ -1863,16 +2509,16 @@ namespace woj
 					)
 				) ||
 				(
-					State == tuple_state::unintialized &&
+					State == state_t::unintialized &&
 					std::is_nothrow_constructible_v<OtherValueType, FirstType>
 				) ||
 				(
-					State == tuple_state::unknown &&
+					State == state_t::unknown &&
 					std::is_nothrow_constructible_v<OtherValueType, FirstType>
 				)
 			)
 		{
-			if constexpr (State == tuple_state::initialized)
+			if constexpr (State == state_t::initialized)
 			{
 				if constexpr (std::is_assignable_v<OtherValueType &&, FirstType>)
 				{
@@ -1884,7 +2530,7 @@ namespace woj
 					std::construct_at(std::addressof(other), first);
 				}
 			}
-			else if constexpr (State == tuple_state::unintialized)
+			else if constexpr (State == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(other), first);
 			}
@@ -1897,7 +2543,7 @@ namespace woj
 		}
 
 		template <dynamic_states_t DynamicStates = dynamic_states, typename OtherValueType = void>
-		constexpr pair &copy_to(const tuple_state state, const tuple_state other_state, OtherValueType &&other)
+		constexpr pair &copy_to(const state_t state, const state_t other_state, OtherValueType &&other)
 			noexcept
 			(
 				std::is_nothrow_assignable_v<OtherValueType &&, FirstType> ||
@@ -1907,7 +2553,7 @@ namespace woj
 				)
 			)
 		{
-			if (state == tuple_state::initialized)
+			if (state == state_t::initialized)
 			{
 				if constexpr (std::is_assignable_v<OtherValueType &&, FirstType>)
 				{
@@ -1919,7 +2565,7 @@ namespace woj
 					std::construct_at(std::addressof(other), first);
 				}
 			}
-			else if (state == tuple_state::unintialized)
+			else if (state == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(other), first);
 			}
@@ -1931,7 +2577,7 @@ namespace woj
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherPairType = void>
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherPairType = void>
 			requires
 			(	
 				std::is_same_v<std::remove_cvref_t<OtherPairType>, pair>
@@ -1940,7 +2586,7 @@ namespace woj
 			noexcept
 			(
 				(
-					State == tuple_state::initialized &&
+					State == state_t::initialized &&
 					(
 						std::is_nothrow_move_assignable_v<FirstType> ||
 						(
@@ -1959,18 +2605,18 @@ namespace woj
 					)
 				) ||
 				(
-					State == tuple_state::unintialized &&
+					State == state_t::unintialized &&
 					std::is_nothrow_move_constructible_v<FirstType> &&
 					std::is_nothrow_move_constructible_v<SecondType>
 				) ||
 				(
-					State == tuple_state::unknown &&
+					State == state_t::unknown &&
 					std::is_nothrow_move_constructible_v<FirstType> &&
 					std::is_nothrow_move_constructible_v<SecondType>
 				)
 			)
 		{
-			if constexpr (State == tuple_state::initialized)
+			if constexpr (State == state_t::initialized)
 			{
 				if constexpr (std::is_move_assignable_v<FirstType>)
 				{
@@ -1991,7 +2637,7 @@ namespace woj
 					std::construct_at(std::addressof(second), std::move(other.second));
 				}
 			}
-			else if constexpr (State == tuple_state::unintialized)
+			else if constexpr (State == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::move(other.first));
 				std::construct_at(std::addressof(second), std::move(other.second));
@@ -2011,7 +2657,7 @@ namespace woj
 			(
 				std::is_same_v<std::remove_cvref_t<OtherPairType>, pair>
 			)
-		constexpr pair &move_from(const tuple_state state, const tuple_state other_state, OtherPairType &&other)
+		constexpr pair &move_from(const state_t state, const state_t other_state, OtherPairType &&other)
 			noexcept
 			(
 				std::is_nothrow_move_constructible_v<FirstType>&&
@@ -2022,7 +2668,7 @@ namespace woj
 				std::is_nothrow_destructible_v<SecondType>
 			)
 		{
-			if (state == tuple_state::initialized)
+			if (state == state_t::initialized)
 			{
 				if constexpr (std::is_move_assignable_v<FirstType>)
 				{
@@ -2043,7 +2689,7 @@ namespace woj
 					std::construct_at(std::addressof(second), std::move(other.second));
 				}
 			}
-			else if (state == tuple_state::unintialized)
+			else if (state == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::move(other.first));
 				std::construct_at(std::addressof(second), std::move(other.second));
@@ -2058,12 +2704,12 @@ namespace woj
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown, typename OtherFirstType = void, typename OtherSecondType = void>
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherFirstType = void, typename OtherSecondType = void>
 		constexpr pair &move_from(OtherFirstType &&other_first, OtherSecondType &&other_second)
 			noexcept
 			(
 				(
-					State == tuple_state::initialized &&
+					State == state_t::initialized &&
 					(
 						std::is_nothrow_assignable_v<FirstType, OtherFirstType &&> ||
 						(
@@ -2082,18 +2728,18 @@ namespace woj
 					)
 				) ||
 				(
-					State == tuple_state::unintialized &&
+					State == state_t::unintialized &&
 					std::is_nothrow_constructible_v<FirstType, OtherFirstType &&> &&
 					std::is_nothrow_constructible_v<SecondType, OtherSecondType &&>
 				) ||
 				(
-					State == tuple_state::unknown &&
+					State == state_t::unknown &&
 					std::is_nothrow_constructible_v<FirstType, OtherFirstType &&> &&
 					std::is_nothrow_constructible_v<SecondType, OtherSecondType &&>
 				)
 			)
 		{
-			if constexpr (State == tuple_state::initialized)
+			if constexpr (State == state_t::initialized)
 			{
 				if constexpr (std::is_move_assignable_v<FirstType>)
 				{
@@ -2114,7 +2760,7 @@ namespace woj
 					std::construct_at(std::addressof(second), std::forward<OtherSecondType>(other_second));
 				}
 			}
-			else if constexpr (State == tuple_state::unintialized)
+			else if constexpr (State == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::forward<OtherFirstType>(other_first));
 				std::construct_at(std::addressof(second), std::forward<OtherSecondType>(other_second));
@@ -2130,7 +2776,7 @@ namespace woj
 		}
 
 		template <dynamic_states_t DynamicStates = dynamic_states, typename OtherFirstType = void, typename OtherSecondType = void>
-		constexpr pair &move_from(const tuple_state state, const tuple_state other_state, OtherFirstType &&other_first, OtherSecondType &&other_second)
+		constexpr pair &move_from(const state_t state, const state_t other_state, OtherFirstType &&other_first, OtherSecondType &&other_second)
 			noexcept
 			(
 				std::is_nothrow_move_constructible_v<FirstType>&&
@@ -2141,7 +2787,7 @@ namespace woj
 				std::is_nothrow_destructible_v<SecondType>
 			)
 		{
-			if (state == tuple_state::initialized)
+			if (state == state_t::initialized)
 			{
 				if constexpr (std::is_move_assignable_v<FirstType>)
 				{
@@ -2162,7 +2808,7 @@ namespace woj
 					std::construct_at(std::addressof(second), std::forward<OtherSecondType>(other_second));
 				}
 			}
-			else if (state == tuple_state::unintialized)
+			else if (state == state_t::unintialized)
 			{
 				std::construct_at(std::addressof(first), std::forward<OtherFirstType>(other_first));
 				std::construct_at(std::addressof(second), std::forward<OtherSecondType>(other_second));
@@ -2244,41 +2890,41 @@ namespace woj
 			return true;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr pair &swap(pair &other)
 			noexcept
 			(
 				(
-					State == tuple_state::initialized &&
+					State == state_t::initialized &&
 					(
 						(
-							OtherState == tuple_state::initialized &&
+							OtherState == state_t::initialized &&
 							std::is_nothrow_swappable_v<FirstType> &&
 							std::is_nothrow_swappable_v<SecondType>
 						) ||
 						(
-							OtherState == tuple_state::unintialized &&
+							OtherState == state_t::unintialized &&
 							std::is_nothrow_move_constructible_v<FirstType> &&
 							std::is_nothrow_move_constructible_v<SecondType>
 						)
 					)
 				) ||
 				(
-					State == tuple_state::unintialized &&
+					State == state_t::unintialized &&
 					(
 						(
-							OtherState == tuple_state::initialized &&
+							OtherState == state_t::initialized &&
 							std::is_nothrow_move_constructible_v<FirstType> &&
 							std::is_nothrow_move_constructible_v<SecondType>
 						) ||
-						OtherState == tuple_state::unintialized
+						OtherState == state_t::unintialized
 					)
 				)
 			)
 		{
-			if constexpr (State == tuple_state::initialized)
+			if constexpr (State == state_t::initialized)
 			{
-				if constexpr (OtherState == tuple_state::initialized)
+				if constexpr (OtherState == state_t::initialized)
 				{
 					std::swap(first, other.first);
 					std::swap(second, other.second);
@@ -2291,7 +2937,7 @@ namespace woj
 			}
 			else 
 			{
-				if constexpr (OtherState == tuple_state::initialized)
+				if constexpr (OtherState == state_t::initialized)
 				{
 					std::construct_at(std::addressof(first), std::move(other.first));
 					std::construct_at(std::addressof(second), std::move(other.second));
@@ -2301,16 +2947,16 @@ namespace woj
 		}
 
 		template <dynamic_states_t DynamicStates = dynamic_states>
-		constexpr pair &swap(const tuple_state state, const tuple_state other_state, pair &other)
+		constexpr pair &swap(const state_t state, const state_t other_state, pair &other)
 			noexcept
 			(
 				std::is_nothrow_swappable_v<FirstType>&&
 				std::is_nothrow_swappable_v<SecondType>
 			)
 		{
-			if (state == tuple_state::initialized)
+			if (state == state_t::initialized)
 			{
-				if (other_state == tuple_state::initialized)
+				if (other_state == state_t::initialized)
 				{
 					std::swap(first, other.first);
 					std::swap(second, other.second);
@@ -2323,7 +2969,7 @@ namespace woj
 			}
 			else
 			{
-				if (other_state == tuple_state::initialized)
+				if (other_state == state_t::initialized)
 				{
 					std::construct_at(std::addressof(first), std::move(other.first));
 					std::construct_at(std::addressof(second), std::move(other.second));
@@ -2332,41 +2978,41 @@ namespace woj
 			return *this;
 		}
 
-		template <tuple_state State = tuple_state::unknown, tuple_state OtherState = tuple_state::unknown>
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr pair &swap(FirstType &other_first, SecondType &other_second)
 			noexcept
 			(
 				(
-					State == tuple_state::initialized &&
+					State == state_t::initialized &&
 					(
 						(
-							OtherState == tuple_state::initialized &&
+							OtherState == state_t::initialized &&
 							std::is_nothrow_swappable_v<FirstType> &&
 							std::is_nothrow_swappable_v<SecondType>
 						) ||
 						(
-							OtherState == tuple_state::unintialized &&
+							OtherState == state_t::unintialized &&
 							std::is_nothrow_move_constructible_v<FirstType> &&
 							std::is_nothrow_move_constructible_v<SecondType>
 						)
 					)	
 				) ||
 				(
-					State == tuple_state::unintialized &&
+					State == state_t::unintialized &&
 					(
 						(
-							OtherState == tuple_state::initialized &&
+							OtherState == state_t::initialized &&
 							std::is_nothrow_move_constructible_v<FirstType> &&
 							std::is_nothrow_move_constructible_v<SecondType>
 						) ||
-						OtherState == tuple_state::unintialized
+						OtherState == state_t::unintialized
 					)
 				)
 			)
 		{
-			if constexpr (State == tuple_state::initialized)
+			if constexpr (State == state_t::initialized)
 			{
-				if constexpr (OtherState == tuple_state::initialized)
+				if constexpr (OtherState == state_t::initialized)
 				{
 					std::swap(first, other_first);
 					std::swap(second, other_second);
@@ -2379,7 +3025,7 @@ namespace woj
 			}
 			else
 			{
-				if constexpr (OtherState == tuple_state::initialized)
+				if constexpr (OtherState == state_t::initialized)
 				{
 					std::construct_at(std::addressof(first), std::move(other_first));
 					std::construct_at(std::addressof(second), std::move(other_second));
@@ -2389,7 +3035,7 @@ namespace woj
 		}
 
 		template <dynamic_states_t DynamicStates = dynamic_states>
-		constexpr pair &swap(const tuple_state state, const tuple_state other_state, FirstType &other_first, SecondType &other_second)
+		constexpr pair &swap(const state_t state, const state_t other_state, FirstType &other_first, SecondType &other_second)
 			noexcept
 			(
 				std::is_nothrow_swappable_v<FirstType> &&
@@ -2398,9 +3044,9 @@ namespace woj
 				std::is_nothrow_move_constructible_v<SecondType>
 			)
 		{
-			if (state == tuple_state::initialized)
+			if (state == state_t::initialized)
 			{
-				if (other_state == tuple_state::initialized)
+				if (other_state == state_t::initialized)
 				{
 					std::swap(first, other_first);
 					std::swap(second, other_second);
@@ -2413,7 +3059,7 @@ namespace woj
 			}
 			else
 			{
-				if (other_state == tuple_state::initialized)
+				if (other_state == state_t::initialized)
 				{
 					std::construct_at(std::addressof(first), std::move(other_first));
 					std::construct_at(std::addressof(second), std::move(other_second));
