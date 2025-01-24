@@ -90,7 +90,7 @@ namespace woj
 #else
 		constexpr
 #endif
-    		nulluple &operator=(nulluple &&)
+    		nulluple &operator=(nulluple &&other)
             noexcept = default;
 
 #if WOJ_HAS_CXX20
@@ -119,7 +119,7 @@ namespace woj
             noexcept
         {
             return std::strong_ordering::equal;
-        }
+							}
 
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 #if WOJ_HAS_CXX20
