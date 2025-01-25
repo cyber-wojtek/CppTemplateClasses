@@ -138,6 +138,7 @@
 #include <type_traits>
 #include <cstdio>
 #include <cstdint>
+#include <compare>
 
 namespace woj
 {

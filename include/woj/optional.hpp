@@ -4155,7 +4155,7 @@ namespace woj
 				m_has_value = false;
             }
 
-			else if (state == optional_state::unknown)`
+			else if (state == optional_state::unknown)
             {
 				if (*this)
 				{
