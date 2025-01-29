@@ -24,24 +24,11 @@
 #define WOJ_HAS_CXX23 1
 #endif
 
-#if WOJ_CPP_VERSION >= 202002L
-#define WOJ_HAS_CXX20 1
-#endif
 
-#if 1 || defined(WOJ_HAS_CXX23)
+#if 1 || WOJ_HAS_CXX23
 #define WOJ_CONSTEXPR23 constexpr
 #else
 #define WOJ_CONSTEXPR23 inline
-#endif
-
-#if defined(WOJ_HAS_CXX20)
-#define WOJ_CONSTEXPR20 constexpr
-#define WOJ_CONSTEVAL20 consteval
-#define WOJ_CONSTEVAL consteval
-#else
-#define WOJ_CONSTEXPR20 inline
-#define WOJ_CONSTEVAL20 inline
-#define WOJ_CONSTEVAL constexpr
 #endif
 
 

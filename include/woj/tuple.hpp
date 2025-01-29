@@ -4,6 +4,8 @@
 
 #include "string.hpp"
 #include "vector.hpp"
+#include "meta/base.hpp"
+#include "meta/sequence.hpp"
 #include "woj/base.hpp"
 
 #define __WOJ_EMPTY_FUNCTION_BODY {}
@@ -35,58 +37,108 @@ namespace woj
 		}
 	};
 
+	/**
+	 * Class representing a null tuple (0-tuple)
+	 */
 	class nulluple;
 
+	/**
+	 * Type trait to check if a type is a nulluple
+	 * @tparam Type Type to check
+	 */
 	template <typename Type>
 	class is_nulluple : public std::false_type {};
 
+	/**
+	 * Type trait to check if a type is a nulluple
+	 */
 	template <>
 	class is_nulluple<nulluple> : public std::true_type {};
 
+	/**
+	 * Type trait to check if a type is a nulluple
+	 * @tparam Type Type to check.
+	 */
 	template <typename Type>
 	constexpr bool is_nulluple_v = is_nulluple<Type>::value;
 
+	/**
+	 * Class representing a null tuple (0-tuple)
+	 */
 	class nulluple
 	{
 	public:
+		/**
+		 * Enum representing the state of the nulluple
+		 */
 		enum class state_t : uint8_t
 		{
-			initialized,
-			uninitialized,
-			unknown
+			initialized /* The nulluple is initialized */,
+			uninitialized /* The nulluple is uninitialized */,
+			unknown /* The state of the nulluple is unknown */
 		};
 
+		using this_type = nulluple;
+
+		/**
+		 * Constructs a nulluple
+		 */
 		constexpr nulluple()
 			noexcept = default;
 
+		/**
+		 * Constructs an uninitialized nulluple
+		 * @param noinit No initialization tag
+		 */
 		constexpr nulluple(const noinit_t noinit)
-			__WOJ_EMPTY_FUNCTION_NOEXCEPT_BODY
+		__WOJ_EMPTY_FUNCTION_NOEXCEPT_BODY
 
-			constexpr nulluple(const nulluple& other)
+		/**
+		 * Constructs a nulluple from another nulluple
+		 * @param other Other nulluple
+		 */
+		constexpr nulluple(const nulluple& other)
 			noexcept = default;
 
+		/**
+		 * Constructs a nulluple from another nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other	Other nulluple
+		 */
 		constexpr nulluple(const state_t other_state, const nulluple& other)
-			__WOJ_EMPTY_FUNCTION_NOEXCEPT_BODY
+		__WOJ_EMPTY_FUNCTION_NOEXCEPT_BODY
 
-			constexpr nulluple(const in_place_t in_place)
-			__WOJ_EMPTY_FUNCTION_NOEXCEPT_BODY
+		/**
+		 * Constructs a nulluple in place
+		 * @param in_place In place tag
+		 */
+		constexpr nulluple(const in_place_t in_place)
+		__WOJ_EMPTY_FUNCTION_NOEXCEPT_BODY
 
-#if WOJ_HAS_CXX20
-			constexpr
-#endif
+		/**
+		 * Destroys the nulluple
+		 */
+		constexpr
 			~nulluple()
 			noexcept = default;
 
 		constexpr nulluple& operator =(const nulluple other)
 			__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-			[[nodiscard]] explicit
-			constexpr operator bool() const
+		/**
+		 * Converts the nulluple to a boolean (always false since the nulluple is empty)
+		 */
+		[[nodiscard]] explicit constexpr operator bool() const
 			noexcept
 		{
 			return false;
 		}
 
+		/**
+		 * Equality operator (always true since all nulluples are equal to each other)
+		 * @param other Other nulluple
+		 * @return True
+		 */
 		[[nodiscard]]
 		constexpr bool operator ==(const nulluple other) const
 			noexcept
@@ -94,6 +146,11 @@ namespace woj
 			return true;
 		}
 
+		/**
+		 * Three-way comparison operator (always equal since all nulluples are equal to each other)
+		 * @param other Other nulluple
+		 * @return Equal
+		 */
 		[[nodiscard]]
 		constexpr std::strong_ordering operator <=>(const nulluple other) const
 			noexcept
@@ -101,83 +158,237 @@ namespace woj
 			return std::strong_ordering::equal;
 		}
 
+		/**
+		 * Constructs current nulluple from a noinit tag (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState UNUSED. State of the other nulluple
+		 * @param noinit No initialization tag
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr const nulluple& construct_from(const noinit_t noinit) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from a noinit tag (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState UNUSED. State of the other nulluple
+		 * @param noinit No initialization tag
+		 * @return lvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
-		constexpr nulluple& construct_from(const noinit_t noinit)&
+		constexpr nulluple& construct_from(const noinit_t noinit) &
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from a noinit tag (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState UNUSED. State of the other nulluple
+		 * @param noinit No initialization tag
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr const nulluple &&construct_from(const noinit_t noinit) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from a noinit tag (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState UNUSED. State of the other nulluple
+		 * @param noinit No initialization tag
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr nulluple &&construct_from(const noinit_t noinit) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state UNUSED. State of the other nulluple
+		 * @param noinit No initialization tag
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr const nulluple& construct_from(const state_t state, const state_t other_state, const noinit_t noinit) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state UNUSED. State of the other nulluple
+		 * @param noinit No initialization tag
+		 * @return lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
-		constexpr nulluple& construct_from(const state_t state, const state_t other_state, const noinit_t noinit)&
+		constexpr nulluple& construct_from(const state_t state, const state_t other_state, const noinit_t noinit) &
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state UNUSED. State of the other nulluple
+		 * @param noinit No initialization tag
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr const nulluple &&construct_from(const state_t state, const state_t other_state, const noinit_t noinit) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state UNUSED. State of the other nulluple
+		 * @param noinit No initialization tag
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr nulluple &&construct_from(const state_t state, const state_t other_state, const noinit_t noinit) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from another nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState State of the other nulluple
+		 * @param other Other nulluple
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr const nulluple& construct_from(const nulluple other) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from another nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState State of the other nulluple
+		 * @param other Other nulluple
+		 * @return lvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
-		constexpr nulluple& construct_from(const nulluple other)&
+		constexpr nulluple& construct_from(const nulluple other) &
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from another nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState State of the other nulluple
+		 * @param other Other nulluple
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr const nulluple &&construct_from(const nulluple other) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from another nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState State of the other nulluple
+		 * @param other Other nulluple
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr nulluple &&construct_from(const nulluple other) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr const nulluple& construct_from(const state_t state, const state_t other_state, const nulluple other) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr nulluple& construct_from(const state_t state, const state_t other_state, const nulluple other)&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr const nulluple &&construct_from(const state_t state, const state_t other_state, const nulluple other) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr nulluple &&construct_from(const state_t state, const state_t other_state, const nulluple other) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-			template <state_t OtherState = state_t::unknown>
-		static
-#if WOJ_HAS_CXX20
-			consteval
-#else
-			constexpr
-#endif
-			nulluple constructed_from(const noinit_t noinit)
+		/**
+		 * Constructs a new nulluple from a noinit tag
+		 * @tparam OtherState UNUSED. State of the other nulluple
+		 * @param noinit No initialization tag
+		 * @return The new nulluple
+		 */
+		template <state_t OtherState = state_t::unknown>
+		[[nodiscard]] static consteval nulluple constructed_from(const noinit_t noinit)
 			noexcept
 		{
 			return nulluple{};
 		}
 
+		/**
+		 * Constructs a new nulluple from a noinit tag
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param other_state UNUSED. State of the other nulluple
+		 * @param noinit No initialization tag
+		 * @return The new nulluple
+		 */
+		template <dynamic_states_t DynamicStates = dynamic_states>
+		[[nodiscard]] static consteval nulluple constructed_from(const state_t other_state, const noinit_t noinit)
+			noexcept
+		{
+			return nulluple{};
+		}
+
+		/**
+		 * Constructs a new nulluple from another nulluple
+		 * @tparam OtherState State of the other nulluple
+		 * @param other Other nulluple
+		 * @return The new nulluple
+		 */
+		template <state_t OtherState = state_t::unknown>
+		[[nodiscard]] static consteval nulluple constructed_from(const nulluple other)
+			noexcept
+		{
+			return nulluple{};
+		}
+
+		/**
+		 * Constructs a new nulluple from another nulluple
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return The new nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		[[nodiscard]] static
 #if WOJ_HAS_CXX20
@@ -185,86 +396,102 @@ namespace woj
 #else
 			constexpr
 #endif
-			nulluple constructed_from(const state_t state, const state_t other_state, const noinit_t noinit)
+			nulluple constructed_from(const state_t other_state, const nulluple other)
 			noexcept
 		{
 			return nulluple{};
 		}
 
-		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
-		[[nodiscard]] static
-#if WOJ_HAS_CXX20
-			consteval
-#else
-			constexpr
-#endif
-			nulluple constructed_from(const nulluple other)
-			noexcept
-		{
-			return nulluple{};
-		}
-
-		template <dynamic_states_t DynamicStates = dynamic_states>
-		[[nodiscard]] static
-#if WOJ_HAS_CXX20
-			consteval
-#else
-			constexpr
-#endif
-			nulluple constructed_from(const nulluple other)
-			noexcept
-		{
-			return nulluple{};
-		}
-
-		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullpleTypes>
+		/**
+		 * Constructs to many other nulluples from current nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OthersStates States of the other nulluples
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param others Other nulluples
+		 * @return const lvalue reference to the current nulluple
+		 */
+		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
 					true &&
 					... &&
-					std::is_same_v<OthersNullpleTypes, nulluple>
+					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr const nulluple& construct_to(const OthersNullpleTypes ...others) const&
+		constexpr const nulluple& construct_to(const OthersNullupleTypes ...others) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullpleTypes>
+		/**
+		 * Constructs to many other nulluples from current nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OthersStates States of the other nulluples
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param others Other nulluples
+		 * @return lvalue reference to the current nulluple
+		 */
+		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
 					true &&
 					... &&
-					std::is_same_v<OthersNullpleTypes, nulluple>
+					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr nulluple& construct_to(const OthersNullpleTypes ...others)&
+		constexpr nulluple& construct_to(const OthersNullupleTypes ...others)&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullpleTypes>
+
+		/**
+		 * Constructs to many other nulluples from current nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OthersStates States of the other nulluples
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param others Other nulluples
+		 * @return const rvalue reference to the current nulluple
+		 */
+		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
 					true &&
 					... &&
-					std::is_same_v<OthersNullpleTypes, nulluple>
+					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr const nulluple &&construct_to(const OthersNullpleTypes ...others) const&&
+		constexpr const nulluple &&construct_to(const OthersNullupleTypes ...others) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullpleTypes>
+		/**
+		 * Constructs to many other nulluples from current nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OthersStates States of the other nulluples
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param others Other nulluples
+		 * @return rvalue reference to the current nulluple
+		 */
+		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
 					true &&
 					... &&
-					std::is_same_v<OthersNullpleTypes, nulluple>
+					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr nulluple&& construct_to(const OthersNullpleTypes ...others) &&
+		constexpr nulluple&& construct_to(const OthersNullupleTypes ...others) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs to many other nulluples from current nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -277,6 +504,15 @@ namespace woj
 		constexpr const nulluple& construct_to(const state_t state, const state_t(&others_states)[SizeOthersStates], const OthersNullupleTypes ...others) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs to many other nulluples from current nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -289,6 +525,15 @@ namespace woj
 		constexpr nulluple& construct_to(const state_t state, const state_t(&others_states)[SizeOthersStates], const OthersNullupleTypes ...others)&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs to many other nulluples from current nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -301,6 +546,15 @@ namespace woj
 		constexpr const nulluple &&construct_to(const state_t state, const state_t(&others_states)[SizeOthersStates], const OthersNullupleTypes ...others) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs to many other nulluples from current nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -313,6 +567,15 @@ namespace woj
 		constexpr nulluple &&construct_to(const state_t state, const state_t(&others_states)[SizeOthersStates], const OthersNullupleTypes ...others) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs to many other nulluples from current nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -325,6 +588,15 @@ namespace woj
 		constexpr const nulluple& construct_to(const state_t state, const stack::vector<state_t, SizeOthersStates>& others_states, const OthersNullupleTypes ...others) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs to many other nulluples from current nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -337,6 +609,15 @@ namespace woj
 		constexpr nulluple& construct_to(const state_t state, const stack::vector<state_t, SizeOthersStates>& others_states, const OthersNullupleTypes ...others)&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs to many other nulluples from current nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -349,6 +630,15 @@ namespace woj
 		constexpr const nulluple &&construct_to(const state_t state, const stack::vector<state_t, SizeOthersStates>& others_states, const OthersNullupleTypes ...others) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Constructs to many other nulluples from current nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -361,6 +651,15 @@ namespace woj
 		constexpr nulluple &&construct_to(const state_t state, const stack::vector<state_t, SizeOthersStates>& others_states, const OthersNullupleTypes ...others) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		* Constructs to many other nulluples from current nulluple (does nothing)
+		* @tparam DynamicStates Dynamic states tag
+		* @tparam OthersNullupleTypes Types of the other nulluples
+		* @param state State of the current nulluple
+		* @param others_states States of the other nulluples
+		* @param others Other nulluples
+		* @return const lvalue reference to the current nulluple
+		*/
 		template <dynamic_states_t DynamicStates = dynamic_states, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -370,10 +669,19 @@ namespace woj
 					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr const nulluple& construct_to(const state_t state, const empty_t empty, const OthersNullupleTypes ...others) const&
+		constexpr const nulluple& construct_to(const state_t state, const empty_t others_states, const OthersNullupleTypes ...others) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
+		/**
+		* Constructs to many other nulluples from current nulluple (does nothing)
+		* @tparam DynamicStates Dynamic states tag
+		* @tparam OthersNullupleTypes Types of the other nulluples
+		* @param state State of the current nulluple
+		* @param others_states States of the other nulluples
+		* @param others Other nulluples
+		* @return lvalue reference to the current nulluple
+		*/
+		template <dynamic_states_t DynamicStates = dynamic_states, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
@@ -382,10 +690,19 @@ namespace woj
 					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr nulluple& construct_to(const state_t state, const empty_t empty, const OthersNullupleTypes ...others)&
+		constexpr nulluple& construct_to(const state_t state, const empty_t others_states, const OthersNullupleTypes ...others) &
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
+		/**
+		* Constructs to many other nulluples from current nulluple (does nothing)
+		* @tparam DynamicStates Dynamic states tag
+		* @tparam OthersNullupleTypes Types of the other nulluples
+		* @param state State of the current nulluple
+		* @param others_states States of the other nulluples
+		* @param others Other nulluples
+		* @return const lvalue reference to the current nulluple
+		*/
+		template <dynamic_states_t DynamicStates = dynamic_states, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
@@ -394,10 +711,19 @@ namespace woj
 				std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr const nulluple &&construct_to(const state_t state, const empty_t empty, const OthersNullupleTypes ...others) const&&
+		constexpr const nulluple &&construct_to(const state_t state, const empty_t others_states, const OthersNullupleTypes ...others) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
+		/**
+		* Constructs to many other nulluples from current nulluple (does nothing)
+		* @tparam DynamicStates Dynamic states tag
+		* @tparam OthersNullupleTypes Types of the other nulluples
+		* @param state State of the current nulluple
+		* @param others_states States of the other nulluples
+		* @param others Other nulluples
+		* @return const lvalue reference to the current nulluple
+		*/
+		template <dynamic_states_t DynamicStates = dynamic_states, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
@@ -406,89 +732,191 @@ namespace woj
 					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr nulluple &&construct_to(const state_t state, const empty_t empty, const OthersNullupleTypes ...others) &&
+		constexpr nulluple &&construct_to(const state_t state, const empty_t others_states, const OthersNullupleTypes ...others) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns current nulluple from another nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState State of the other nulluple
+		 * @param other Other nulluple
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr const nulluple& assign_from(const nulluple other) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns current nulluple from another nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState State of the other nulluple
+		 * @param other Other nulluple
+		 * @return lvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr nulluple& assign_from(const nulluple other)&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns current nulluple from another nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState State of the other nulluple
+		 * @param other Other nulluple
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr const nulluple &&assign_from(const nulluple other) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns current nulluple from another nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState State of the other nulluple
+		 * @param other Other nulluple
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr nulluple &&assign_from(const nulluple other) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+
+		/**
+		 * Assigns current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr const nulluple& assign_from(const state_t state, const state_t other_state, const nulluple other) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr nulluple& assign_from(const state_t state, const state_t other_state, const nulluple other)&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr const nulluple &&assign_from(const state_t state, const state_t other_state, const nulluple other) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr nulluple &&assign_from(const state_t state, const state_t other_state, const nulluple other) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullpleTypes>
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OthersStates States of the other nulluples
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param others Other nulluples
+		 * @return const lvalue reference to the current nulluple
+		 */
+		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
 					true &&
 					... &&
-					std::is_same_v<OthersNullpleTypes, nulluple>
+					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr const nulluple& assign_to(const OthersNullpleTypes ...others) const&
+		constexpr const nulluple& assign_to(const OthersNullupleTypes ...others) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullpleTypes>
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OthersStates States of the other nulluples
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param others Other nulluples
+		 * @return lvalue reference to the current nulluple
+		 */
+		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
 					true &&
 					... &&
-					std::is_same_v<OthersNullpleTypes, nulluple>
+					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr nulluple& assign_to(const OthersNullpleTypes ...others)&
+		constexpr nulluple& assign_to(const OthersNullupleTypes ...others) &
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullpleTypes>
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OthersStates States of the other nulluples
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param others Other nulluples
+		 * @return const rvalue reference to the current nulluple
+		 */
+		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
 					true &&
 					... &&
-					std::is_same_v<OthersNullpleTypes, nulluple>
+					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr const nulluple &&assign_to(const OthersNullpleTypes ...others) const&&
+		constexpr const nulluple &&assign_to(const OthersNullupleTypes ...others) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullpleTypes>
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OthersStates States of the other nulluples
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param others Other nulluples
+		 * @return rvalue reference to the current nulluple
+		 */
+		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
 					true &&
 					... &&
-					std::is_same_v<OthersNullpleTypes, nulluple>
+					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr nulluple &&assign_to(const OthersNullpleTypes ...others) &&
+		constexpr nulluple &&assign_to(const OthersNullupleTypes ...others) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -501,6 +929,15 @@ namespace woj
 		constexpr const nulluple& assign_to(const state_t state, const state_t(&others_states)[SizeOthersStates], const OthersNullupleTypes ...others) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -513,6 +950,15 @@ namespace woj
 		constexpr nulluple& assign_to(const state_t state, const state_t(&others_states)[SizeOthersStates], const OthersNullupleTypes ...others)&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -525,6 +971,15 @@ namespace woj
 		constexpr const nulluple &&assign_to(const state_t state, const state_t(&others_states)[SizeOthersStates], const OthersNullupleTypes ...others) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -537,6 +992,15 @@ namespace woj
 		constexpr nulluple &&assign_to(const state_t state, const state_t(&others_states)[SizeOthersStates], const OthersNullupleTypes ...others) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -549,6 +1013,15 @@ namespace woj
 		constexpr const nulluple& assign_to(const state_t state, const stack::vector<state_t, SizeOthersStates>& others_states, const OthersNullupleTypes ...others) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -561,6 +1034,15 @@ namespace woj
 		constexpr nulluple& assign_to(const state_t state, const stack::vector<state_t, SizeOthersStates>& others_states, const OthersNullupleTypes ...others)&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -573,6 +1055,15 @@ namespace woj
 		constexpr const nulluple &&assign_to(const state_t state, const stack::vector<state_t, SizeOthersStates>& others_states, const OthersNullupleTypes ...others) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -585,6 +1076,15 @@ namespace woj
 		constexpr nulluple &&assign_to(const state_t state, const stack::vector<state_t, SizeOthersStates>& others_states, const OthersNullupleTypes ...others) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -594,9 +1094,18 @@ namespace woj
 					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr const nulluple& assign_to(const state_t state, const empty_t empty, const OthersNullupleTypes ...others) const&
+		constexpr const nulluple& assign_to(const state_t state, const empty_t others_states, const OthersNullupleTypes ...others) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -606,9 +1115,18 @@ namespace woj
 					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr nulluple& assign_to(const state_t state, const empty_t empty, const OthersNullupleTypes ...others)&
+		constexpr nulluple& assign_to(const state_t state, const empty_t others_states, const OthersNullupleTypes ...others)&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -618,9 +1136,18 @@ namespace woj
 					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr const nulluple &&assign_to(const state_t state, const empty_t empty, const OthersNullupleTypes ...others) const&&
+		constexpr const nulluple &&assign_to(const state_t state, const empty_t others_states, const OthersNullupleTypes ...others) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Assigns from current nulluple to many other nulluples (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -630,87 +1157,194 @@ namespace woj
 					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-				constexpr nulluple&& assign_to(const state_t state, const empty_t empty, const OthersNullupleTypes ...others) &&
-				__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
+		constexpr nulluple&& assign_to(const state_t state, const empty_t others_states, const OthersNullupleTypes ...others) &&
+		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-
-		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		/**
+		 * Emplaces fields from provided arguments, each field has its arguments separated by delimiter tag (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @return const lvalue reference to the current nulluple
+		 */
+		template <state_t State = state_t::unknown>
 		constexpr const nulluple& emplace_from() const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
-		constexpr nulluple& emplace_from()&
+		/**
+		 * Emplaces fields from provided arguments, each field has its arguments separated by delimiter tag (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @return lvalue reference to the current nulluple
+		 */
+		template <state_t State = state_t::unknown>
+		constexpr nulluple& emplace_from() &
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Emplaces from provided arguments (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown>
 		constexpr const nulluple &&emplace_from() const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Emplaces from provided arguments (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown>
 		constexpr nulluple &&emplace_from() &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Emplaces fields from provided arguments, each field has its arguments separated by delimiter tag (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr const nulluple& emplace_from(const state_t state) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Emplaces fields from provided arguments, each field has its arguments separated by delimiter tag (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @return lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
-		constexpr nulluple& emplace_from(const state_t state)&
+		constexpr nulluple& emplace_from(const state_t state) &
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Emplaces from provided arguments (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr const nulluple &&emplace_from(const state_t state, const state_t other_state) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Emplaces from provided arguments (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr nulluple &&emplace_from(const state_t state) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-			[[nodiscard]] static
-#if WOJ_HAS_CXX20
-			consteval
-#else
-			constexpr
-#endif
-			nulluple emplaced_from()
+
+		/**
+		 * Emplaces from provided arguments into new nulluple (does nothing)
+		 * @return new nulluple
+		 */
+		[[nodiscard]] static consteval nulluple emplaced_from()
 			noexcept
 		{
 			return nulluple{};
 		}
 
+		/**
+		 * Copies into current nulluple from another nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState State of the other nulluple
+		 * @param other Other nulluple
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr const nulluple& copy_from(const nulluple other) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-			template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		/**
+		 * Copies into current nulluple from another nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState State of the other nulluple
+		 * @param other Other nulluple
+		 * @return lvalue reference to the current nulluple
+		 */
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr nulluple& copy_from(const nulluple other)&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Copies into current nulluple from another nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState State of the other nulluple
+		 * @param other Other nulluple
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr const nulluple &&copy_from(const nulluple other) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Copies into current nulluple from another nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OtherState State of the other nulluple
+		 * @param other Other nulluple
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
 		constexpr nulluple &&copy_from(const nulluple other) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Copies into current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr const nulluple& copy_from(const state_t state, const state_t other_state, const nulluple other) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Copies into current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr nulluple& copy_from(const state_t state, const state_t other_state, const nulluple other)&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Copies into current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return const rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr const nulluple &&copy_from(const state_t state, const state_t other_state, const nulluple other) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Copies into current nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return rvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr nulluple &&copy_from(const state_t state, const state_t other_state, const nulluple other) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-			template <state_t OtherState = state_t::unknown>
+		/**
+		 * Copies into new nulluple from another nulluple (does nothing)
+		 * @tparam OtherState State of the other nulluple
+		 * @param other Other nulluple
+		 * @return new nulluple
+		*/
+		template <state_t OtherState = state_t::unknown>
 		[[nodiscard]] static
 #if WOJ_HAS_CXX20
 			consteval
@@ -723,6 +1357,14 @@ namespace woj
 			return nulluple{ other };
 		}
 
+		/**
+		 * Copies into new nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return new nulluple
+		*/
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		[[nodiscard]] static
 #if WOJ_HAS_CXX20
@@ -736,54 +1378,95 @@ namespace woj
 			return nulluple{ other };
 		}
 
-		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullpleTypes>
+		/**
+		 * Copies into new nulluple from another nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @param state State of the current nulluple
+		 * @param other_state State of the other nulluple
+		 * @param other Other nulluple
+		 * @return new nulluple
+		*/
+		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
 					true &&
 					... &&
-					std::is_same_v<OthersNullpleTypes, nulluple>
+					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr const nulluple& copy_to(const OthersNullpleTypes ...others) const&
+		constexpr const nulluple& copy_to(const OthersNullupleTypes ...others) const&
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullpleTypes>
+		/**
+		 * Copies to many other nulluples from current nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OthersStates States of the other nulluples
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param others Other nulluples
+		 * @return lvalue reference to the current nulluple
+		 */
+		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
 					true &&
 					... &&
-					std::is_same_v<OthersNullpleTypes, nulluple>
+					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr nulluple& copy_to(const OthersNullpleTypes ...others)&
+		constexpr nulluple& copy_to(const OthersNullupleTypes ...others) &
 		__WOJ_RETURN_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullpleTypes>
+		/**
+		 * Copies to many other nulluples from current nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OthersStates States of the other nulluples
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param others Other nulluples
+		 * @return const rvalue reference to the current nulluple
+		 */
+		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
 					true &&
 					... &&
-					std::is_same_v<OthersNullpleTypes, nulluple>
+					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr const nulluple &&copy_to(const OthersNullpleTypes ...others) const&&
+		constexpr const nulluple &&copy_to(const OthersNullupleTypes ...others) const&&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
-		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullpleTypes>
+		/**
+		 * Copies to many other nulluples from current nulluple (does nothing)
+		 * @tparam State State of the current nulluple
+		 * @tparam OthersStates States of the other nulluples
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param others Other nulluples
+		 * @return rvalue reference to the current nulluple
+		 */
+		template <state_t State = state_t::unknown, state_t ...OthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
 				(
 					true &&
 					... &&
-					std::is_same_v<OthersNullpleTypes, nulluple>
+					std::is_same_v<OthersNullupleTypes, nulluple>
 				)
 			)
-		constexpr nulluple&& copy_to(const OthersNullpleTypes ...others) &&
+		constexpr nulluple&& copy_to(const OthersNullupleTypes ...others) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
 
+		/**
+		 * Copies to many other nulluples from current nulluple (does nothing)
+		 * @tparam DynamicStates Dynamic states tag
+		 * @tparam OthersNullupleTypes Types of the other nulluples
+		 * @param state State of the current nulluple
+		 * @param others_states States of the other nulluples
+		 * @param others Other nulluples
+		 * @return const lvalue reference to the current nulluple
+		 */
 		template <dynamic_states_t DynamicStates = dynamic_states, size_t SizeOthersStates, typename ...OthersNullupleTypes>
 			requires
 			(
@@ -1164,6 +1847,21 @@ namespace woj
 		template <dynamic_states_t DynamicStates = dynamic_states>
 		constexpr nulluple &&swap_with(const state_t state, const state_t other_state, const nulluple other) &&
 		__WOJ_RETURN_MOVE_THIS_FUNCTION_METHOD_NOEXCEPT_BODY
+
+		template <state_t State = state_t::unknown, typename VisitFunctionType, typename ...VisitArgumentsTypes>
+		constexpr const nulluple& visit(VisitFunctionType&& visit_function, VisitArgumentsTypes &&...visit_arguments) const&
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#endif
+		{
+#ifndef NDEBUG
+			throw bad_tuple_access{ __LINE__, "Nulluple access out of bounds.", __FILE__, __func__ };
+#endif
+			return *this; 
+		}
 	};
 
 	template <typename FirstType>
@@ -1194,6 +1892,7 @@ namespace woj
 			FirstType first;
 		};
 
+		using this_type = single;
 		using first_value_type = FirstType;
 		using value_type = FirstType;
 		using reference = FirstType&;
@@ -1254,32 +1953,54 @@ namespace woj
 			(
 				std::is_nothrow_copy_constructible_v<FirstType>
 			)
-			: first{ other.first } {
-		}
+			: first{ other.first } {}
 
 		constexpr single(single &&other)
 			noexcept
 			(
 				std::is_nothrow_move_constructible_v<FirstType>
 			)
-			: first{ std::move(other.first) } {
-		}
+			: first{ std::move(other.first) } {}
 
 		constexpr single(const state_t other_state, const single& other)
 			noexcept
 			(
 				std::is_nothrow_copy_constructible_v<FirstType>
 			)
-			: first{ other.first } {
-		}
+			: first{ other.first } {}
 
 		constexpr single(const state_t other_state, single &&other)
 			noexcept
 			(
 				std::is_nothrow_move_constructible_v<FirstType>
 			)
-			: first{ std::move(other.first) } {
-		}
+			: first{ std::move(other.first) } {}
+
+		template <typename OtherSingleType>
+			requires
+			(
+				is_single_v<OtherSingleType> &&
+				!std::is_same_v<OtherSingleType, single>
+			)
+		constexpr single(OtherSingleType &&other)
+			noexcept
+			(
+				std::is_nothrow_constructible_v<FirstType, decltype(other.template get<0>()) &&>
+			)
+			: first{ std::forward<decltype(other.template get<0>())>(other.template get<0>()) } {}
+
+		template <typename OtherSingleType>
+			requires
+			(
+				is_single_v<OtherSingleType> &&
+				!std::is_same_v<OtherSingleType, single>
+			)
+		constexpr single(const state_t other_state, OtherSingleType&& other)
+			noexcept
+			(
+				std::is_nothrow_constructible_v<FirstType, decltype(other.template get<0>())&&>
+			)
+			: first{ std::forward<decltype(other.template get<0>())>(other.template get<0>()) } {}
 
 		template <typename ...FirstArgsValueTypes>
 			requires
@@ -1404,10 +2125,10 @@ namespace woj
 		constexpr single &&operator=(single &&other) &&
 			noexcept
 			(
-				std::is_nothrow_copy_assignable_v<FirstType>
+				std::is_nothrow_copy_assignable_v<FirstType> ||
 				(
-					!std::is_copy_assignable_v<FirstType>&&
-					std::is_nothrow_copy_constructible_v<FirstType>&&
+					!std::is_copy_assignable_v<FirstType> &&
+					std::is_nothrow_copy_constructible_v<FirstType> &&
 					std::is_nothrow_destructible_v<FirstType>
 				)
 			)
@@ -1420,6 +2141,64 @@ namespace woj
 			{
 				std::destroy_at(std::addressof(first));
 				std::construct_at(std::addressof(first), other.first);
+			}
+			return *this;
+		}
+
+		template <typename OtherSingleType>
+			requires
+			(
+				is_single_v<OtherSingleType> &&
+				!std::is_same_v<OtherSingleType, single>
+			)
+		constexpr single& operator=(OtherSingleType&& other) &
+			noexcept
+			(
+				std::is_nothrow_assignable_v<FirstType, decltype(other.template get<0>())&&> ||
+				(
+					!std::is_copy_assignable_v<FirstType> &&
+					std::is_nothrow_constructible_v<FirstType, decltype(other.template get<0>())&&> &&
+					std::is_nothrow_destructible_v<FirstType>
+				)
+			)
+		{
+			if constexpr (std::is_assignable_v<FirstType, decltype(other.template get<0>())&&>)
+			{
+				first = std::forward<decltype(other.template get<0>())>(other.template get<0>());
+			}
+			else
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), std::forward<decltype(other.template get<0>())>(other.template get<0>()));
+			}
+			return *this;
+		}
+
+		template <typename OtherSingleType>
+			requires
+			(
+				is_single_v<OtherSingleType> &&
+				!std::is_same_v<OtherSingleType, single>
+			)
+		constexpr single&& operator=(OtherSingleType&& other) &&
+			noexcept
+			(
+				std::is_nothrow_assignable_v<FirstType, decltype(other.template get<0>())&&> ||
+				(
+					!std::is_copy_assignable_v<FirstType> &&
+					std::is_nothrow_constructible_v<FirstType, decltype(other.template get<0>())&&> &&
+					std::is_nothrow_destructible_v<FirstType>
+				)
+			)
+		{
+			if constexpr (std::is_assignable_v<FirstType, decltype(other.template get<0>())&&>)
+			{
+				first = std::forward<decltype(other.template get<0>())>(other.template get<0>());
+			}
+			else
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), std::forward<decltype(other.template get<0>())>(other.template get<0>()));
 			}
 			return *this;
 		}
@@ -1647,7 +2426,7 @@ namespace woj
 			)
 		{
 			this->template construct_from_helper<State, OtherState>(other);
-			return std::forward<single>(*this);
+			return *this;
 		}
 
 	private:
@@ -2273,6 +3052,173 @@ namespace woj
 			this->template construct_to_helper<dynamic_states>(state, other_state, other);
 			return *this;
 		}
+
+
+	private:
+		template <typename ...OthersTypes, size_t ...OthersTypesIndexes>
+		static
+#if WOJ_HAS_CXX20
+			consteval
+#else
+			constexpr
+#endif
+		size_t helper_count_singles(std::index_sequence<OthersTypesIndexes...>) noexcept
+		{
+			using tuple_type = std::tuple<std::remove_cvref_t<OthersTypes>...>;
+
+			constexpr size_t res = (0 + ... + std::is_same_v<std::tuple_element_t<OthersTypesIndexes, tuple_type>, this_type>);
+			return res;
+		}
+
+		template <state_t State = state_t::unknown, typename OtherType, size_t Index, typename ...OthersTypes, state_t ...OthersSingleStates>
+		constexpr void construct_to_impl(OtherType &&other, const woj::meta::value_sequence<OthersSingleStates...> others_states) const&
+		{
+			constexpr size_t number_singles = helper_count_singles<OthersTypes...>(std::make_index_sequence<Index>());
+
+			if constexpr (is_single_v<OtherType>)
+			{
+				if constexpr (number_singles < sizeof...(OthersSingleStates))
+				{
+					constexpr stack::vector<state_t, sizeof...(OthersSingleStates)> others_states{ std::forward<decltype(OthersSingleStates)>(OthersSingleStates)... };
+					constexpr state_t other_state = others_states[number_singles];
+					this->template construct_to<State, other_state>(std::forward<decltype(other)>(other));
+				}
+				else
+				{
+					this->template construct_to<State>(std::forward<decltype(other)>(other));
+				}
+			}
+			else
+			{
+				this->template construct_to<State>(std::forward<decltype(other)>(other));
+			}
+		}
+
+		template <state_t State = state_t::unknown, typename OtherType, size_t Index, typename ...OthersTypes, state_t ...OthersSingleStates>
+		constexpr void construct_to_impl(OtherType&& other, const woj::meta::value_sequence<OthersSingleStates...> others_states) &
+		{
+			constexpr size_t number_singles = helper_count_singles<OthersTypes...>(std::make_index_sequence<Index>());
+
+			if constexpr (is_single_v<OtherType>)
+			{
+				if constexpr (number_singles < sizeof...(OthersSingleStates))
+				{
+					constexpr stack::vector<state_t, sizeof...(OthersSingleStates)> others_states{ std::forward<decltype(OthersSingleStates)>(OthersSingleStates)... };
+					constexpr state_t other_state = others_states[number_singles];
+					this->template construct_to<State, other_state>(std::forward<decltype(other)>(other));
+				}
+				else
+				{
+					this->template construct_to<State>(std::forward<decltype(other)>(other));
+				}
+			}
+			else
+			{
+				this->template construct_to<State>(std::forward<decltype(other)>(other));
+			}
+		}
+
+		template <state_t State = state_t::unknown, typename OtherType, size_t Index, typename ...OthersTypes, state_t ...OthersSingleStates>
+		constexpr void construct_to_impl(OtherType&& other, const woj::meta::value_sequence<OthersSingleStates...> others_states) const&&
+		{
+			constexpr size_t number_singles = helper_count_singles<OthersTypes...>(std::make_index_sequence<Index>());
+
+			if constexpr (is_single_v<OtherType>)
+			{
+				if constexpr (number_singles < sizeof...(OthersSingleStates))
+				{
+					constexpr stack::vector<state_t, sizeof...(OthersSingleStates)> others_states{ std::forward<decltype(OthersSingleStates)>(OthersSingleStates)... };
+					constexpr state_t other_state = others_states[number_singles];
+					this->template construct_to<State, other_state>(std::forward<decltype(other)>(other));
+				}
+				else
+				{
+					this->template construct_to<State>(std::forward<decltype(other)>(other));
+				}
+			}
+			else
+			{
+				this->template construct_to<State>(std::forward<decltype(other)>(other));
+			}
+		}
+
+		template <state_t State = state_t::unknown, typename OtherType, size_t Index, typename ...OthersTypes, state_t ...OthersSingleStates>
+		constexpr void construct_to_impl(OtherType&& other, const woj::meta::value_sequence<OthersSingleStates...> others_states) &&
+		{
+			constexpr size_t number_singles = helper_count_singles<OthersTypes...>(std::make_index_sequence<Index>());
+
+			if constexpr (is_single_v<OtherType>)
+			{
+				if constexpr (number_singles < sizeof...(OthersSingleStates))
+				{
+					constexpr stack::vector<state_t, sizeof...(OthersSingleStates)> others_states{ std::forward<decltype(OthersSingleStates)>(OthersSingleStates)... };
+					constexpr state_t other_state = others_states[number_singles];
+					this->template construct_to<State, other_state>(std::forward<decltype(other)>(other));
+				}
+				else
+				{
+					this->template construct_to<State>(std::forward<decltype(other)>(other));
+				}
+			}
+			else
+			{
+				this->template construct_to<State>(std::forward<decltype(other)>(other));
+			}
+		}
+
+		template <state_t State = state_t::unknown, state_t ...OthersSingleStates, typename ...OthersTypes, size_t ...OthersTypesIndexes>
+		constexpr void construct_to_helper(OthersTypes &&...others, std::index_sequence<OthersTypesIndexes...>) const&
+		{
+			(
+				this->template construct_to_impl<State, OthersTypes, OthersTypesIndexes, OthersTypes...>(std::forward<OthersTypes>(others), woj::meta::value_sequence<OthersSingleStates...>{}), 
+				...
+			);
+		}
+
+		template <state_t State = state_t::unknown, state_t ...OthersSingleStates, typename ...OthersTypes, size_t ...OthersTypesIndexes>
+		constexpr void construct_to_helper(OthersTypes &&...others, std::index_sequence<OthersTypesIndexes...>) &
+		{
+			(
+				this->template construct_to_impl<State, OthersTypes, OthersTypesIndexes, OthersTypes...>(std::forward<OthersTypes>(others), woj::meta::value_sequence<OthersSingleStates...>{}),
+				...
+				);
+		}
+
+		template <state_t State = state_t::unknown, state_t ...OthersSingleStates, typename ...OthersTypes, size_t ...OthersTypesIndexes>
+		constexpr void construct_to_helper(OthersTypes &&...others, std::index_sequence<OthersTypesIndexes...>) const&&
+		{
+			(
+				this->template construct_to_impl<State, OthersTypes, OthersTypesIndexes, OthersTypes...>(std::forward<OthersTypes>(others), woj::meta::value_sequence<OthersSingleStates...>{}),
+				...
+				);
+		}
+
+		template <state_t State = state_t::unknown, state_t ...OthersSingleStates, typename ...OthersTypes, size_t ...OthersTypesIndexes>
+		constexpr void construct_to_helper(OthersTypes &&...others, std::index_sequence<OthersTypesIndexes...>) &&
+		{
+			(
+				this->template construct_to_impl<State, OthersTypes, OthersTypesIndexes, OthersTypes...>(std::forward<OthersTypes>(others), woj::meta::value_sequence<OthersSingleStates...>{}),
+				...
+				);
+		}
+
+	public:
+
+		template <state_t State = state_t::unknown, state_t ...OthersSingleStates, typename ...OthersTypes>
+		constexpr const single& construct_to(OthersTypes &&...others) const&
+		{
+			this->template construct_to_helper<State, OthersSingleStates..., OthersTypes...>(std::forward<OthersTypes>(others)..., std::make_index_sequence<sizeof...(OthersTypes)>{});
+			return *this;
+		}
+
+		template <state_t State = state_t::unknown, state_t ...OthersSingleStates, typename ...OthersTypes>
+		constexpr single& construct_to(OthersTypes &&...others) &
+		{
+			this->template construct_to_helper<State, OthersSingleStates..., OthersTypes...>(std::forward<OthersTypes>(others)..., std::make_index_sequence<sizeof...(OthersTypes)>{});
+			return *this;
+		}
+
+
 
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherSingleType>
 			requires
