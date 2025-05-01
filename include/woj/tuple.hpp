@@ -2569,7 +2569,7 @@ namespace woj
 		}
 
 		template <state_t State = state_t::unknown, typename VisitFunctionType, typename ...VisitArgumentsTypes>
-		static
+		[[nodiscard]] static
 #ifndef NDEBUG
 			constexpr
 #else
@@ -2591,7 +2591,14 @@ namespace woj
 			throw bad_nulluple_access{ __LINE__, "Nulluple access out of bounds.", __FILE__, __func__ };
 #endif
 			visit_function(std::forward<VisitArgumentsTypes>(visit_arguments) ...);
-			return nulluple{};
+			return nulluple{};""
+		}
+		
+		template <typename FindValueType>
+		[[nodiscard]] static constexpr size_t find(FindValueType &&find_value)
+			noexcept
+		{
+			return static_cast<size_t>(-1);
 		}
 	};
 
