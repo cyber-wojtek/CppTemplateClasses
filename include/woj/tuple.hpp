@@ -2182,7 +2182,7 @@ namespace woj
 			return nulluple{};
 		}
 
-		template <size_t Index>
+		template <state_t State, size_t Index>
 		[[nodiscard]] static
 #if defined(NDEBUG)
 			consteval
@@ -2194,6 +2194,31 @@ namespace woj
 			[[noreturn]]
 #endif
 			()
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#endif
+		{
+#ifndef NDEBUG
+			throw bad_nulluple_access{ __LINE__, "Nulluple access out of bounds.", __FILE__, __func__ };
+#endif
+			return invalid;
+		}
+
+		template <dynamic_states_t DynamicStates, size_t Index>
+		[[nodiscard]] static
+#if defined(NDEBUG)
+			consteval
+#else
+			constexpr
+#endif
+			invalid_t get
+#ifndef NDEBUG
+			[[noreturn]]
+#endif
+			(const state_t state)
 			noexcept
 #ifndef NDEBUG
 			(
@@ -2236,6 +2261,87 @@ namespace woj
 			noexcept
 		{
 			return 0;
+		}
+
+		template <dynamic_states_t DynamicStates, size_t Index>
+		[[nodiscard]] static
+#if defined(NDEBUG)
+			consteval
+#else
+			constexpr
+#endif
+			invalid_t at
+#ifndef NDEBUG
+			[[noreturn]]
+#endif
+			(const state_t state)
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#endif
+		{
+#ifndef NDEBUG
+			throw bad_nulluple_access{ __LINE__, "Nulluple access out of bounds.", __FILE__, __func__ };
+#endif
+			return invalid;
+		}
+
+		template <state_t State, auto FindValue>
+		static consteval size_t find()
+			noexcept
+		{
+			return static_cast<size_t>(-1);
+		}
+
+		template <dynamic_states_t DynamicStates, auto FindValue>
+		static constexpr size_t find(const size_t state)
+			noexcept
+		{
+			return static_cast<size_t>(-1);
+		}
+
+		template <state_t State, typename FindValueType>
+		static constexpr size_t find(const FindValueType &find_value)
+			noexcept
+		{
+			return static_cast<size_t>(-1);
+		}
+
+		template <dynamic_states_t DynamicStates, typename FindValueType>
+		static constexpr size_t find(const state_t state, const FindValueType &find_value)
+			noexcept
+		{
+			return static_cast<size_t>(-1);
+		}
+
+		template <state_t State, auto ContainValue>
+		static consteval bool contains()
+			noexcept
+		{
+			return false;
+		}
+
+		template <dynamic_states_t DynamicStates, auto ContainValue>
+		static constexpr bool contains(const state_t state)
+			noexcept
+		{
+			return false;
+		}
+
+		template <state_t State, typename FindValueType>
+		static constexpr bool contains(const FindValueType &contain_value)
+			noexcept
+		{
+			return false;
+		}
+
+		template <dynamic_states_t DynamicStates, typename FindValueType>
+		static constexpr bool contains(const state_t state, const FindValueType &contain_value)
+			noexcept
+		{
+			return false;
 		}
 
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
@@ -2366,6 +2472,102 @@ namespace woj
 			return *this;
 		}
 
+		template <dynamic_states_t DynamicStates, typename VisitFunctionType, typename ...VisitArgumentsTypes>
+		constexpr const nulluple &visit
+#ifndef NDEBUG
+			[[noreturn]]
+#endif
+			(const state_t state, VisitFunctionType &&visit_function, VisitArgumentsTypes &&...visit_arguments) const &
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#else
+			(
+				std::is_nothrow_invocable_v<VisitFunctionType, VisitArgumentsTypes &&...>
+			)
+#endif
+		{
+#ifndef NDEBUG
+			throw bad_nulluple_access{ __LINE__, "Nulluple access out of bounds.", __FILE__, __func__ };
+#endif
+			visit_function(std::forward<VisitArgumentsTypes>(visit_arguments) ...);
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates, typename VisitFunctionType, typename ...VisitArgumentsTypes>
+		constexpr nulluple &visit
+#ifndef NDEBUG
+			[[noreturn]]
+#endif
+			(const state_t state, VisitFunctionType &&visit_function, VisitArgumentsTypes &&...visit_arguments) &
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#else
+			(
+				std::is_nothrow_invocable_v<VisitFunctionType, VisitArgumentsTypes &&...>
+			)
+#endif
+		{
+#ifndef NDEBUG
+			throw bad_nulluple_access{ __LINE__, "Nulluple access out of bounds.", __FILE__, __func__ };
+#endif
+			visit_function(std::forward<VisitArgumentsTypes>(visit_arguments) ...);
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates, typename VisitFunctionType, typename ...VisitArgumentsTypes>
+		constexpr const nulluple &&visit
+#ifndef NDEBUG
+			[[noreturn]]
+#endif
+			(const state_t state, VisitFunctionType &&visit_function, VisitArgumentsTypes &&...visit_arguments) const &&
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#else
+			(
+				std::is_nothrow_invocable_v<VisitFunctionType, VisitArgumentsTypes &&...>
+			)
+#endif
+		{
+#ifndef NDEBUG
+			throw bad_nulluple_access{ __LINE__, "Nulluple access out of bounds.", __FILE__, __func__ };
+#endif
+			visit_function(std::forward<VisitArgumentsTypes>(visit_arguments) ...);
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates, typename VisitFunctionType, typename ...VisitArgumentsTypes>
+		constexpr nulluple &&visit
+#ifndef NDEBUG
+			[[noreturn]]
+#endif
+			(const state_t state, VisitFunctionType &&visit_function, VisitArgumentsTypes &&...visit_arguments) &&
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#else
+			(
+				std::is_nothrow_invocable_v<VisitFunctionType, VisitArgumentsTypes &&...>
+			)
+#endif
+		{
+#ifndef NDEBUG
+			throw bad_nulluple_access{ __LINE__, "Nulluple access out of bounds.", __FILE__, __func__ };
+#endif
+			visit_function(std::forward<VisitArgumentsTypes>(visit_arguments) ...);
+			return *this;
+		}
+
 		template <state_t State = state_t::unknown, typename VisitFunctionType, typename ...VisitArgumentsTypes>
 		static
 #ifndef NDEBUG
@@ -2397,12 +2599,11 @@ namespace woj
 	{
 	public:
 		bad_single_access(const size_t line, const char* const message, const char* const file, const char* const function)
-			: exception{ line, message, file, function } {
-		}
-		bad_single_access(const bad_single_access&) = default;
-		bad_single_access(bad_single_access&&) = default;
-		bad_single_access& operator=(const bad_single_access&) = default;
-		bad_single_access& operator=(bad_single_access&&) = default;
+			: exception{ line, message, file, function } {}
+		bad_single_access(const bad_single_access &) = default;
+		bad_single_access(bad_single_access &&) = default;
+		bad_single_access& operator=(const bad_single_access &) = default;
+		bad_single_access& operator=(bad_single_access &&) = default;
 		~bad_single_access() = default;
 	};
 
@@ -2425,12 +2626,12 @@ namespace woj
 		using this_type = single;
 		using first_value_type = FirstValueType;
 		using value_type = FirstValueType;
-		using reference = FirstValueType&;
-		using const_reference = const FirstValueType&;
-		using rvalue_reference = FirstValueType&&;
-		using const_rvalue_reference = const FirstValueType&&;
-		using pointer = FirstValueType*;
-		using const_pointer = const FirstValueType*;
+		using reference = FirstValueType &;
+		using const_reference = const FirstValueType &;
+		using rvalue_reference = FirstValueType &&;
+		using const_rvalue_reference = const FirstValueType &&;
+		using pointer = FirstValueType *;
+		using const_pointer = const FirstValueType *;
 
 		constexpr single()
 			noexcept
@@ -5767,8 +5968,793 @@ namespace woj
 			return *this;
 		}
 
+	private:
 		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
-		constexpr const single& construct_to(single& other) const&
+		constexpr void assign_from_helper(const single &other)
+#ifndef NDEBUG
+			noexcept
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+					) &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+					) &&
+					std::is_nothrow_copy_assignable_v<FirstValueType>
+				) ||
+				(
+					State == state_t::uninitialized &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+					) &&
+					std::is_nothrow_copy_constructible_v<FirstValueType>
+				)
+			)
+#else
+			noexcept
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+					) &&
+					std::is_nothrow_copy_assignable_v<FirstValueType>
+				) ||
+				(
+					State == state_t::uninitialized &&
+					std::is_nothrow_copy_constructible_v<FirstValueType>
+				)
+			)
+#endif
+		{
+			if constexpr
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+					) &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+					)
+				)
+			{
+				first = other.first;
+			}
+			else if constexpr
+				(
+					State == state_t::uninitialized &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+					)
+				)
+			{
+				std::construct_at(std::addressof(first), other.first);
+			}
+#ifndef NDEBUG
+			else
+			{
+				throw bad_single_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
+			}
+#endif
+		}
+	public:
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		constexpr single &assign_from(const single &other) &
+#ifndef NDEBUG
+			noexcept
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+					) &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+					) &&
+					std::is_nothrow_copy_assignable_v<FirstValueType>
+				) ||
+				(
+					State == state_t::uninitialized &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+						) &&
+					std::is_nothrow_copy_constructible_v<FirstValueType>
+					)
+				)
+#else
+			noexcept
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+					)
+					std::is_nothrow_copy_assignable_v<FirstValueType>
+				) ||
+				(
+					State == state_t::uninitialized &&
+					std::is_nothrow_copy_constructible_v<FirstValueType>
+				)
+			)
+#endif
+		{
+			this->construct_from_helper<State, OtherState>(other);
+			return *this;
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		constexpr single &&assign_from(const single& other) &&
+#ifndef NDEBUG
+			noexcept
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+					) &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+					) &&
+					std::is_nothrow_copy_assignable_v<FirstValueType>
+				) ||
+				(
+					State == state_t::uninitialized &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+					) &&
+					std::is_nothrow_copy_constructible_v<FirstValueType>
+				)
+			)
+#else
+			noexcept
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+					)
+					std::is_nothrow_copy_assignable_v<FirstValueType>
+				) ||
+				(
+					State == state_t::uninitialized &&
+					std::is_nothrow_copy_constructible_v<FirstValueType>
+				)
+			)
+#endif
+		{
+			this->construct_from_helper<State, OtherState>(other);
+			return *this;
+		}
+
+		private:
+			template <dynamic_states_t DynamicStates>
+			constexpr void assign_from_helper(const state_t state, const state_t other_state, const single& other)
+				noexcept
+#ifndef NDEBUG
+				(
+					false
+				)
+#else
+				(
+					std::is_nothrow_copy_assignable_v<FirstValueType> &&
+					std::is_nothrow_copy_constructible_v<FirstValueType>
+				)
+#endif
+			{
+				if
+					(
+						(
+							state == state_t::initialized ||
+							state == state_t::unknown
+						) &&
+						(
+							other_state == state_t::initialized ||
+							other_state == state_t::unknown
+						)
+					)
+				{
+					first = other.first;
+				}
+				else if
+					(
+						state == state_t::uninitialized &&
+						(
+							other_state == state_t::initialized ||
+							other_state == state_t::unknown
+						)
+					)
+				{
+					std::construct_at(std::addressof(first), other.first);
+				}
+#ifndef NDEBUG
+				else
+				{
+					throw bad_single_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
+				}
+#endif
+			}
+	public:
+
+		template <dynamic_states_t DynamicStates>
+		constexpr single& construct_from(const state_t state, const state_t other_state, const single& other) &
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#else
+			(
+				std::is_nothrow_destructible_v<FirstValueType>&&
+				std::is_nothrow_constructible_v<FirstValueType>
+				)
+#endif
+		{
+			this->construct_from_helper<dynamic_states>(state, other_state, other);
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates>
+		constexpr single&& construct_from(const state_t state, const state_t other_state, const single& other) &&
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#else
+			(
+				std::is_nothrow_destructible_v<FirstValueType>&&
+				std::is_nothrow_constructible_v<FirstValueType>
+				)
+#endif
+		{
+			this->construct_from_helper<dynamic_states>(state, other_state, other);
+			return *this;
+		}
+
+	private:
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		constexpr void construct_from_helper(single&& other)
+			noexcept
+#ifndef NDEBUG
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+						) &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+						) &&
+					std::is_nothrow_destructible_v<FirstValueType>&&
+					std::is_nothrow_move_constructible_v<FirstValueType>
+					) ||
+				(
+					State == state_t::uninitialized &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+						) &&
+					std::is_nothrow_move_constructible_v<FirstValueType>
+					)
+			)
+#else
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+						) &&
+					std::is_nothrow_destructible_v<FirstValueType>&&
+					std::is_nothrow_move_constructible_v<FirstValueType>
+					) ||
+				(
+					State == state_t::uninitialized &&
+					std::is_nothrow_move_constructible_v<FirstValueType>
+					)
+				)
+#endif
+
+		{
+			if constexpr
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+						) &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+						)
+					)
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), other.first);
+			}
+			else if constexpr
+				(
+					State == state_t::uninitialized &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+						)
+					)
+			{
+				std::construct_at(std::addressof(first), std::move(other.first));
+			}
+#ifndef NDEBUG
+			else
+			{
+				throw bad_single_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
+			}
+#endif
+		}
+	public:
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		constexpr single& construct_from(single&& other) &
+			noexcept
+#ifndef NDEBUG
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+						) &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+						) &&
+					std::is_nothrow_destructible_v<FirstValueType>&&
+					std::is_nothrow_move_constructible_v<FirstValueType>
+					) ||
+				(
+					State == state_t::uninitialized &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+						) &&
+					std::is_nothrow_move_constructible_v<FirstValueType>
+					)
+			)
+#else
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+						) &&
+					std::is_nothrow_destructible_v<FirstValueType>&&
+					std::is_nothrow_move_constructible_v<FirstValueType>
+					) ||
+				(
+					State == state_t::uninitialized &&
+					std::is_nothrow_move_constructible_v<FirstValueType>
+					)
+				)
+#endif
+		{
+			this->construct_from_helper<State, OtherState>(other);
+			return *this;
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		constexpr single&& construct_from(single&& other) &&
+			noexcept
+#ifndef NDEBUG
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+						) &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+						) &&
+					std::is_nothrow_destructible_v<FirstValueType>&&
+					std::is_nothrow_move_constructible_v<FirstValueType>
+					) ||
+				(
+					State == state_t::uninitialized &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+						) &&
+					std::is_nothrow_move_constructible_v<FirstValueType>
+					)
+			)
+#else
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+						) &&
+					std::is_nothrow_destructible_v<FirstValueType>&&
+					std::is_nothrow_move_constructible_v<FirstValueType>
+					) ||
+				(
+					State == state_t::uninitialized &&
+					std::is_nothrow_move_constructible_v<FirstValueType>
+					)
+				)
+#endif
+		{
+			this->construct_from_helper<State, OtherState>(other);
+			return *this;
+		}
+
+	private:
+		template <dynamic_states_t DynamicStates>
+		constexpr void construct_from_helper(const state_t state, const state_t other_state, single&& other)
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#else
+			(
+				std::is_nothrow_destructible_v<FirstValueType>&&
+				std::is_nothrow_move_constructible_v<FirstValueType>
+				)
+#endif
+		{
+			if
+				(
+					(
+						state == state_t::initialized ||
+						state == state_t::unknown
+						) &&
+					(
+						other_state == state_t::initialized ||
+						other_state == state_t::unknown
+						)
+					)
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), other.first);
+			}
+			else if
+				(
+					state == state_t::uninitialized &&
+					(
+						other_state == state_t::initialized ||
+						other_state == state_t::unknown
+						)
+					)
+			{
+				std::construct_at(std::addressof(first), std::move(other.first));
+			}
+#ifndef NDEBUG
+			else
+			{
+				throw bad_single_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
+			}
+#endif
+		}
+	public:
+
+		template <dynamic_states_t DynamicStates>
+		constexpr single& construct_from(const state_t state, const state_t other_state, single&& other) &
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#else
+			(
+				std::is_nothrow_destructible_v<FirstValueType>&&
+				std::is_nothrow_move_constructible_v<FirstValueType>
+				)
+#endif
+		{
+			this->construct_from_helper<DynamicStates>(state, other_state, other);
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates>
+		constexpr single&& construct_from(const state_t state, const state_t other_state, single&& other) &&
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#else
+			(
+				std::is_nothrow_destructible_v<FirstValueType>&&
+				std::is_nothrow_move_constructible_v<FirstValueType>
+				)
+#endif
+		{
+			this->construct_from_helper<DynamicStates>(state, other_state, other);
+			return *this;
+		}
+
+	private:
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherFirstValueType>
+			requires
+		(
+			!std::is_same_v<std::remove_cvref_t<OtherFirstValueType>, single>
+			)
+			constexpr void construct_from_helper(OtherFirstValueType&& other)
+			noexcept
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+						) &&
+					std::is_nothrow_destructible_v<FirstValueType>&&
+					std::is_nothrow_constructible_v<FirstValueType, OtherFirstValueType&&>
+					) ||
+				(
+					State == state_t::uninitialized &&
+					std::is_nothrow_constructible_v<FirstValueType, OtherFirstValueType&&>
+					)
+				)
+		{
+			if constexpr (State == state_t::initialized || State == state_t::unknown)
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), std::forward<OtherFirstValueType>(other));
+			}
+			else
+			{
+				std::construct_at(std::addressof(first), std::forward<OtherFirstValueType>(other));
+			}
+		}
+	public:
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherFirstValueType>
+			requires
+		(
+			!std::is_same_v<std::remove_cvref_t<OtherFirstValueType>, single>
+			)
+			constexpr single& construct_from(OtherFirstValueType&& other) &
+			noexcept
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+						) &&
+					std::is_nothrow_destructible_v<FirstValueType>&&
+					std::is_nothrow_constructible_v<FirstValueType, OtherFirstValueType&&>
+					) ||
+				(
+					State == state_t::uninitialized &&
+					std::is_nothrow_constructible_v<FirstValueType, OtherFirstValueType&&>
+					)
+				)
+		{
+			this->construct_from_helper<State, OtherState>(std::forward<OtherFirstValueType>(other));
+
+			return *this;
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown, typename OtherFirstValueType>
+			requires
+		(
+			!std::is_same_v<std::remove_cvref_t<OtherFirstValueType>, single>
+			)
+			constexpr single&& construct_from(OtherFirstValueType&& other) &&
+			noexcept
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+						) &&
+					std::is_nothrow_destructible_v<FirstValueType>&&
+					std::is_nothrow_constructible_v<FirstValueType, OtherFirstValueType&&>
+					) ||
+				(
+					State == state_t::uninitialized &&
+					std::is_nothrow_constructible_v<FirstValueType, OtherFirstValueType&&>
+					)
+				)
+		{
+			this->construct_from_helper<State, OtherState>(std::forward<OtherFirstValueType>(other));
+
+			return *this;
+		}
+
+	private:
+
+		template <dynamic_states_t DynamicStates, typename OtherFirstValueType>
+			requires
+		(
+			!std::is_same_v<std::remove_cvref_t<OtherFirstValueType>, single>
+			)
+			constexpr void construct_from_helper(const state_t state, const state_t other_state, OtherFirstValueType&& other)
+			noexcept
+			(
+				std::is_nothrow_destructible_v<FirstValueType>&&
+				std::is_nothrow_constructible_v<FirstValueType, OtherFirstValueType&&>
+				)
+		{
+			if (state == state_t::initialized || state == state_t::unknown)
+			{
+				std::destroy_at(std::addressof(first));
+				std::construct_at(std::addressof(first), std::forward<OtherFirstValueType>(other));
+			}
+			else
+			{
+				std::construct_at(std::addressof(first), std::forward<OtherFirstValueType>(other));
+			}
+		}
+
+	public:
+
+		template <dynamic_states_t DynamicStates, typename OtherFirstValueType>
+			requires
+		(
+			!std::is_same_v<std::remove_cvref_t<OtherFirstValueType>, single>
+			)
+			constexpr single& construct_from(const state_t state, const state_t other_state, OtherFirstValueType&& other) &
+			noexcept
+			(
+				std::is_nothrow_destructible_v<FirstValueType>&&
+				std::is_nothrow_constructible_v<FirstValueType, OtherFirstValueType&&>
+				)
+		{
+			this->construct_from_helper(state, other_state, std::forward<OtherFirstValueType>(other));
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates, typename OtherFirstValueType>
+			requires
+		(
+			!std::is_same_v<std::remove_cvref_t<OtherFirstValueType>, single>
+			)
+			constexpr single&& construct_from(const state_t state, const state_t other_state, OtherFirstValueType&& other) &&
+			noexcept
+			(
+				std::is_nothrow_destructible_v<FirstValueType>&&
+				std::is_nothrow_constructible_v<FirstValueType, OtherFirstValueType&&>
+				)
+		{
+			this->construct_from_helper(state, other_state, std::forward<OtherFirstValueType>(other));
+			return *this;
+		}
+
+		template <state_t OtherState = state_t::unknown>
+		[[nodiscard]] static constexpr single constructed_from(const noinit_t noinit)
+			noexcept
+		{
+			return single{ noinit };
+		}
+
+		template <dynamic_states_t DynamicStates>
+		[[nodiscard]] static constexpr single constructed_from(const state_t other_state, const noinit_t noinit)
+			noexcept
+		{
+			return single{ noinit };
+		}
+
+		template <state_t OtherState = state_t::unknown>
+		[[nodiscard]] static constexpr single constructed_from(const single& other)
+			noexcept
+#ifndef NDEBUG
+			(
+				(
+					OtherState == state_t::initialized ||
+					OtherState == state_t::unknown
+					) &&
+				std::is_nothrow_copy_constructible_v<FirstValueType>
+			)
+#else
+			(
+				std::is_nothrow_move_constructible_v<FirstValueType>
+				)
+#endif
+		{
+			single temp{ noinit };
+			temp.construct_from<state_t::uninitialized, OtherState>(other);
+			return std::move(temp);
+		}
+
+		template <dynamic_states_t DynamicStates>
+		[[nodiscard]] static constexpr single constructed_from(const state_t other_state, const single& other)
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#else
+			(
+				std::is_nothrow_copy_constructible_v<FirstValueType>
+				)
+#endif
+		{
+			single temp{ noinit };
+			temp.construct_from(state_t::uninitialized, other_state, other);
+			return std::move(temp);
+		}
+
+		template <state_t OtherState = state_t::unknown>
+		[[nodiscard]] static constexpr single constructed_from(single&& other)
+			noexcept
+#ifndef NDEBUG
+			(
+				(
+					OtherState == state_t::initialized ||
+					OtherState == state_t::unknown
+					) &&
+				std::is_nothrow_move_constructible_v<FirstValueType>
+			)
+#else
+			(
+				std::is_nothrow_move_constructible_v<FirstValueType>
+				)
+#endif
+
+		{
+			single temp{ noinit };
+			temp.template construct_from<state_t::uninitialized, OtherState>(std::forward<single>(other));
+			return std::move(temp);
+		}
+
+		template <dynamic_states_t DynamicStates>
+		[[nodiscard]] static constexpr single constructed_from(const state_t other_state, single&& other)
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#else
+			(
+				std::is_nothrow_copy_constructible_v<FirstValueType>
+				)
+#endif
+		{
+			single temp{ noinit };
+			temp.template construct_from<dynamic_states>(state_t::uninitialized, other_state, std::forward<single>(other));
+			return std::move(temp);
+		}
+
+		template <state_t OtherState = state_t::unknown, typename OtherFirstValueType>
+			requires
+		(
+			!std::is_same_v<std::remove_cvref_t<OtherFirstValueType>, single>
+			)
+			[[nodiscard]] static constexpr single constructed_from(OtherFirstValueType&& other)
+			noexcept
+			(
+				std::is_nothrow_constructible_v<FirstValueType, OtherFirstValueType&&>
+				)
+		{
+			single temp{ noinit };
+			temp.template construct_from<state_t::uninitialized, OtherState>(std::forward<OtherFirstValueType>(other));
+			return std::move(temp);
+		}
+
+		template <dynamic_states_t DynamicStates, typename OtherFirstValueType>
+		[[nodiscard]] static constexpr single constructed_from(const state_t other_state, OtherFirstValueType&& other)
+			noexcept
+			(
+				std::is_nothrow_constructible_v<FirstValueType, OtherFirstValueType&&>
+				)
+		{
+			single temp{ noinit };
+			temp.template construct_from<dynamic_states>(state_t::uninitialized, other_state, std::forward<OtherFirstValueType>(other));
+			return std::move(temp);
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		constexpr const single &assign_to(single& other) const &
 			noexcept
 #ifndef NDEBUG
 			(
@@ -5781,8 +6767,7 @@ namespace woj
 						OtherState == state_t::initialized ||
 						OtherState == state_t::unknown
 					) &&
-					std::is_nothrow_destructible_v<FirstValueType>&&
-					std::is_nothrow_copy_constructible_v<FirstValueType>
+					std::is_nothrow_copy_assignable_v<FirstValueType>
 				) ||
 				(
 					State == state_t::uninitialized &&
@@ -5796,23 +6781,21 @@ namespace woj
 					(
 						State == state_t::initialized ||
 						State == state_t::unknown
-						) &&
-					std::is_nothrow_destructible_v<FirstValueType>&&
-					std::is_nothrow_copy_constructible_v<FirstValueType>
-					) ||
+					) &&
+					std::is_nothrow_copy_assignable_v<FirstValueType>
+				) ||
 				(
 					State == state_t::uninitialized &&
 					std::is_nothrow_copy_constructible_v<FirstValueType>
-					)
 				)
+			)
 #endif
 		{
 			if constexpr (State == state_t::initialized || State == state_t::unknown)
 			{
 				if constexpr (OtherState == state_t::initialized || OtherState == state_t::unknown)
 				{
-					std::destroy_at(std::addressof(other.first));
-					std::construct_at(std::addressof(other.first), first);
+					other.first = first;
 				}
 				else
 				{
@@ -5828,223 +6811,213 @@ namespace woj
 			return *this;
 		}
 
-			template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
-			constexpr single& construct_to(single& other) &
-				noexcept
-#ifndef NDEBUG
-				(
-					(
-						(
-							State == state_t::initialized ||
-							State == state_t::unknown
-							) &&
-						(
-							OtherState == state_t::initialized ||
-							OtherState == state_t::unknown
-							) &&
-						std::is_nothrow_destructible_v<FirstValueType>&&
-						std::is_nothrow_copy_constructible_v<FirstValueType>
-						) ||
-					(
-						State == state_t::uninitialized &&
-						OtherState == state_t::initialized &&
-						std::is_nothrow_copy_constructible_v<FirstValueType>
-						)
-				)
-#else
-				(
-					(
-						(
-							State == state_t::initialized ||
-							State == state_t::unknown
-							) &&
-						std::is_nothrow_destructible_v<FirstValueType>&&
-						std::is_nothrow_copy_constructible_v<FirstValueType>
-						) ||
-					(
-						State == state_t::uninitialized &&
-						std::is_nothrow_copy_constructible_v<FirstValueType>
-						)
-					)
-#endif
-			{
-				if constexpr (State == state_t::initialized || State == state_t::unknown)
-				{
-					if constexpr (OtherState == state_t::initialized || OtherState == state_t::unknown)
-					{
-						std::destroy_at(std::addressof(other.first));
-						std::construct_at(std::addressof(other.first), first);
-					}
-					else
-					{
-						std::construct_at(std::addressof(other.first), first);
-					}
-				}
-#ifndef NDEBUG
-				else
-				{
-					throw bad_single_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
-				}
-#endif
-				return *this;
-			}
 
-			template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
-			constexpr single&& construct_to(single& other) &&
-				noexcept
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		constexpr single &assign_to(single& other) &
+			noexcept
 #ifndef NDEBUG
+			(
 				(
 					(
-						(
-							State == state_t::initialized ||
-							State == state_t::unknown
-							) &&
-						(
-							OtherState == state_t::initialized ||
-							OtherState == state_t::unknown
-							) &&
-						std::is_nothrow_destructible_v<FirstValueType>&&
-						std::is_nothrow_move_constructible_v<FirstValueType>
-						) ||
+						State == state_t::initialized ||
+						State == state_t::unknown
+					) &&
 					(
-						State == state_t::uninitialized &&
-						OtherState == state_t::initialized &&
-						std::is_nothrow_move_constructible_v<FirstValueType>
-						)
-				)
-#else
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+					) &&
+					std::is_nothrow_copy_assignable_v<FirstValueType>
+				) ||
 				(
-					(
-						(
-							State == state_t::initialized ||
-							State == state_t::unknown
-							) &&
-						std::is_nothrow_destructible_v<FirstValueType>&&
-						std::is_nothrow_move_constructible_v<FirstValueType>
-						) ||
-					(
-						State == state_t::uninitialized &&
-						std::is_nothrow_move_constructible_v<FirstValueType>
-						)
-					)
-#endif
-			{
-				if constexpr (State == state_t::initialized || State == state_t::unknown)
-				{
-					if constexpr (OtherState == state_t::initialized || OtherState == state_t::unknown)
-					{
-						std::destroy_at(std::addressof(other.first));
-						std::construct_at(std::addressof(other.first), std::move(first));
-					}
-					else
-					{
-						std::construct_at(std::addressof(other.first), std::move(first));
-					}
-				}
-#ifndef NDEBUG
-				else
-				{
-					throw bad_single_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
-				}
-#endif
-				return *this;
-			}
-
-			template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
-			constexpr const single&& construct_to(single& other) const&&
-				noexcept
-#ifndef NDEBUG
-				(
-					(
-						(
-							State == state_t::initialized ||
-							State == state_t::unknown
-							) &&
-						(
-							OtherState == state_t::initialized ||
-							OtherState == state_t::unknown
-							) &&
-						std::is_nothrow_destructible_v<FirstValueType>&&
-						std::is_nothrow_copy_constructible_v<FirstValueType>
-						) ||
-					(
-						State == state_t::uninitialized &&
-						OtherState == state_t::initialized &&
-						std::is_nothrow_copy_constructible_v<FirstValueType>
-						)
-				)
-#else
-				(
-					(
-						(
-							State == state_t::initialized ||
-							State == state_t::unknown
-							) &&
-						std::is_nothrow_destructible_v<FirstValueType>&&
-						std::is_nothrow_copy_constructible_v<FirstValueType>
-						) ||
-					(
-						State == state_t::uninitialized &&
-						std::is_nothrow_copy_constructible_v<FirstValueType>
-						)
-					)
-#endif
-			{
-				if constexpr (State == state_t::initialized || State == state_t::unknown)
-				{
-					if constexpr (OtherState == state_t::initialized || OtherState == state_t::unknown)
-					{
-						std::destroy_at(std::addressof(other.first));
-						std::construct_at(std::addressof(other.first), first);
-					}
-					else
-					{
-						std::construct_at(std::addressof(other.first), first);
-					}
-				}
-#ifndef NDEBUG
-				else
-				{
-					throw bad_single_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
-				}
-#endif
-				return *this;
-			}
-
-			template <dynamic_states_t DynamicStates>
-			constexpr const single& construct_to(const state_t state, const state_t other_state, single& other) const&
-				noexcept
-#ifndef NDEBUG
-				(
-					false
-				)
-#else
-				(
-					std::is_nothrow_destructible_v<FirstValueType>&&
+					State == state_t::uninitialized &&
+					OtherState == state_t::initialized &&
 					std::is_nothrow_copy_constructible_v<FirstValueType>
-					)
+				)
+			)
+#else
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+					) &&
+					std::is_nothrow_copy_assignable_v<FirstValueType>
+				) ||
+				(
+					State == state_t::uninitialized &&
+					std::is_nothrow_copy_constructible_v<FirstValueType>
+				)
+			)
 #endif
+		{
+			if constexpr (State == state_t::initialized || State == state_t::unknown)
+			{
+				if constexpr (OtherState == state_t::initialized || OtherState == state_t::unknown)
+				{
+					other.first = first;
+				}
+				else
+				{
+					std::construct_at(std::addressof(other.first), first);
+				}
+			}
+#ifndef NDEBUG
+			else
+			{
+				throw bad_single_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
+			}
+#endif
+			return *this;
+		}
+
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		constexpr const single &&assign_to(single& other) const &&
+			noexcept
+#ifndef NDEBUG
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+					) &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+					) &&
+					std::is_nothrow_copy_assignable_v<FirstValueType>
+				) ||
+				(
+					State == state_t::uninitialized &&
+					OtherState == state_t::initialized &&
+					std::is_nothrow_copy_constructible_v<FirstValueType>
+				)
+			)
+#else
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+					) &&
+					std::is_nothrow_copy_assignable_v<FirstValueType>
+				) ||
+				(
+					State == state_t::uninitialized &&
+					std::is_nothrow_copy_constructible_v<FirstValueType>
+				)
+			)
+#endif
+		{
+			if constexpr (State == state_t::initialized || State == state_t::unknown)
+			{
+				if constexpr (OtherState == state_t::initialized || OtherState == state_t::unknown)
+				{
+					other.first = first;
+				}
+				else
+				{
+					std::construct_at(std::addressof(other.first), first);
+				}
+			}
+#ifndef NDEBUG
+			else
+			{
+				throw bad_single_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
+			}
+#endif
+			return *this;
+		}
+		template <state_t State = state_t::unknown, state_t OtherState = state_t::unknown>
+		constexpr single &&assign_to(single& other) &&
+			noexcept
+#ifndef NDEBUG
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+					) &&
+					(
+						OtherState == state_t::initialized ||
+						OtherState == state_t::unknown
+					) &&
+					std::is_nothrow_move_assignable_v<FirstValueType>
+				) ||
+				(
+					State == state_t::uninitialized &&
+					OtherState == state_t::initialized &&
+					std::is_nothrow_move_constructible_v<FirstValueType>
+				)
+			)
+#else
+			(
+				(
+					(
+						State == state_t::initialized ||
+						State == state_t::unknown
+					) &&
+					std::is_nothrow_copy_assignable_v<FirstValueType>
+				) ||
+				(
+					State == state_t::uninitialized &&
+					std::is_nothrow_copy_constructible_v<FirstValueType>
+				)
+			)
+#endif
+		{
+			if constexpr (State == state_t::initialized || State == state_t::unknown)
+			{
+				if constexpr (OtherState == state_t::initialized || OtherState == state_t::unknown)
+				{
+					other.first = std::move(first);
+				}
+				else
+				{
+					std::construct_at(std::addressof(other.first), std::move(first));
+				}
+			}
+#ifndef NDEBUG
+			else
+			{
+				throw bad_single_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
+			}
+#endif
+			return *this;
+		}
+
+		template <dynamic_states_t DynamicStates>
+		constexpr const single &assign_to(const state_t state, const state_t other_state, single& other) const &
+			noexcept
+#ifndef NDEBUG
+			(
+				false
+			)
+#else
+			(
+				std::is_nothrow_copy_assignable_v<FirstValueType> &&
+				std::is_nothrow_copy_constructible_v<FirstValueType>
+			)
+#endif
+		{
+			if (state == state_t::initialized || other_state == state_t::unknown)
 			{
 				if (state == state_t::initialized || other_state == state_t::unknown)
 				{
-					if (state == state_t::initialized || other_state == state_t::unknown)
-					{
-						std::destroy_at(std::addressof(other.first));
-						std::construct_at(std::addressof(other.first), first);
-					}
-					else
-					{
-						std::construct_at(std::addressof(other.first), first);
-					}
+					other.first = first;
 				}
-#ifndef NDEBUG
 				else
 				{
-					throw bad_single_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
+					std::construct_at(std::addressof(other.first), first);
 				}
-#endif
-				return *this;
 			}
+#ifndef NDEBUG
+			else
+			{
+				throw bad_single_access{ __LINE__, "Single access out of bounds.", __FILE__, __func__ };
+			}
+#endif
+			return *this;
+		}
 
 			template <dynamic_states_t DynamicStates>
 			constexpr single& construct_to(const state_t state, const state_t other_state, single& other) &
